@@ -19,7 +19,7 @@ struct RGBIntegration {
 };
     //Change integratortype and data to correct one TODO
     template <typename SubmapType, typename GeometryVoxelType>
-    class RGBSensor : public Sensor<RGBSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::Image::Ptr, voxblox::RGBVoxel, TsdfIntegratorWrapper, TsdfIntegrationData>
+    class RGBSensor : public Sensor<RGBSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::Image::Ptr, voxblox::RGBVoxel, TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType, voxblox::RGBVoxel>
     {
         public:
             RGBSensor (std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>> submap_collection_ptr,

@@ -16,6 +16,7 @@ cs_add_library(${PROJECT_NAME}
     src/submap_conversions.cc
 
     src/cblox_factory.cpp
+    src/generic_active_submap_visualizer.cc
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 

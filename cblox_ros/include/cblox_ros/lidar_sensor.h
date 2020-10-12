@@ -11,7 +11,7 @@ namespace cblox {
 
 
 template <typename SubmapType, typename GeometryVoxelType>
-class LIDARSensor : public Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::PointCloud2::Ptr, GeometryVoxelType, TsdfIntegratorWrapper, TsdfIntegrationData>
+class LIDARSensor : public Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::PointCloud2::Ptr, GeometryVoxelType, TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType, GeometryVoxelType>
 {
     public:
         LIDARSensor (ros::NodeHandle& nh, 

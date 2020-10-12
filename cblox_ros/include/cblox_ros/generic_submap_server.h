@@ -27,6 +27,8 @@
 
 #include "cblox/core/map_config.h"
 #include "cblox/core/generic_submap.h"
+
+#include <cblox/mesh/submap_mesher.h>
 //#include <cblox_ros/rgb_sensor.h>
 
 //TODO replace tsdf with geometry

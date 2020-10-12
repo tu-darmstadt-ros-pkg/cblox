@@ -1,6 +1,7 @@
 //maybe merge to voxel.h in voxblox
 #ifndef CBLOX_CORE_VOXEL_H_
 #define CBLOX_CORE_VOXEL_H_
+#include <voxblox/core/color.h>
 namespace voxblox{
 
 
@@ -11,6 +12,7 @@ struct RGBVoxel {
     float r = 0.0f;
     float g = 0.0f;
     float b = 0.0f;
+    Color color;
 };
 
 }

@@ -11,7 +11,7 @@ namespace cblox {
                                     std::string camera_image_topic,
                                     std::string camera_info_topic,
                                     std::string world_frame)
-                                    : Sensor<RGBSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::Image::Ptr, voxblox::RGBVoxel, TsdfIntegratorWrapper, TsdfIntegrationData>(/*submap_collection_ptr, */nh, nh_private, world_frame), 
+                                    : Sensor<RGBSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::Image::Ptr, voxblox::RGBVoxel, TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType, voxblox::RGBVoxel>(/*submap_collection_ptr, */nh, nh_private, world_frame), 
                                       nh_(nh), 
                                       nh_private_(nh_private),
                                       world_frame_("world")

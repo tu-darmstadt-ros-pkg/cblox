@@ -11,6 +11,7 @@
 #include <cblox/core/tsdf_submap.h>
 #include <voxblox_ros/transformer.h>
 #include <cblox/integrator/generic_submap_collection_integrator.h>
+#include <cblox_ros/generic_active_submap_visualizer.h>
 
 
 namespace cblox {
@@ -24,7 +25,7 @@ namespace cblox {
     
     // Represents an abstract sensor for the generic submap server
     // Behavior is adapted from the submap server
-    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData>
+    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData, typename GeometryVoxelType, typename ColorVoxelType>
     class Sensor {
         public:
             explicit Sensor(//std::shared_ptr<SubmapCollection<SubmapType>> submap_collection_ptr,
@@ -71,11 +72,15 @@ namespace cblox {
             void finishSubmap(const SubmapID submap_id);
 
             //visualization (maybe do this in upper)/call this from upper/pass from here to upper
+            void register_visualizer(std::shared_ptr<GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>> visualizer);
+
         protected:
             // Node handles
             ros::NodeHandle nh_;
             ros::NodeHandle nh_private_;
-            
+
+            bool visualizer_registered_;
+            std::shared_ptr<GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>> visualizer_ptr_;
 
             // msg delaying
             ros::Duration msg_delay_; //TODO init

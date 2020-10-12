@@ -5,8 +5,8 @@
 
 namespace cblox {
 
-    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData>
-    Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData>::Sensor(
+    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData, typename GeometryVoxelType, typename ColorVoxelType>
+    Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData, GeometryVoxelType, ColorVoxelType>::Sensor(
                             const ros::NodeHandle& nh,
                             const ros::NodeHandle& nh_private,
                             std::string world_frame,
@@ -17,7 +17,8 @@ namespace cblox {
                             submap_collection_ptr_(submap_collection_ptr),
                             transformer_(nh, nh_private),
                             num_integrated_frames_current_submap_(0),
-                            num_integrated_frames_per_submap_(kDefaultNumFramesPerSubmap_i) {
+                            num_integrated_frames_per_submap_(kDefaultNumFramesPerSubmap_i),
+                            visualizer_registered_(false) {
 
         submap_collection_integrator_.reset(
         new GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData, VoxelType> (submap_collection_ptr));
@@ -26,8 +27,8 @@ namespace cblox {
         //    new GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData, VoxelType, SubmapType> (submap_collection_ptr));
     };
 
-    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData>
-    void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData>::
+    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData, typename GeometryVoxelType, typename ColorVoxelType>
+    void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData, GeometryVoxelType, ColorVoxelType>::
         addMessageToQueue(const MsgType& msg) {
 
             //TODO handle delay different
@@ -38,8 +39,8 @@ namespace cblox {
             }
         }
 
-    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData>
-    void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData>::serviceQueue() {
+    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData, typename GeometryVoxelType, typename ColorVoxelType>
+    void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData, GeometryVoxelType, ColorVoxelType>::serviceQueue() {
         MsgType msg;
         Transformation T_G_C;
         while (getMessageFromQueue(&msg_queue_, &msg, &T_G_C)) {
@@ -55,8 +56,8 @@ namespace cblox {
 
     }
 
-    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData>
-    bool Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData>::
+    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData, typename GeometryVoxelType, typename ColorVoxelType>
+    bool Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData, GeometryVoxelType, ColorVoxelType>::
     getMessageFromQueue(std::queue<MsgType>* queue, MsgType* msg, Transformation* T_G_C) {
         const size_t kMaxQueueSize = 10;
         if (queue->empty()) {
@@ -80,8 +81,8 @@ namespace cblox {
         return false;
     }
 
-    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData>
-    void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData>::
+    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData, typename GeometryVoxelType, typename ColorVoxelType>
+    void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData, GeometryVoxelType, ColorVoxelType>::
     processMessage(const MsgType& msg, const Transformation& T_G_C) {
 
         //TODO handle if map is initialized /layer
@@ -111,18 +112,18 @@ namespace cblox {
 
     }
 
-    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData>
-    bool Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData>::newSubmapRequired() const {
+    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData, typename GeometryVoxelType, typename ColorVoxelType>
+    bool Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData, GeometryVoxelType, ColorVoxelType>::newSubmapRequired() const {
         return (num_integrated_frames_current_submap_ >
                 num_integrated_frames_per_submap_);
     }
     
-    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData>
-    void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData>::createNewSubmap(const Transformation& T_G_C, const ros::Time& timestamp) {
+    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData, typename GeometryVoxelType, typename ColorVoxelType>
+    void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData, GeometryVoxelType, ColorVoxelType>::createNewSubmap(const Transformation& T_G_C, const ros::Time& timestamp) {
         // finishing up the last submap
         if (!submap_collection_ptr_->empty()) {
             std::thread finish_submap_thread(
-            &Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData>::finishSubmap, this,
+            &Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData, GeometryVoxelType, ColorVoxelType>::finishSubmap, this,
             submap_collection_ptr_->getActiveSubmapID());
             finish_submap_thread.detach();
         }
@@ -137,7 +138,8 @@ namespace cblox {
         num_integrated_frames_current_submap_ = 0;
 
         // Updating the active submap mesher
-        //active_submap_visualizer_ptr_->switchToActiveSubmap();
+        if(visualizer_registered_)
+            visualizer_ptr_->switchToActiveSubmap();
         //TODO visualize
 
         // Publish the baseframes
@@ -159,13 +161,13 @@ namespace cblox {
   }
     }
 
-    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData>
-    void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData>::initializeMap(const Transformation& T_G_C) {
+    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData, typename GeometryVoxelType, typename ColorVoxelType>
+    void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData, GeometryVoxelType, ColorVoxelType>::initializeMap(const Transformation& T_G_C) {
         createNewSubmap(T_G_C, ros::Time::now());
     }
 
-    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData>
-    void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData>::finishSubmap(const SubmapID submap_id) {
+    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData, typename GeometryVoxelType, typename ColorVoxelType>
+    void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData, GeometryVoxelType, ColorVoxelType>::finishSubmap(const SubmapID submap_id) {
         if (submap_collection_ptr_->exists(submap_id)) {
             typename SubmapType::Ptr submap_ptr =
             submap_collection_ptr_->getSubmapPtr(submap_id);
@@ -178,6 +180,13 @@ namespace cblox {
             ROS_INFO("[CbloxServer] Finished submap %d", submap_id);
         }
         //TODO finish map
+    }
+
+    template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData, typename GeometryVoxelType, typename ColorVoxelType>
+    void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData, GeometryVoxelType, ColorVoxelType>::
+    register_visualizer(std::shared_ptr<GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>> visualizer) {
+        visualizer_ptr_ = visualizer;
+        visualizer_registered_ = true;
     }
 
     /*template <typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, ty>

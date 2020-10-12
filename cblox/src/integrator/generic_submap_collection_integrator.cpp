@@ -34,13 +34,14 @@ void GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData, VoxelTyp
 initializeIntegrator(const std::shared_ptr<GenericMap<VoxelType>>& map_ptr) {
     CHECK(map_ptr);
     //TODO, create integrator here
-    void (*integration_function)(VoxelType&, IntegrationData&);
+    //void (*integration_function)(VoxelType&, IntegrationData&);
     //or maybe try to declare them explicit instead of passing?
-    //TODO test
-
+    
+    //TODO config passing in this class is needed
 
     Layer<VoxelType> *layer = new Layer<VoxelType>(0.2, 16u);
     voxblox::TsdfIntegratorBase::Config config;
+    config.default_truncation_distance = 0.4;
     //integrator_.reset(new IntegratorType(NULL, &layer, integration_function));
     integrator_.reset(new IntegratorType("simple", config, layer));
 }

@@ -17,7 +17,7 @@ LIDARSensor<SubmapType, GeometryVoxelType>::LIDARSensor(
                                             std::string pointcloud_topic,
                                             std::string world_frame,
                                             std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>> submap_collection_ptr)
-                                            : Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::PointCloud2::Ptr, GeometryVoxelType, TsdfIntegratorWrapper, TsdfIntegrationData>
+                                            : Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::PointCloud2::Ptr, GeometryVoxelType, TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType, GeometryVoxelType>
                                             (nh, nh_private, world_frame, submap_collection_ptr),
                                             color_map_(new voxblox::GrayscaleColorMap()) {
     //submap_collection_ptr_ = submap_collection_ptr;
@@ -44,10 +44,8 @@ void LIDARSensor<SubmapType, GeometryVoxelType>::
 integrateMessage(const sensor_msgs::PointCloud2::Ptr msg, const Transformation& T_G_C){
     //debug prints
     int id = static_cast<int>(this->submap_collection_ptr_->getActiveSubmapID());
-    std::cout << id << std::endl;
     if (id >= 0) {
     auto blocks = (this->submap_collection_ptr_->getActiveSubmap()).getNumberOfAllocatedBlocks();
-    std::cout << blocks << std::endl;
     }
     //TODO freespace pointcloud
 
@@ -76,7 +74,6 @@ integrateMessage(const sensor_msgs::PointCloud2::Ptr msg, const Transformation& 
     data.points_C = points_C;
     data.colors = colors;
     data.freespace_points = false;
-    //std::cout << "integrating pcl" << std::endl;
     this->submap_collection_integrator_->integrate(T_G_C, data);
     ros::WallTime end = ros::WallTime::now();
     /*num_integrated_frames_current_submap_++;
