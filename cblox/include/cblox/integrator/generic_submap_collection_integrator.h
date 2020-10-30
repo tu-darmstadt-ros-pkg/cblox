@@ -22,6 +22,8 @@ class GenericSubmapCollectionIntegrator {
     // Changes the active submap to the last one on the collection
     void switchToActiveSubmap();
 
+    void setIntegrator(std::shared_ptr<IntegratorType> integ);
+
   protected:
 
     void initializeIntegrator(const std::shared_ptr<GenericMap<VoxelType>>& map_ptr);

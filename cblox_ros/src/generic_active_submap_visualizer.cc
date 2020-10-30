@@ -31,6 +31,14 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::switchToA
   
   if(active_submap_mesh_integrator_ptr_ != nullptr){
       //Temporary TODO, not thread safe
+      //TODO rethink mutex
+      std::unique_lock<std::mutex> lock(geometry_submap_collection_ptr_->collection_mutex_);
+      if (typeid(geometry_submap_collection_ptr_.get()) != typeid(color_submap_collection_ptr_.get())) {
+        //TODO rethink mutex
+        std::unique_lock<std::mutex> lock2(color_submap_collection_ptr_->collection_mutex_);
+      
+      }
+      
       updateMeshLayer();
       visualization_msgs::Marker marker;
       getDisplayMesh(&marker);
@@ -92,6 +100,7 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::updateInt
 template <typename GeometryVoxelType, typename ColorVoxelType>
 void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::updateMeshLayer() {
   CHECK(active_submap_mesh_integrator_ptr_) << "Integrator not initialized.";
+
   // Updating the mesh layer
   constexpr bool only_mesh_updated_blocks = true;
   constexpr bool clear_updated_flag = true;
@@ -184,12 +193,16 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::getDispla
   std::shared_ptr<MeshLayer> mesh_layer_ptr = getDisplayMeshLayer();
   // Filling the marker
   const voxblox::ColorMode color_mode = voxblox::ColorMode::kLambertColor;
+  //const voxblox::ColorMode color_mode = voxblox::ColorMode::kColor;
+  //TODO currently only mode with transparency
+  
   voxblox::fillMarkerWithMesh(mesh_layer_ptr, color_mode, marker_ptr);
   marker_ptr->id = active_submap_id_;
   // Setting opacity of marker
   marker_ptr->color.a = opacity_;
+
   for (std_msgs::ColorRGBA& color : marker_ptr->colors) {
-    color.a = opacity_;
+    color.a *= opacity_; //added * because it deletes existing transparency
   }
 }
 
@@ -214,5 +227,8 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::setUseDef
 
 }  // namespace cblox
 
+
+#include <cblox/core/voxel.h>
 //instantiation
 template class cblox::GenericActiveSubmapVisualizer<voxblox::TsdfVoxel, voxblox::TsdfVoxel>;
+template class cblox::GenericActiveSubmapVisualizer<voxblox::TsdfVoxel, voxblox::RGBVoxel>;

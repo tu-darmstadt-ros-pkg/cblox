@@ -2,6 +2,8 @@
 #ifndef CBLOX_CORE_VOXEL_H_
 #define CBLOX_CORE_VOXEL_H_
 #include <voxblox/core/color.h>
+
+#include <voxblox/core/block.h>
 namespace voxblox{
 
 
@@ -9,9 +11,6 @@ namespace voxblox{
 //Just for testing purposes
 struct RGBVoxel {
     float weight = 0.0f;
-    float r = 0.0f;
-    float g = 0.0f;
-    float b = 0.0f;
     Color color;
 };
 

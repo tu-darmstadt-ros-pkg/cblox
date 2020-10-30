@@ -15,10 +15,10 @@ struct TsdfIntegrationData {
 
 class TsdfIntegratorWrapper {
   public:
-    TsdfIntegratorWrapper(const std::string& integrator_type, 
+    TsdfIntegratorWrapper(//const std::string& integrator_type, 
                           const voxblox::TsdfIntegratorBase::Config& config,
                           voxblox::Layer<TsdfVoxel>* layer) {
-        integrator_ = voxblox::TsdfIntegratorFactory::create(integrator_type, config, layer);
+        integrator_ = voxblox::TsdfIntegratorFactory::create(/*integrator_type*/ "simple", config, layer);
     }
 
     void integrate(const voxblox::Transformation& T_G_C, const TsdfIntegrationData& data) {

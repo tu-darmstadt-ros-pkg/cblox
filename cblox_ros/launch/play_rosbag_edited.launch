@@ -4,7 +4,7 @@
 
   <!-- Path to dataset -->
   <arg name="dataset_path" default="/home/frederik/Desktop/output.bag" />
-  <arg name="play_rate" default="2.0" />
+  <arg name="play_rate" default="0.1" />
 
   <!-- cblox Parameters -->
   <arg name="voxel_size" default="0.1" />

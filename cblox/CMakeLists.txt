@@ -40,9 +40,11 @@ cs_add_library(${PROJECT_NAME}_lib
 
   #either explicitly instantiate here, or make to header? Right now instantiating
   #TODO think about this
+  src/core/voxel.cpp
   src/core/generic_submap.cpp
   src/integrator/generic_submap_collection_integrator.cpp
-  src/integrator/projection_integrator.cpp
+  #src/integrator/projection_integrator.cpp
+  src/integrator/rgb_projection_integrator.cpp
 )
 target_link_libraries(${PROJECT_NAME}_lib ${PROJECT_NAME}_proto)
 

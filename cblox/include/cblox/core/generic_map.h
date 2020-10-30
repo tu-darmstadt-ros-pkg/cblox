@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <mutex>
 
 #include "voxblox/core/layer.h"
 #include "voxblox/core/voxel.h"

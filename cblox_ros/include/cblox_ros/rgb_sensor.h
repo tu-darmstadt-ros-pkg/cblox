@@ -9,8 +9,9 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <cblox/core/voxel.h>
-#include <cblox/integrator/projection_integrator.h>
-#include "cblox/integrator/tsdf_integrator_wrapper.h"
+#include <cblox/integrator/rgb_projection_integrator.h>
+#include <cv_bridge/cv_bridge.h>
+
 
 namespace cblox {
 
@@ -19,15 +20,17 @@ struct RGBIntegration {
 };
     //Change integratortype and data to correct one TODO
     template <typename SubmapType, typename GeometryVoxelType>
-    class RGBSensor : public Sensor<RGBSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::Image::Ptr, voxblox::RGBVoxel, TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType, voxblox::RGBVoxel>
+    class RGBSensor : public Sensor<RGBSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::Image::Ptr, voxblox::RGBVoxel, RGBProjectionIntegrator<GeometryVoxelType>, ProjectionData<Color>, GeometryVoxelType, voxblox::RGBVoxel>
     {
         public:
-            RGBSensor (std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>> submap_collection_ptr,
+            RGBSensor (
                        ros::NodeHandle& nh,
                        ros::NodeHandle& nh_private,
                        std::string camera_image_topic,
                        std::string camera_info_topic,
-                       std::string world_frame);
+                       std::string world_frame,
+                       std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>> coll_submap_collection_ptr,
+                       std::shared_ptr<GenericSubmapCollection<voxblox::RGBVoxel>> rgb_submap_collection_ptr);
 
             virtual ~RGBSensor() {}
 
@@ -49,6 +52,11 @@ struct RGBIntegration {
             ros::NodeHandle nh_private_;
 
             std::string world_frame_;
+
+            bool valid_info_;
+            double fx_;
+
+            size_t subsample_factor_;
     };
 
 }

@@ -16,6 +16,7 @@ namespace cblox {
                             world_frame_("world"),
                             submap_collection_ptr_(submap_collection_ptr),
                             transformer_(nh, nh_private),
+                            msg_delay_(ros::Duration(1.0)),
                             num_integrated_frames_current_submap_(0),
                             num_integrated_frames_per_submap_(kDefaultNumFramesPerSubmap_i),
                             visualizer_registered_(false) {
@@ -43,6 +44,13 @@ namespace cblox {
     void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData, GeometryVoxelType, ColorVoxelType>::serviceQueue() {
         MsgType msg;
         Transformation T_G_C;
+
+        //drop old messages if queue is too long
+        const size_t kMaxQueueSize = 10;
+        while (msg_queue_.size() >= kMaxQueueSize) {
+            msg_queue_.pop();
+        }
+
         while (getMessageFromQueue(&msg_queue_, &msg, &T_G_C)) {
 
             //TODO somehow the correct submaps need to be determined

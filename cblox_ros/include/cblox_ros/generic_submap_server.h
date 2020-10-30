@@ -24,6 +24,7 @@
 #include <cblox/core/generic_map.h>
 #include <cblox/core/voxel.h>
 #include <cblox_ros/lidar_sensor.h>
+#include <cblox_ros/rgb_sensor.h>
 
 #include "cblox/core/map_config.h"
 #include "cblox/core/generic_submap.h"
@@ -56,7 +57,8 @@ class GenericSubmapServer {
 
 
         //std::vector<std::shared_ptr<RGBSensor>> rgb_sensors;
-        std::vector<std::shared_ptr<LIDARSensor<GenericSubmap<TsdfVoxel>, voxblox::TsdfVoxel>>> lidar_sensors_;
+        std::vector<std::shared_ptr<LIDARSensor<GenericSubmap<voxblox::TsdfVoxel>, voxblox::TsdfVoxel>>> lidar_sensors_;
+        std::vector<std::shared_ptr<RGBSensor<GenericSubmap<voxblox::RGBVoxel>, voxblox::TsdfVoxel>>> rgb_sensors_;
         //TODO error on compile with submap server
 
         //std::shared_ptr<RGBSensor<SubmapType, CollisionVoxelType>> rgb_sensor_;

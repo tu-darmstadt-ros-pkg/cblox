@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <mutex>
 #include "cblox/core/generic_map.h"
 #include "cblox/core/generic_submap.h"
 
@@ -152,6 +153,10 @@ class GenericSubmapCollection : public GenericSubmapCollectionInterface<VoxelTyp
   static bool LoadFromFile(
       const std::string& file_path,
       typename GenericSubmapCollection<VoxelType>::Ptr* submap_collection_ptr);
+
+  //TODO rethink mutex/check if needed later
+  mutable std::mutex collection_mutex_;
+
 
  private:
   // TODO(alexmillane): Get some concurrency guards

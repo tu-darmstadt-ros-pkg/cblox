@@ -101,7 +101,9 @@ GenericSubmap<VoxelType>::LoadFromStream(const Config& config,
 }
 
 #include "voxblox/core/voxel.h"
+#include "cblox/core/voxel.h"
 #include "voxblox/core/tsdf_map.h"
 
 // explicit instantiations
 template class cblox::GenericSubmap<voxblox::TsdfVoxel>;
+template class cblox::GenericSubmap<voxblox::RGBVoxel>;

@@ -18,6 +18,8 @@ integrate(
 
     const Transformation T_S_C = getSubmapRelativePose(T_G_C);
 
+    //TODO rethink mutex
+    std::unique_lock<std::mutex> lock(submap_collection_ptr_->collection_mutex_);
     integrator_->integrate(T_S_C, data);
     }
 
@@ -39,11 +41,17 @@ initializeIntegrator(const std::shared_ptr<GenericMap<VoxelType>>& map_ptr) {
     
     //TODO config passing in this class is needed
 
+    //or integrator must be instantiated elsewhere
+
+    //TODO pass everything in config
+
     Layer<VoxelType> *layer = new Layer<VoxelType>(0.2, 16u);
     voxblox::TsdfIntegratorBase::Config config;
     config.default_truncation_distance = 0.4;
     //integrator_.reset(new IntegratorType(NULL, &layer, integration_function));
-    integrator_.reset(new IntegratorType("simple", config, layer));
+    //integrator_.reset(new IntegratorType(config, layer));
+    //TODO repair this with use of config structs!!!
+
 }
 
 template <typename IntegratorType, typename IntegrationData, typename VoxelType>
@@ -65,9 +73,19 @@ getSubmapRelativePose(const Transformation& T_G_C) const {
     return (T_G_S_active_.inverse() * T_G_C);
 }
 
+
+
+template <typename IntegratorType, typename IntegrationData, typename VoxelType>
+void GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData, VoxelType>::
+setIntegrator(std::shared_ptr<IntegratorType> integ) {
+    integrator_ = integ;
+}
+
 } //namespace cblox
 
 #include "cblox/integrator/tsdf_integrator_wrapper.h"
+#include "cblox/integrator/rgb_projection_integrator.h"
 #include "cblox/core/tsdf_submap.h"
 //explicit instantiations
-template class cblox::GenericSubmapCollectionIntegrator<cblox::TsdfIntegratorWrapper, cblox::TsdfIntegrationData, voxblox::TsdfVoxel>; 
+template class cblox::GenericSubmapCollectionIntegrator<cblox::TsdfIntegratorWrapper, cblox::TsdfIntegrationData, voxblox::TsdfVoxel>;
+template class cblox::GenericSubmapCollectionIntegrator<cblox::RGBProjectionIntegrator<voxblox::TsdfVoxel>, cblox::ProjectionData<voxblox::Color>, voxblox::RGBVoxel>; 

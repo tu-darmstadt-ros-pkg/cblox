@@ -1,0 +1,27 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/frederik/hector/devel/include",
+                "/opt/hector/include",
+                "/opt/ros/melodic/include",
+                "/home/frederik/hector/src/cblox/cblox/include",
+                "/home/frederik/hector/src/cblox/cblox_ros/include",
+                "/home/frederik/hector/src/voxblox/voxblox/include",
+                "/home/frederik/hector/src/voxblox/voxblox_ros/include",
+                "/home/frederik/hector/src/voxblox/voxblox_rviz_plugin/include",
+                "/usr/include"
+            ],
+            "name": "Linux",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu11",
+            "cppStandard": "gnu++14"
+        }
+    ],
+    "version": 4
+}
