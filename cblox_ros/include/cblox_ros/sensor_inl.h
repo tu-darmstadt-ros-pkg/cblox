@@ -16,6 +16,7 @@ namespace cblox {
                             world_frame_("world"),
                             submap_collection_ptr_(submap_collection_ptr),
                             transformer_(nh, nh_private),
+                            last_msg_stamp_(ros::Time(0)),
                             msg_delay_(ros::Duration(1.0)),
                             num_integrated_frames_current_submap_(0),
                             num_integrated_frames_per_submap_(kDefaultNumFramesPerSubmap_i),
@@ -38,6 +39,7 @@ namespace cblox {
                 last_msg_stamp_ = msg->header.stamp;
                 msg_queue_.push(msg);
             }
+
         }
 
     template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData, typename GeometryVoxelType, typename ColorVoxelType>
@@ -52,7 +54,6 @@ namespace cblox {
         }
 
         while (getMessageFromQueue(&msg_queue_, &msg, &T_G_C)) {
-
             //TODO somehow the correct submaps need to be determined
             processMessage(msg, T_G_C);
 
@@ -72,11 +73,19 @@ namespace cblox {
             return false;
         }
         *msg = queue->front();
-        if (transformer_.lookupTransform((*msg)->header.frame_id, world_frame_, (*msg)->header.stamp, T_G_C)) {
+        std::string frame_id = (*msg)->header.frame_id;
+        
+        //TODO remove this dirty workaround for a bag
+        if (frame_id.compare("arm_thermal_cam") == 0) {
+            std::cout << "problematic frame" << std::endl;
+            frame_id = "arm_thermal_cam_frame";
+        }
+        if (transformer_.lookupTransform(frame_id, world_frame_, (*msg)->header.stamp, T_G_C)) {
             queue->pop();
             return true;
         } else {
-            if (queue->size() >= kMaxQueueSize) {
+            //std::cout << "couldn't lookup transform" << std::endl;
+            if (queue->size() >= (kMaxQueueSize - 1)) {
                 ROS_ERROR_THROTTLE(60,
                          "Input msg queue getting too long! Dropping "
                          "some msgs. Either unable to look up transform "
@@ -92,7 +101,6 @@ namespace cblox {
     template <typename T, typename SubmapType, typename MsgType, typename VoxelType, typename IntegratorType, typename IntegrationData, typename GeometryVoxelType, typename ColorVoxelType>
     void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData, GeometryVoxelType, ColorVoxelType>::
     processMessage(const MsgType& msg, const Transformation& T_G_C) {
-
         //TODO handle if map is initialized /layer
          
         if (!mapInitialized()) {

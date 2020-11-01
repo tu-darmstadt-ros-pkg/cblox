@@ -22,8 +22,8 @@ LIDARSensor<SubmapType, GeometryVoxelType>::LIDARSensor(
                                             color_map_(new voxblox::GrayscaleColorMap()) {
     //submap_collection_ptr_ = submap_collection_ptr;
 
-Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::PointCloud2::Ptr, GeometryVoxelType, TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType, GeometryVoxelType>::
-num_integrated_frames_per_submap_ = 200;
+//Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::PointCloud2::Ptr, GeometryVoxelType, TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType, GeometryVoxelType>::
+//num_integrated_frames_per_submap_ = 200;
 
     //TODO remove this workaround by fixing submapcollectionintegrator
     voxblox::TsdfIntegratorBase::Config config;

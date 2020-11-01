@@ -232,3 +232,4 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::setUseDef
 //instantiation
 template class cblox::GenericActiveSubmapVisualizer<voxblox::TsdfVoxel, voxblox::TsdfVoxel>;
 template class cblox::GenericActiveSubmapVisualizer<voxblox::TsdfVoxel, voxblox::RGBVoxel>;
+template class cblox::GenericActiveSubmapVisualizer<voxblox::TsdfVoxel, voxblox::IntensityVoxel>;
