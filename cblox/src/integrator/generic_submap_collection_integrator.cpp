@@ -85,7 +85,9 @@ setIntegrator(std::shared_ptr<IntegratorType> integ) {
 
 #include "cblox/integrator/tsdf_integrator_wrapper.h"
 #include "cblox/integrator/rgb_projection_integrator.h"
+#include "cblox/integrator/thermal_projection_integrator.h"
 #include "cblox/core/tsdf_submap.h"
 //explicit instantiations
 template class cblox::GenericSubmapCollectionIntegrator<cblox::TsdfIntegratorWrapper, cblox::TsdfIntegrationData, voxblox::TsdfVoxel>;
-template class cblox::GenericSubmapCollectionIntegrator<cblox::RGBProjectionIntegrator<voxblox::TsdfVoxel>, cblox::ProjectionData<voxblox::Color>, voxblox::RGBVoxel>; 
+template class cblox::GenericSubmapCollectionIntegrator<cblox::RGBProjectionIntegrator<voxblox::TsdfVoxel>, cblox::ProjectionData<voxblox::Color>, voxblox::RGBVoxel>;
+template class cblox::GenericSubmapCollectionIntegrator<cblox::ThermalProjectionIntegrator<voxblox::TsdfVoxel>, cblox::ProjectionData<float>, voxblox::IntensityVoxel>;  

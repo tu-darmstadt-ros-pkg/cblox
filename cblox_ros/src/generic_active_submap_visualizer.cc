@@ -43,6 +43,8 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::switchToA
       visualization_msgs::Marker marker;
       getDisplayMesh(&marker);
       marker.header.frame_id = "world";
+      marker.id = message_id_;
+      message_id_++;
       visualization_msgs::MarkerArray marker_array;
       marker_array.markers.push_back(marker);
       publisher_.publish(marker_array);
@@ -177,11 +179,10 @@ MeshLayer::Ptr GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>:
 
   if(use_function_)
     recolorWithColorFunction(mesh_layer_G_ptr.get());
-  //TODO add coloring function with function pointer here, transformation to 2nd layer needed, if used
-  //test transform by recoloring tsdf with its own colors, test all combinations.
-  //TODO own use of 2nd layer set not found voxels to black/transparent
-  //(missing voxel behavior) 
-  //also add option to not recolor
+
+  if(remove_alpha_)
+    removeAlphaChanneled(mesh_layer_G_ptr.get());
+
   return mesh_layer_G_ptr;
 }
 
@@ -210,19 +211,60 @@ template <typename GeometryVoxelType, typename ColorVoxelType>
 void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::setColorFunction(voxblox::Color (*color_function)(const ColorVoxelType*)) {
   color_function_ = color_function;
   use_function_ = true;
-  //use_color_map_ = false;
+  use_color_map_ = false;
 }
 
 template <typename GeometryVoxelType, typename ColorVoxelType>
 void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::setUseColorMap() {
   use_color_map_ = true;
-  //use_function_ = false;
+  use_function_ = false;
 }
 
 template <typename GeometryVoxelType, typename ColorVoxelType>
 void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::setUseDefault() {
   use_color_map_ = false;
   use_function_ = false;
+}
+
+template <typename GeometryVoxelType, typename ColorVoxelType>
+void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::setRemoveAlpha(bool val) {
+  remove_alpha_ = val;
+}
+
+template <typename GeometryVoxelType, typename ColorVoxelType>
+void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::removeAlphaChanneled(
+    MeshLayer* mesh_layer_ptr) const {
+  CHECK_NOTNULL(mesh_layer_ptr);
+
+  //Loop over Index
+  voxblox::BlockIndexList index_list;
+  mesh_layer_ptr->getAllAllocatedMeshes(&index_list);
+  for (const voxblox::BlockIndex& block_index : index_list) {
+    Mesh::Ptr mesh_ptr = mesh_layer_ptr->getMeshPtrByIndex(block_index);
+      
+    int i = 0;
+    bool has_normals = mesh_ptr->hasNormals();
+    bool has_indices = mesh_ptr->hasTriangles();
+    //go in steps of 3
+
+    while (i < mesh_ptr->vertices.size()) {
+      if (mesh_ptr->colors[i].a == 0 || 
+          mesh_ptr->colors[i + 1].a == 0 ||
+          mesh_ptr->colors[i + 2].a == 0) {
+        mesh_ptr->colors.erase(mesh_ptr->colors.begin() + i, mesh_ptr->colors.begin() + i + 3);
+        mesh_ptr->vertices.erase(mesh_ptr->vertices.begin() + i, mesh_ptr->vertices.begin() + i + 3);
+        if (has_normals) {
+          mesh_ptr->normals.erase(mesh_ptr->normals.begin() + i, mesh_ptr->normals.begin() + i + 3);
+        }
+        if (has_indices) {
+          mesh_ptr->indices.erase(mesh_ptr->indices.begin() + i, mesh_ptr->indices.begin() + i + 3);
+        }
+          //fix index list? What even does it?
+      }else 
+        i += 3;
+      
+    }
+  }
 }
 
 }  // namespace cblox

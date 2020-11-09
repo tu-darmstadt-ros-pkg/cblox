@@ -71,7 +71,7 @@ class ProjectionIntegrator {
 
     void setLayer(Layer<VoxelType2>* layer);
 
-  private:
+  protected:
     FloatingPoint max_distance_;
     FloatingPoint max_weight_;
 

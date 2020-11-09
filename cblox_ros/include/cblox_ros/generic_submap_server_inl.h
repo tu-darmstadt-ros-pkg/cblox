@@ -30,9 +30,9 @@ voxblox::Color func(const voxblox::TsdfVoxel* v) {
 
 voxblox::Color func2(const voxblox::RGBVoxel* v) {
     voxblox::Color c;
-    c.r = 255;
+    c.r = 0;
     c.g = 0;
-    c.b = 255;
+    c.b = 0;
     c.a = 0;
     if(v == nullptr) {
         return c;
@@ -108,6 +108,7 @@ void GenericSubmapServer::readConfig() {
     rgb_sensor->register_visualizer(visualizer2);
     voxblox::Color (*f2)(const voxblox::RGBVoxel*) {& func2};
     visualizer2->setColorFunction(f2);
+    visualizer2->setRemoveAlpha(true);
     
 
     auto visualizer3 = std::make_shared<GenericActiveSubmapVisualizer<voxblox::TsdfVoxel, voxblox::IntensityVoxel>>(mesh_config, tsdf, intensity, "test_topic3", nh_, nh_private_);

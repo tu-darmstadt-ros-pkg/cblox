@@ -47,7 +47,12 @@ class GenericActiveSubmapVisualizer {
         nh_(nh),
         nh_private_(nh_private_),
         use_function_(false),
-        use_color_map_(false) {
+        use_color_map_(false),
+        remove_alpha_(false),
+        geometry_id_(0),
+        color_id_(0),
+        message_id_(0) 
+        {
             publisher_ = nh_private_.advertise<visualization_msgs::MarkerArray>(topic, 1);
         }
 
@@ -89,6 +94,7 @@ class GenericActiveSubmapVisualizer {
   void setColorFunction(voxblox::Color (*color_function)(const ColorVoxelType*));
   void setUseColorMap();
   void setUseDefault();
+  void setRemoveAlpha(bool val);
 
  private:
   // Functions called when swapping active submaps
@@ -103,6 +109,8 @@ class GenericActiveSubmapVisualizer {
   void colorMeshWithCurrentIndex(MeshLayer* mesh_layer_ptr) const;
 
   void recolorWithColorFunction(MeshLayer* mesh_layer_ptr) const;
+
+  void removeAlphaChanneled(MeshLayer* mesh_layer_ptr) const;
 
   // Config
   const MeshIntegratorConfig mesh_config_;
@@ -136,11 +144,16 @@ class GenericActiveSubmapVisualizer {
 
   bool use_function_;
   bool use_color_map_;
+  bool remove_alpha_;
   voxblox::Color (*color_function_)(const ColorVoxelType*);
 
   ros::Publisher publisher_;
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;
+
+  int geometry_id_;
+  int color_id_;
+  int message_id_;
 };
 
 }  // namespace cblox

@@ -45,6 +45,7 @@ cs_add_library(${PROJECT_NAME}_lib
   src/integrator/generic_submap_collection_integrator.cpp
   #src/integrator/projection_integrator.cpp
   src/integrator/rgb_projection_integrator.cpp
+  src/integrator/thermal_projection_integrator.cpp
 )
 target_link_libraries(${PROJECT_NAME}_lib ${PROJECT_NAME}_proto)
 

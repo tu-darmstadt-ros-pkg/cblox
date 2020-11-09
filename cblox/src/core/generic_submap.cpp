@@ -107,3 +107,4 @@ GenericSubmap<VoxelType>::LoadFromStream(const Config& config,
 // explicit instantiations
 template class cblox::GenericSubmap<voxblox::TsdfVoxel>;
 template class cblox::GenericSubmap<voxblox::RGBVoxel>;
+template class cblox::GenericSubmap<voxblox::IntensityVoxel>;

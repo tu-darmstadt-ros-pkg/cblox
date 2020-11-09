@@ -56,4 +56,15 @@ void mergeVoxelAIntoVoxelB(const RGBVoxel& voxel_A, RGBVoxel* voxel_B) {
     voxel_B->weight = combined_weight;
   }
 }
+
+template <>
+void mergeVoxelAIntoVoxelB(const IntensityVoxel& voxel_A, IntensityVoxel* voxel_B) {
+  float combined_weight = voxel_A.weight + voxel_B->weight;
+  if (combined_weight > 0) {
+
+    voxel_B->intensity = (voxel_A.weight * voxel_A.intensity + voxel_B->weight * voxel_B->intensity) / (voxel_A.weight + voxel_B->weight);
+
+    voxel_B->weight = combined_weight;
+  }
+}
 }

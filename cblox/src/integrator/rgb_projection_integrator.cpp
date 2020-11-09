@@ -23,6 +23,10 @@ integrationFunction(voxblox::RGBVoxel& voxel, Color& data) {
     voxel.color = Color::blendTwoColors(voxel.color, voxel.weight,
                                         data, 1.0);
     voxel.weight += 1.0;
+
+    if (voxel.weight > this->max_weight_) {
+        voxel.weight = this->max_weight_;
+    }
 }
 }
 //explicit instantiations
