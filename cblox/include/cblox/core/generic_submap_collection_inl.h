@@ -17,7 +17,9 @@ template <typename VoxelType>
 GenericSubmapCollection<VoxelType>::GenericSubmapCollection(
     const typename GenericSubmap<VoxelType>::Config& submap_config,
     const std::vector<typename GenericSubmap<VoxelType>::Ptr>& sub_maps)
-    : submap_config_(submap_config) {
+    : submap_config_(submap_config),
+    has_parent_(false),
+    last_parent_id_(0) {
   // Constructing from a list of existing submaps
   // NOTE(alexmillane): Relies on the submaps having unique submap IDs...
   for (const auto& submap_ptr : sub_maps) {
@@ -53,14 +55,27 @@ void GenericSubmapCollection<VoxelType>::createNewSubmap(const Transformation& T
   // exists. This is fairly brittle behaviour and we may want to change it at a
   // later date. Currently the onus is put in the caller to exists() before
   // creating a submap.
+
   const auto it = id_to_submap_.find(submap_id);
   CHECK(it == id_to_submap_.end());
   // Creating the new submap and adding it to the list
+  Transformation T_G;
+  if (has_parent_) {
+    T_G = last_parent_transform_;
+  } else{
+    T_G = T_G_S;
+  }
   typename GenericSubmap<VoxelType>::Ptr sub_map(
-      new GenericSubmap<VoxelType>(T_G_S, submap_id, submap_config_));
+      new GenericSubmap<VoxelType>(T_G, submap_id, submap_config_));
   id_to_submap_.emplace(submap_id, std::move(sub_map));
   // Updating the active submap
   active_submap_id_ = submap_id;
+
+  if (has_parent_) {
+    if (parent_to_child_.find(last_parent_id_) == parent_to_child_.end())
+      parent_to_child_.emplace(last_parent_id_, std::vector<SubmapID>());
+    parent_to_child_.find(last_parent_id_)->second.push_back(submap_id);
+  }
 }
 
 template <typename VoxelType>
@@ -436,7 +451,52 @@ size_t GenericSubmapCollection<VoxelType>::getMemorySize() const {
   }
   return size;
 }
+template <typename VoxelType>
+std::vector<SubmapID> GenericSubmapCollection<VoxelType>::getChildMapIDs(SubmapID parent) {
+  std::vector<SubmapID> vec;
+  if (!has_parent_) {
+    vec.push_back(parent);
+    return vec;
+  }
 
+  auto res = parent_to_child_.find(parent);
+  if (res != parent_to_child_.end())
+    vec = res->second;
+  return vec;
+}
+
+template <typename VoxelType>
+std::vector<typename GenericSubmap<VoxelType>::Ptr> GenericSubmapCollection<VoxelType>::getChildMaps(SubmapID parent) {
+  std::vector<typename GenericSubmap<VoxelType>::Ptr> vec;
+  if (!has_parent_) {
+    vec.push_back(id_to_submap_.find(parent)->second);
+    return vec;
+  }
+
+  for (auto child : getChildMapIDs(parent)) {
+    vec.push_back((id_to_submap_.find(child)->second));
+  }  
+  return vec;
+}
+
+//like before but use parent transform and do id handling
+template <typename VoxelType>
+void GenericSubmapCollection<VoxelType>::createNewChildSubMap(const Transformation& T_G_P, const SubmapID submap_id, const SubmapID parent) {
+  has_parent_ = true;
+  last_parent_id_ = parent;
+  last_parent_transform_ = T_G_P;
+  createNewSubmap(T_G_P, submap_id);
+}
+
+template <typename VoxelType>
+SubmapID GenericSubmapCollection<VoxelType>::createNewChildSubMap(const Transformation& T_G_P, const SubmapID parent) {
+  SubmapID new_ID = 0;
+  if (!id_to_submap_.empty()) {
+    new_ID = id_to_submap_.rbegin()->first + 1;
+  }
+  createNewChildSubMap(T_G_P, new_ID, last_parent_id_);
+  return new_ID;
+}
 }  // namespace cblox
 
 #endif  // CBLOX_CORE_GENERIC_SUBMAP_COLLECTION_INL_H_

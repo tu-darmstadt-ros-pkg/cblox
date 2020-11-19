@@ -26,7 +26,7 @@ struct ProjectionData {
 template <typename VoxelType1, typename VoxelType2, typename Data>
 struct ProjectionConfig {
   std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection;
-  Layer<VoxelType2>* integration_layer;
+  std::shared_ptr<GenericSubmapCollection<VoxelType2>> data_collection;
 };
 
 //TODO maybe derive from interpolator???
@@ -38,11 +38,11 @@ class ProjectionIntegrator {
 
     //TODO add integration function
     ProjectionIntegrator(std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection,
-                         Layer<VoxelType2>* integration_layer
+                         std::shared_ptr<GenericSubmapCollection<VoxelType2>> data_collection //Layer<VoxelType2>* integration_layer
                          //(*integration_function)(VoxelType2&, IntegrationData&)
                          );
 
-    ProjectionIntegrator(ProjectionConfig<VoxelType1, VoxelType2, Data> c, Layer<VoxelType2>* l);
+    ProjectionIntegrator(ProjectionConfig<VoxelType1, VoxelType2, Data> c);
 
     void setMaxDistance(const FloatingPoint max_distance) {
         max_distance_ = max_distance;
@@ -69,7 +69,7 @@ class ProjectionIntegrator {
 
     void setIntegrationLayer(Layer<VoxelType2>* layer);
 
-    void setLayer(Layer<VoxelType2>* layer);
+    void setActiveLayers();
 
   protected:
     FloatingPoint max_distance_;
@@ -77,6 +77,7 @@ class ProjectionIntegrator {
 
     int prop_voxel_radius_;
     std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection_;
+    std::shared_ptr<GenericSubmapCollection<VoxelType2>> data_collection_;
     Layer<VoxelType1>* collision_layer_;
     Layer<VoxelType2>* integration_layer_;
 

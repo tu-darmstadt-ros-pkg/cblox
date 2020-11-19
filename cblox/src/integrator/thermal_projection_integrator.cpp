@@ -5,15 +5,15 @@ namespace cblox{
 template<typename VoxelType1>
 ThermalProjectionIntegrator<VoxelType1>::
 ThermalProjectionIntegrator(std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection,
-                     Layer<voxblox::IntensityVoxel>* integration_layer)
-    : ProjectionIntegrator<ThermalProjectionIntegrator<VoxelType1>, VoxelType1, voxblox::IntensityVoxel, float>(collision_collection, integration_layer)
+                            std::shared_ptr<GenericSubmapCollection<voxblox::IntensityVoxel>> data_collection)
+    : ProjectionIntegrator<ThermalProjectionIntegrator<VoxelType1>, VoxelType1, voxblox::IntensityVoxel, float>(collision_collection, data_collection)
       //msg_transformation_(msg_transformation) 
       {}
 
 template<typename VoxelType1>
 ThermalProjectionIntegrator<VoxelType1>::
-ThermalProjectionIntegrator(ProjectionConfig<VoxelType1, voxblox::IntensityVoxel, float> config, Layer<voxblox::IntensityVoxel>* l)
-    : ProjectionIntegrator<ThermalProjectionIntegrator<VoxelType1>, VoxelType1, voxblox::IntensityVoxel, float>(config, l) 
+ThermalProjectionIntegrator(ProjectionConfig<VoxelType1, voxblox::IntensityVoxel, float> config)
+    : ProjectionIntegrator<ThermalProjectionIntegrator<VoxelType1>, VoxelType1, voxblox::IntensityVoxel, float>(config) 
     {}
 
 template<typename VoxelType1>

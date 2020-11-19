@@ -14,9 +14,9 @@ namespace cblox {
     {
         public:
             ThermalProjectionIntegrator(std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection,
-                                    Layer<voxblox::IntensityVoxel>* integration_layer);
+                                        std::shared_ptr<GenericSubmapCollection<voxblox::IntensityVoxel>> data_collection);
 
-            ThermalProjectionIntegrator(ProjectionConfig<VoxelType1, voxblox::IntensityVoxel, float> c, Layer<voxblox::IntensityVoxel>* l);
+            ThermalProjectionIntegrator(ProjectionConfig<VoxelType1, voxblox::IntensityVoxel, float> c);
 
             void integrationFunction(voxblox::IntensityVoxel& voxel, float& data);
     };

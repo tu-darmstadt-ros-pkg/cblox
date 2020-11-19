@@ -36,7 +36,8 @@ class GenericActiveSubmapVisualizer {
                              geometry_submap_collection_ptr,
                          std::string topic,
                          ros::NodeHandle nh,
-                         ros::NodeHandle nh_private)
+                         ros::NodeHandle nh_private,
+                         double update_interval)
       : mesh_config_(mesh_config),
         geometry_submap_collection_ptr_(geometry_submap_collection_ptr),
         color_layer_(false),
@@ -54,6 +55,11 @@ class GenericActiveSubmapVisualizer {
         message_id_(0) 
         {
             publisher_ = nh_private_.advertise<visualization_msgs::MarkerArray>(topic, 1);
+            if (update_interval > 0.0) {
+                //moved from server to here
+                update_mesh_timer_ = nh_private.createTimer(ros::Duration(update_interval), 
+                    &GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::updateMeshCallback, this);
+            }
         }
 
     GenericActiveSubmapVisualizer(const MeshIntegratorConfig& mesh_config,
@@ -63,7 +69,8 @@ class GenericActiveSubmapVisualizer {
                              color_submap_collection_ptr,
                          std::string topic,
                          ros::NodeHandle nh,
-                         ros::NodeHandle nh_private) 
+                         ros::NodeHandle nh_private,
+                         double update_interval) 
       : mesh_config_(mesh_config),
         geometry_submap_collection_ptr_(geometry_submap_collection_ptr),
         color_layer_(true),
@@ -75,8 +82,17 @@ class GenericActiveSubmapVisualizer {
         nh_(nh),
         nh_private_(nh_private),
         use_function_(false),
-        use_color_map_(false) {
+        use_color_map_(false),
+        remove_alpha_(false),
+        geometry_id_(0),
+        color_id_(0),
+        message_id_(0) {
             publisher_ = nh_private_.advertise<visualization_msgs::MarkerArray>(topic, 1);
+            if (update_interval > 0.0) {
+                //moved from server to here
+                update_mesh_timer_ = nh_private.createTimer(ros::Duration(update_interval), 
+                    &GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::updateMeshCallback, this);
+            }
         }
 
 
@@ -111,6 +127,12 @@ class GenericActiveSubmapVisualizer {
   void recolorWithColorFunction(MeshLayer* mesh_layer_ptr) const;
 
   void removeAlphaChanneled(MeshLayer* mesh_layer_ptr) const;
+
+  void publishCurrentMesh();
+
+  void publishCompleteMesh();
+
+  void updateMeshCallback(const ros::TimerEvent&);
 
   // Config
   const MeshIntegratorConfig mesh_config_;
@@ -151,9 +173,11 @@ class GenericActiveSubmapVisualizer {
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;
 
-  int geometry_id_;
-  int color_id_;
-  int message_id_;
+  unsigned int geometry_id_;
+  unsigned int color_id_;
+  unsigned int message_id_;
+
+  ros::Timer update_mesh_timer_;
 };
 
 }  // namespace cblox

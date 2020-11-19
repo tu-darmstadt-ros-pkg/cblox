@@ -14,9 +14,9 @@ namespace cblox {
     {
         public:
             RGBProjectionIntegrator(std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection,
-                                    Layer<voxblox::RGBVoxel>* integration_layer);
+                                    std::shared_ptr<GenericSubmapCollection<voxblox::RGBVoxel>> data_collection);
 
-            RGBProjectionIntegrator(ProjectionConfig<VoxelType1, voxblox::RGBVoxel, Color> c, Layer<voxblox::RGBVoxel>* l);
+            RGBProjectionIntegrator(ProjectionConfig<VoxelType1, voxblox::RGBVoxel, Color> c);
 
             void integrationFunction(voxblox::RGBVoxel& voxel, Color& data);
     };

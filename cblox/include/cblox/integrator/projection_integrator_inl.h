@@ -10,23 +10,27 @@ namespace cblox {
 template <typename T, typename VoxelType1, typename VoxelType2, typename Data>
 ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::
 ProjectionIntegrator(std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection,
-                     Layer<VoxelType2>* integration_layer)
+                     std::shared_ptr<GenericSubmapCollection<VoxelType2>> data_collection)
     : max_distance_(20.0),
       max_weight_(100.0),
       prop_voxel_radius_(2),
       collision_collection_(collision_collection),
-      integration_layer_(integration_layer)
+      data_collection_(data_collection),
+      integration_layer_(data_collection->getActiveMapPtr()->getLayerPtr())
       //msg_transformation_(msg_transformation) 
       {}
 
 template <typename T, typename VoxelType1, typename VoxelType2, typename Data>
 ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::
-ProjectionIntegrator(ProjectionConfig<VoxelType1, VoxelType2, Data> config, Layer<VoxelType2>* l) 
+ProjectionIntegrator(ProjectionConfig<VoxelType1, VoxelType2, Data> config) 
     : max_distance_(20.0),
     max_weight_(100.0),
     prop_voxel_radius_(2),
     collision_collection_(config.collision_collection),
-    integration_layer_(config.integration_layer) {
+    data_collection_(config.data_collection),
+    integration_layer_(config.data_collection->getActiveMapPtr()->getLayerPtr()) {
+
+
 
 }
 
@@ -37,12 +41,18 @@ void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::
 integrate(const Transformation& T_S_C, const ProjectionData<Data>& data) {
     //get active collision layer
 
-    //TODO rethink mutex
-    std::unique_lock<std::mutex> lock(collision_collection_->collection_mutex_);
-
-    collision_layer_ = collision_collection_->getActiveMapPtr()->getLayerPtr();
+    //TODO rethink updating of layers
+    setActiveLayers();
+    //collision_layer_ = collision_collection_->getActiveMapPtr()->getLayerPtr();
     Transformation T_S2_C = collision_collection_->getActiveSubmapPose().inverse();
+
+    //lock TODO rethink
+    std::unique_lock<std::mutex> lock1(collision_collection_->collection_mutex_, std::defer_lock);
+    std::unique_lock<std::mutex> lock2(data_collection_->collection_mutex_, std::defer_lock);
+    std::lock(lock1, lock2);
     addBearingVectors(data.origin, data.bearing_vectors, data.data, T_S_C, T_S2_C);
+    lock1.unlock();
+    lock2.unlock();
     //using transform to project back from world frame after collision
 }   
 
@@ -107,8 +117,9 @@ addBearingVectors(const Point& origin, const Pointcloud& bearing_vectors,
 
 template <typename T, typename VoxelType1, typename VoxelType2, typename Data>
 void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::
-setLayer(Layer<VoxelType2>* layer) {
-    integration_layer_ = layer;
+setActiveLayers() {
+    integration_layer_ = data_collection_->getActiveMapPtr()->getLayerPtr();
+    collision_layer_ = collision_collection_->getActiveMapPtr()->getLayerPtr();
 }
 
 

@@ -19,7 +19,7 @@ integrate(
     const Transformation T_S_C = getSubmapRelativePose(T_G_C);
 
     //TODO rethink mutex
-    std::unique_lock<std::mutex> lock(submap_collection_ptr_->collection_mutex_);
+    
     integrator_->integrate(T_S_C, data);
     }
 
@@ -63,7 +63,7 @@ updateIntegratorTarget(const std::shared_ptr<GenericMap<VoxelType>>& map_ptr) {
         initializeIntegrator(map_ptr);
     } else {
         std::cout << "updated integrator target" << std::endl;
-        integrator_->setLayer(map_ptr->getLayerPtr());
+        integrator_->setActiveLayers();
     }
 }
 

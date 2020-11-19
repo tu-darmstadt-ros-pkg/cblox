@@ -28,7 +28,8 @@ num_integrated_frames_per_submap_ = 200;
     //TODO remove this workaround by fixing submapcollectionintegrator
     voxblox::TsdfIntegratorBase::Config config;
     config.default_truncation_distance = 0.4;
-    std::shared_ptr<TsdfIntegratorWrapper> integ = std::make_shared<TsdfIntegratorWrapper>(config, submap_collection_ptr->getActiveMapPtr()->getLayerPtr());
+    TsdfConfig c("simple", config, submap_collection_ptr);
+    std::shared_ptr<TsdfIntegratorWrapper> integ = std::make_shared<TsdfIntegratorWrapper>(c);
     Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::PointCloud2::Ptr, GeometryVoxelType, TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType, GeometryVoxelType>::submap_collection_integrator_->setIntegrator(integ);
     subscribeAndAdvertise(pointcloud_topic);
 }
@@ -82,7 +83,9 @@ integrateMessage(const sensor_msgs::PointCloud2::Ptr msg, const Transformation& 
     data.points_C = points_C;
     data.colors = colors;
     data.freespace_points = false;
+
     this->submap_collection_integrator_->integrate(T_G_C, data);
+
     ros::WallTime end = ros::WallTime::now();
     /*num_integrated_frames_current_submap_++;
     if (verbose_) {

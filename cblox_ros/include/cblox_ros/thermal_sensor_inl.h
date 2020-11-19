@@ -20,12 +20,18 @@ namespace cblox {
                                       nh_private_(nh_private),
                                       world_frame_("world"),
                                       subsample_factor_(4),
-                                      valid_info_(false)
+                                      valid_info_(false),
+                                      collision_submap_collection_ptr_(coll_submap_collection_ptr)
                                     {
 
         auto integ = std::make_shared<ThermalProjectionIntegrator<GeometryVoxelType>>(coll_submap_collection_ptr, thermal_submap_collection_ptr->getActiveMapPtr()->getLayerPtr());
         Sensor<ThermalSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::Image::Ptr, voxblox::IntensityVoxel, ThermalProjectionIntegrator<GeometryVoxelType>, ProjectionData<float>, GeometryVoxelType, voxblox::IntensityVoxel>::submap_collection_integrator_->setIntegrator(integ);
         subscribeAndAdvertise(camera_image_topic, camera_info_topic);
+
+        last_parent_id_ = coll_submap_collection_ptr->getActiveSubmapID();
+        Transformation t = coll_submap_collection_ptr->getActiveSubmapPose();
+        //creating child map instead of normal map
+        thermal_submap_collection_ptr->createNewChildSubMap(t, last_parent_id_);
     }
 
     template <typename SubmapType, typename GeometryVoxelType>
@@ -52,6 +58,17 @@ namespace cblox {
     template <typename SubmapType, typename GeometryVoxelType>
     void ThermalSensor<SubmapType, GeometryVoxelType>::
     integrateMessage(const sensor_msgs::Image::Ptr msg, const Transformation T_G_C) {
+
+
+      //check if parent map changed
+      if (last_parent_id_ != collision_submap_collection_ptr_->getActiveSubmapID()) {
+        last_parent_id_ = collision_submap_collection_ptr_->getActiveSubmapID();
+        Transformation t = collision_submap_collection_ptr_->getActiveSubmapPose();
+        //creating child map instead of normal map
+        this->submap_collection_ptr_->createNewChildSubMap(t, last_parent_id_);
+      }
+
+
       if (!valid_info_) {
         ROS_WARN("No Camera Info received");
         return;

@@ -157,6 +157,14 @@ class GenericSubmapCollection : public GenericSubmapCollectionInterface<VoxelTyp
   //TODO rethink mutex/check if needed later
   mutable std::mutex collection_mutex_;
 
+  //returns child maps, if this hasn't a parent, return the ID itself
+  std::vector<SubmapID> getChildMapIDs(SubmapID parent);
+
+  std::vector<typename GenericSubmap<VoxelType>::Ptr> getChildMaps(SubmapID parent);
+
+  void createNewChildSubMap(const Transformation& T_P_S, const SubmapID submap_id, const SubmapID parent);
+
+  SubmapID createNewChildSubMap(const Transformation& T_P_S, const SubmapID parent);
 
  private:
   // TODO(alexmillane): Get some concurrency guards
@@ -169,6 +177,15 @@ class GenericSubmapCollection : public GenericSubmapCollectionInterface<VoxelTyp
 
   // Submap storage and access
   std::map<SubmapID, typename GenericSubmap<VoxelType>::Ptr> id_to_submap_;
+
+  // Mapping of parent maps to child maps. Empty if there is no parent map
+  std::map<SubmapID, std::vector<SubmapID>> parent_to_child_;
+
+  bool has_parent_;
+
+  SubmapID last_parent_id_;
+  Transformation last_parent_transform_;
+
 };
 
 }  // namespace cblox

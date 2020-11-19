@@ -91,30 +91,30 @@ void GenericSubmapServer::readConfig() {
     rgb_sensors_.push_back(rgb_sensor);
     std::cout << "added rgb" << std::endl;
 
-    auto thermal_sensor = std::make_shared<ThermalSensor<GenericSubmap<voxblox::IntensityVoxel>, voxblox::TsdfVoxel>>(nh_, nh_private_, "/arm_thermal_cam/image_raw", "/arm_thermal_cam/camera_info", "world", tsdf_maps_[0], intensity);
+/*    auto thermal_sensor = std::make_shared<ThermalSensor<GenericSubmap<voxblox::IntensityVoxel>, voxblox::TsdfVoxel>>(nh_, nh_private_, "/arm_thermal_cam/image_raw", "/arm_thermal_cam/camera_info", "world", tsdf_maps_[0], intensity);
     thermal_sensors_.push_back(thermal_sensor);
-    std::cout << "added thermal" << std::endl;
+    std::cout << "added thermal" << std::endl;*/
 
 
     voxblox::MeshIntegratorConfig mesh_config
     = voxblox::getMeshIntegratorConfigFromRosParam(nh_private_);
-    auto visualizer = std::make_shared<GenericActiveSubmapVisualizer<voxblox::TsdfVoxel, voxblox::TsdfVoxel>>(mesh_config, tsdf, tsdf, "test_topic", nh_, nh_private_);
+    auto visualizer = std::make_shared<GenericActiveSubmapVisualizer<voxblox::TsdfVoxel, voxblox::TsdfVoxel>>(mesh_config, tsdf, tsdf, "test_topic", nh_, nh_private_, 10.0);
     lidar_sensor->register_visualizer(visualizer);
     voxblox::Color (*f)(const voxblox::TsdfVoxel*) {& func};
-    visualizer->setColorFunction(f);
-    //visualizer->setUseColorMap();
+    //visualizer->setColorFunction(f);
+    visualizer->setUseColorMap();
 
-    auto visualizer2 = std::make_shared<GenericActiveSubmapVisualizer<voxblox::TsdfVoxel, voxblox::RGBVoxel>>(mesh_config, tsdf, rgb, "test_topic2", nh_, nh_private_);
+    auto visualizer2 = std::make_shared<GenericActiveSubmapVisualizer<voxblox::TsdfVoxel, voxblox::RGBVoxel>>(mesh_config, tsdf, rgb, "test_topic2", nh_, nh_private_, 10.0);
     rgb_sensor->register_visualizer(visualizer2);
     voxblox::Color (*f2)(const voxblox::RGBVoxel*) {& func2};
     visualizer2->setColorFunction(f2);
     visualizer2->setRemoveAlpha(true);
     
 
-    auto visualizer3 = std::make_shared<GenericActiveSubmapVisualizer<voxblox::TsdfVoxel, voxblox::IntensityVoxel>>(mesh_config, tsdf, intensity, "test_topic3", nh_, nh_private_);
+/*    auto visualizer3 = std::make_shared<GenericActiveSubmapVisualizer<voxblox::TsdfVoxel, voxblox::IntensityVoxel>>(mesh_config, tsdf, intensity, "test_topic3", nh_, nh_private_, 10.0);
     thermal_sensor->register_visualizer(visualizer3);
     voxblox::Color (*f3)(const voxblox::IntensityVoxel*) {& func3};
-    visualizer3->setColorFunction(f3);
+    visualizer3->setColorFunction(f3);*/
 
 
 }

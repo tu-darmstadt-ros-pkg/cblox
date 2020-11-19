@@ -20,12 +20,18 @@ namespace cblox {
                                       nh_private_(nh_private),
                                       world_frame_("world"),
                                       subsample_factor_(4),
-                                      valid_info_(false)
+                                      valid_info_(false),
+                                      collision_submap_collection_ptr_(coll_submap_collection_ptr)
                                     {
 
-        auto integ = std::make_shared<RGBProjectionIntegrator<GeometryVoxelType>>(coll_submap_collection_ptr, rgb_submap_collection_ptr->getActiveMapPtr()->getLayerPtr());
+        auto integ = std::make_shared<RGBProjectionIntegrator<GeometryVoxelType>>(coll_submap_collection_ptr, rgb_submap_collection_ptr);
         Sensor<RGBSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::Image::Ptr, voxblox::RGBVoxel, RGBProjectionIntegrator<GeometryVoxelType>, ProjectionData<Color>, GeometryVoxelType, voxblox::RGBVoxel>::submap_collection_integrator_->setIntegrator(integ);
         subscribeAndAdvertise(camera_image_topic, camera_info_topic);
+
+        last_parent_id_ = coll_submap_collection_ptr->getActiveSubmapID();
+        Transformation t = coll_submap_collection_ptr->getActiveSubmapPose();
+        //creating child map instead of normal map
+        rgb_submap_collection_ptr->createNewChildSubMap(t, last_parent_id_);
     }
 
     template <typename SubmapType, typename GeometryVoxelType>
@@ -52,6 +58,16 @@ namespace cblox {
     template <typename SubmapType, typename GeometryVoxelType>
     void RGBSensor<SubmapType, GeometryVoxelType>::
     integrateMessage(const sensor_msgs::Image::Ptr msg, const Transformation T_G_C) {
+
+      //TODO check here if parent map is updated, if yes update integrator and create new submap
+      if (last_parent_id_ != collision_submap_collection_ptr_->getActiveSubmapID()) {
+        last_parent_id_ = collision_submap_collection_ptr_->getActiveSubmapID();
+        Transformation t = collision_submap_collection_ptr_->getActiveSubmapPose();
+        //creating child map instead of normal map
+        this->submap_collection_ptr_->createNewChildSubMap(t, last_parent_id_);
+      }
+
+
       if (!valid_info_) {
         ROS_WARN("No Camera Info received");
         return;

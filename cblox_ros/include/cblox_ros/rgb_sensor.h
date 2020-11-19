@@ -57,6 +57,9 @@ struct RGBIntegration {
             double fx_;
 
             size_t subsample_factor_;
+
+            std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>> collision_submap_collection_ptr_;
+            SubmapID last_parent_id_;
     };
 
 }

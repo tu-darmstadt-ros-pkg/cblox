@@ -13,23 +13,41 @@ struct TsdfIntegrationData {
     bool freespace_points;
 };
 
+struct TsdfConfig {
+  std::string type;
+  voxblox::TsdfIntegratorBase::Config config;
+  std::shared_ptr<GenericSubmapCollection<TsdfVoxel>> collection;
+
+  TsdfConfig(std::string t, voxblox::TsdfIntegratorBase::Config& c, std::shared_ptr<GenericSubmapCollection<TsdfVoxel>> coll) {
+    type = t;
+    config = c;
+    collection = coll;
+  }
+};
+
 class TsdfIntegratorWrapper {
   public:
     TsdfIntegratorWrapper(//const std::string& integrator_type, 
-                          const voxblox::TsdfIntegratorBase::Config& config,
-                          voxblox::Layer<TsdfVoxel>* layer) {
-        integrator_ = voxblox::TsdfIntegratorFactory::create(/*integrator_type*/ "simple", config, layer);
+                          const TsdfConfig config) : 
+                          collection_(config.collection) {
+        integrator_ = voxblox::TsdfIntegratorFactory::create(/*integrator_type*/ config.type, config.config, config.collection->getActiveMapPtr()->getLayerPtr());
     }
 
     void integrate(const voxblox::Transformation& T_G_C, const TsdfIntegrationData& data) {
-        integrator_->integratePointCloud(T_G_C, data.points_C, data.colors, data.freespace_points);
+      //TODO rethink layer updating
+      setActiveLayers();
+      //locking
+      std::unique_lock<std::mutex> lock(collection_->collection_mutex_);
+      integrator_->integratePointCloud(T_G_C, data.points_C, data.colors, data.freespace_points);
+      lock.unlock();
     }
 
-    void setLayer(voxblox::Layer<TsdfVoxel>* layer) {
-        integrator_->setLayer(layer);
+    void setActiveLayers() {
+        integrator_->setLayer(collection_->getActiveMapPtr()->getLayerPtr());
     }
   protected:
     voxblox::TsdfIntegratorBase::Ptr integrator_;
+    std::shared_ptr<GenericSubmapCollection<TsdfVoxel>> collection_; 
 
 };
 }

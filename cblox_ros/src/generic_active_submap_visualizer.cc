@@ -28,29 +28,6 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::switchToS
 
 template <typename GeometryVoxelType, typename ColorVoxelType>
 void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::switchToActiveSubmap() {
-  
-  if(active_submap_mesh_integrator_ptr_ != nullptr){
-      //Temporary TODO, not thread safe
-      //TODO rethink mutex
-      std::unique_lock<std::mutex> lock(geometry_submap_collection_ptr_->collection_mutex_);
-      if (typeid(geometry_submap_collection_ptr_.get()) != typeid(color_submap_collection_ptr_.get())) {
-        //TODO rethink mutex
-        std::unique_lock<std::mutex> lock2(color_submap_collection_ptr_->collection_mutex_);
-      
-      }
-      
-      updateMeshLayer();
-      visualization_msgs::Marker marker;
-      getDisplayMesh(&marker);
-      marker.header.frame_id = "world";
-      marker.id = message_id_;
-      message_id_++;
-      visualization_msgs::MarkerArray marker_array;
-      marker_array.markers.push_back(marker);
-      publisher_.publish(marker_array);
-      std::cout << "published mesh" << std::endl;
-
-  }
 
     // Getting the active submap ID
   const SubmapID geometry_submap_id = geometry_submap_collection_ptr_->getActiveSubmapID();
@@ -59,6 +36,75 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::switchToA
     color_active_submap_id_ = color_submap_collection_ptr_->getActiveSubmapID();
   }
   switchToSubmap(geometry_submap_id);
+}
+
+template <typename GeometryVoxelType, typename ColorVoxelType>
+void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::updateMeshCallback(const ros::TimerEvent&) {
+  if(active_submap_mesh_integrator_ptr_ != nullptr){
+      //TODO rethink mutex
+      
+      if (typeid(geometry_submap_collection_ptr_.get()) != typeid(color_submap_collection_ptr_.get())) {
+        //TODO rethink mutex
+        std::unique_lock<std::mutex> lock1(geometry_submap_collection_ptr_->collection_mutex_, std::defer_lock);
+        std::unique_lock<std::mutex> lock2(color_submap_collection_ptr_->collection_mutex_, std::defer_lock);
+        std::lock(lock1, lock2);
+        publishCurrentMesh();
+        lock1.unlock();
+        lock2.unlock();
+      } else {
+        std::unique_lock<std::mutex> lock1(geometry_submap_collection_ptr_->collection_mutex_);
+        //lock1.lock();
+        publishCurrentMesh();
+        lock1.unlock();
+      }
+      
+      
+
+  }
+  
+}
+
+template <typename GeometryVoxelType, typename ColorVoxelType>
+void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::publishCurrentMesh() {
+  std::cout << "publish" << std::endl;
+  //saving and reusing meshes? TODO
+  //only working if subscribers exists
+  if (publisher_.getNumSubscribers() < 1) {
+    return;
+  }
+  std::vector<SubmapID> geometry_ids = geometry_submap_collection_ptr_->getIDs();
+  
+  //check if current valid submap id / find it in vector
+  std::vector<SubmapID>::iterator it = std::find(geometry_ids.begin(), geometry_ids.end(), geometry_id_);
+  
+  //reset if invalid id
+  if (it == geometry_ids.end()) {
+    it = geometry_ids.begin();
+    geometry_id_ = *it;
+  }
+  std::cout << geometry_id_ << std::endl;
+  
+  std::cout << "starting publish" << std::endl;
+  while (it != geometry_ids.end()) {
+    switchToSubmap(*it);
+    updateMeshLayer();
+    visualization_msgs::Marker marker;
+    getDisplayMesh(&marker);
+    marker.header.frame_id = "world";
+    marker.id = message_id_;
+    message_id_++;
+    visualization_msgs::MarkerArray marker_array;
+    marker_array.markers.push_back(marker);
+    publisher_.publish(marker_array);
+    geometry_id_ = *it;
+    it++;
+  }
+  std::cout << "end publish" << std::endl;
+}
+
+template <typename GeometryVoxelType, typename ColorVoxelType>
+void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::publishCompleteMesh() {
+  //TODO
 }
 
 template <typename GeometryVoxelType, typename ColorVoxelType>
@@ -104,8 +150,9 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::updateMes
   CHECK(active_submap_mesh_integrator_ptr_) << "Integrator not initialized.";
 
   // Updating the mesh layer
-  constexpr bool only_mesh_updated_blocks = true;
-  constexpr bool clear_updated_flag = true;
+  //TODO save mesh layers so this can be easier
+  constexpr bool only_mesh_updated_blocks = false; //true;
+  constexpr bool clear_updated_flag = true; //TODO reuse 
   active_submap_mesh_integrator_ptr_->generateMesh(only_mesh_updated_blocks,
                                                    clear_updated_flag);
 }
@@ -142,12 +189,23 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::recolorWi
     ROS_INFO("Not able to color without color layer");
     return;
   }
+  std::cout << "recoloring" <<std::endl;
+  //TODO get color layers here by using new function in map, default in same layer if empty
+  //TODO remove color id
+  //also remove active color id
 
   //get transform from color layer
-  
-  Transformation T_w_s;
-  color_submap_collection_ptr_->getSubmapPose(color_active_submap_id_, &T_w_s);;
-  const voxblox::Layer<ColorVoxelType>* color_layer = color_submap_collection_ptr_->getMapPtr(color_active_submap_id_)->getLayerPtr();
+
+  //Transformation T_w_s;
+  //color_submap_collection_ptr_->getSubmapPose(color_active_submap_id_, &T_w_s);;
+  //const voxblox::Layer<ColorVoxelType>* color_layer = color_submap_collection_ptr_->getMapPtr(color_active_submap_id_)->getLayerPtr();
+
+  std::vector<typename GenericSubmap<ColorVoxelType>::Ptr> color_layers = color_submap_collection_ptr_->getChildMaps(active_submap_id_);
+
+  //TODO make sure color layers Transforms are aligned (in submaps)
+  if (color_layers.size() == 0)
+    return;
+  Transformation T_w_s = (color_layers[0]->getPose());
 
   //Loop over Index
   voxblox::BlockIndexList index_list;
@@ -159,8 +217,17 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::recolorWi
     for(int i = 0; i < mesh_ptr->vertices.size(); i++) {
       //std::cout << mesh_ptr->vertices[i] << std::endl;
       voxblox::Point vertex = T_w_s.inverse() * mesh_ptr->vertices[i];
-      const ColorVoxelType* voxel = color_layer->getVoxelPtrByCoordinates(vertex);
-      voxblox::Color color = (*color_function_)(voxel);
+      
+      
+      //loop over all color layers here
+      voxblox::Color color(0.0, 0.0, 0.0, 0.0);
+      for (auto color_layer : color_layers) {
+        const ColorVoxelType* voxel = color_layer->getMap().getLayer().getVoxelPtrByCoordinates(vertex);
+        voxblox::Color c = (*color_function_)(voxel);
+        if (c.a > 0) {
+          color = c;
+        }
+      }
       mesh_ptr->colors[i] = color;
     }
   }
