@@ -18,12 +18,15 @@ int main(int argc, char** argv) {
 
   cblox::GenericSubmapServer node(nh, nh_private);
 
-  //std::shared_ptr<cblox::SubmapCollection<cblox::TsdfSubmap>> ptr;
-  //cblox::RGBSensor<cblox::TsdfSubmap> rgb();
+  // std::shared_ptr<cblox::SubmapCollection<cblox::TsdfSubmap>> ptr;
+  // cblox::RGBSensor<cblox::TsdfSubmap> rgb();
 
-  //auto sensor = std::make_shared<cblox::RGBSensor<cblox::TsdfSubmap, voxblox::TsdfVoxel>>(ptr, nh, nh_private, "/realsense_d435_back/color/image_raw", "/realsense_d435_back/color/camera_info", "world");
-  
-  //node.add_sensor(sensor);
+  // auto sensor = std::make_shared<cblox::RGBSensor<cblox::TsdfSubmap,
+  // voxblox::TsdfVoxel>>(ptr, nh, nh_private,
+  // "/realsense_d435_back/color/image_raw",
+  // "/realsense_d435_back/color/camera_info", "world");
+
+  // node.add_sensor(sensor);
 
   std::cout << "started generic submap server" << std::endl;
   ros::MultiThreadedSpinner spinner;

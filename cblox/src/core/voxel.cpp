@@ -14,7 +14,6 @@ void Block<RGBVoxel>::deserializeFromIntegers(
 
     RGBVoxel& voxel = voxels_[voxel_idx];
 
-
     memcpy(&(voxel.weight), &bytes_1, sizeof(bytes_1));
 
     voxel.color.r = static_cast<uint8_t>(bytes_2 >> 24);
@@ -49,7 +48,6 @@ template <>
 void mergeVoxelAIntoVoxelB(const RGBVoxel& voxel_A, RGBVoxel* voxel_B) {
   float combined_weight = voxel_A.weight + voxel_B->weight;
   if (combined_weight > 0) {
-
     voxel_B->color = Color::blendTwoColors(voxel_A.color, voxel_A.weight,
                                            voxel_B->color, voxel_B->weight);
 
@@ -58,13 +56,15 @@ void mergeVoxelAIntoVoxelB(const RGBVoxel& voxel_A, RGBVoxel* voxel_B) {
 }
 
 template <>
-void mergeVoxelAIntoVoxelB(const IntensityVoxel& voxel_A, IntensityVoxel* voxel_B) {
+void mergeVoxelAIntoVoxelB(const IntensityVoxel& voxel_A,
+                           IntensityVoxel* voxel_B) {
   float combined_weight = voxel_A.weight + voxel_B->weight;
   if (combined_weight > 0) {
-
-    voxel_B->intensity = (voxel_A.weight * voxel_A.intensity + voxel_B->weight * voxel_B->intensity) / (voxel_A.weight + voxel_B->weight);
+    voxel_B->intensity = (voxel_A.weight * voxel_A.intensity +
+                          voxel_B->weight * voxel_B->intensity) /
+                         (voxel_A.weight + voxel_B->weight);
 
     voxel_B->weight = combined_weight;
   }
 }
-}
+}  // namespace voxblox

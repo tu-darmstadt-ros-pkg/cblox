@@ -4,11 +4,10 @@
 #include <cblox/integrator/projection_integrator.h>
 
 namespace cblox {
-    class MethodToolbox {
-
-        template <typename T>
-        static ProjectionData<T> createProjectionData();
-    }
+class MethodToolbox {
+  template <typename T>
+  static ProjectionData<T> createProjectionData();
 }
+}  // namespace cblox
 
-#endif //CBLOX_ROS_METHOD_TOOLBOX_H_
+#endif  // CBLOX_ROS_METHOD_TOOLBOX_H_

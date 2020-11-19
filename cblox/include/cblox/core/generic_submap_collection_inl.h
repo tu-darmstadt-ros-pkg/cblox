@@ -10,21 +10,17 @@
 #include <voxblox/integrator/merge_integration.h>
 #include <voxblox/utils/protobuf_utils.h>
 
-
 namespace cblox {
 
 template <typename VoxelType>
 GenericSubmapCollection<VoxelType>::GenericSubmapCollection(
     const typename GenericSubmap<VoxelType>::Config& submap_config,
     const std::vector<typename GenericSubmap<VoxelType>::Ptr>& sub_maps)
-    : submap_config_(submap_config),
-    has_parent_(false),
-    last_parent_id_(0) {
+    : submap_config_(submap_config), has_parent_(false), last_parent_id_(0) {
   // Constructing from a list of existing submaps
   // NOTE(alexmillane): Relies on the submaps having unique submap IDs...
   for (const auto& submap_ptr : sub_maps) {
-    const auto ret =
-        id_to_submap_.insert({submap_ptr->getID(), submap_ptr});
+    const auto ret = id_to_submap_.insert({submap_ptr->getID(), submap_ptr});
     CHECK(ret.second) << "Attempted to construct collection from vector of "
                          "submaps containing at least one duplicate ID.";
   }
@@ -41,15 +37,16 @@ std::vector<SubmapID> GenericSubmapCollection<VoxelType>::getIDs() const {
 }
 
 template <typename VoxelType>
-bool GenericSubmapCollection<VoxelType>::exists(const SubmapID submap_id) const {
+bool GenericSubmapCollection<VoxelType>::exists(
+    const SubmapID submap_id) const {
   // Searching for the passed submap ID
   const auto it = id_to_submap_.find(submap_id);
   return (it != id_to_submap_.end());
 }
 
 template <typename VoxelType>
-void GenericSubmapCollection<VoxelType>::createNewSubmap(const Transformation& T_G_S,
-                                                   const SubmapID submap_id) {
+void GenericSubmapCollection<VoxelType>::createNewSubmap(
+    const Transformation& T_G_S, const SubmapID submap_id) {
   // Checking if the submap already exists
   // NOTE(alexmillane): This hard fails the program if the submap already
   // exists. This is fairly brittle behaviour and we may want to change it at a
@@ -62,7 +59,7 @@ void GenericSubmapCollection<VoxelType>::createNewSubmap(const Transformation& T
   Transformation T_G;
   if (has_parent_) {
     T_G = last_parent_transform_;
-  } else{
+  } else {
     T_G = T_G_S;
   }
   typename GenericSubmap<VoxelType>::Ptr sub_map(
@@ -109,13 +106,15 @@ bool GenericSubmapCollection<VoxelType>::duplicateSubmap(
   // Get pointer to the source submap
   const auto src_submap_ptr_it = id_to_submap_.find(source_submap_id);
   if (src_submap_ptr_it != id_to_submap_.end()) {
-    typename GenericSubmap<VoxelType>::Ptr src_submap_ptr = src_submap_ptr_it->second;
+    typename GenericSubmap<VoxelType>::Ptr src_submap_ptr =
+        src_submap_ptr_it->second;
     // Create a new submap with the same pose and get its pointer
     const Transformation T_G_S = src_submap_ptr->getPose();
     // Creating the new submap and adding it to the list
     typename GenericSubmap<VoxelType>::Ptr new_sub_map(
         new GenericSubmap<VoxelType>(T_G_S, new_submap_id, submap_config_));
-    // Reset the GenericMap<VoxelType> based on a copy of the source submap's TSDF layer
+    // Reset the GenericMap<VoxelType> based on a copy of the source submap's
+    // TSDF layer
     // TODO(victorr): Find a better way to do this, however with .reset(...) as
     // below the new submap appears empty
     // new_tsdf_sub_map->getGenericMap<VoxelType>Ptr().reset(new
@@ -157,29 +156,32 @@ GenericSubmapCollection<VoxelType>::getSubmapConstPtrs() const {
 }
 
 template <typename VoxelType>
-typename GenericMap<VoxelType>::Ptr GenericSubmapCollection<VoxelType>::getActiveMapPtr() {
+typename GenericMap<VoxelType>::Ptr
+GenericSubmapCollection<VoxelType>::getActiveMapPtr() {
   const auto it = id_to_submap_.find(active_submap_id_);
   CHECK(it != id_to_submap_.end());
   return (it->second)->getMapPtr();
 }
 
 template <typename VoxelType>
-typename GenericMap<VoxelType>::Ptr GenericSubmapCollection<VoxelType>::getMapPtr(
-    const SubmapID submap_id) {
+typename GenericMap<VoxelType>::Ptr
+GenericSubmapCollection<VoxelType>::getMapPtr(const SubmapID submap_id) {
   const auto it = id_to_submap_.find(submap_id);
   CHECK(it != id_to_submap_.end());
   return (it->second)->getMapPtr();
 }
 
 template <typename VoxelType>
-const GenericMap<VoxelType>& GenericSubmapCollection<VoxelType>::getActiveMap() const {
+const GenericMap<VoxelType>& GenericSubmapCollection<VoxelType>::getActiveMap()
+    const {
   const auto it = id_to_submap_.find(active_submap_id_);
   CHECK(it != id_to_submap_.end());
   return (it->second)->getMap();
 }
 
 template <typename VoxelType>
-const GenericSubmap<VoxelType>& GenericSubmapCollection<VoxelType>::getActiveSubmap() const {
+const GenericSubmap<VoxelType>&
+GenericSubmapCollection<VoxelType>::getActiveSubmap() const {
   const auto it = id_to_submap_.find(active_submap_id_);
   CHECK(it != id_to_submap_.end());
   return *(it->second);
@@ -187,7 +189,8 @@ const GenericSubmap<VoxelType>& GenericSubmapCollection<VoxelType>::getActiveSub
 
 // Gets a pointer to the active submap
 template <typename VoxelType>
-typename GenericSubmap<VoxelType>::Ptr GenericSubmapCollection<VoxelType>::getActiveSubmapPtr() {
+typename GenericSubmap<VoxelType>::Ptr
+GenericSubmapCollection<VoxelType>::getActiveSubmapPtr() {
   const auto it = id_to_submap_.find(active_submap_id_);
   CHECK(it != id_to_submap_.end());
   return it->second;
@@ -204,35 +207,35 @@ SubmapID GenericSubmapCollection<VoxelType>::getActiveSubmapID() const {
 }
 
 template <typename VoxelType>
-void GenericSubmapCollection<VoxelType>::activateSubmap(const SubmapID submap_id) {
+void GenericSubmapCollection<VoxelType>::activateSubmap(
+    const SubmapID submap_id) {
   const auto it = id_to_submap_.find(submap_id);
   CHECK(it != id_to_submap_.end());
   active_submap_id_ = submap_id;
 }
 
 template <typename VoxelType>
-typename GenericMap<VoxelType>::Ptr GenericSubmapCollection<VoxelType>::getProjectedMap() const {
+typename GenericMap<VoxelType>::Ptr
+GenericSubmapCollection<VoxelType>::getProjectedMap() const {
   // Creating the global tsdf map and getting its tsdf layer
   typename GenericMap<VoxelType>::Ptr projected_map_ptr =
       GenericMap<VoxelType>::Ptr(new GenericMap<VoxelType>(submap_config_));
-  Layer<VoxelType>* combined_layer_ptr =
-      projected_map_ptr->getTsdfLayerPtr();
+  Layer<VoxelType>* combined_layer_ptr = projected_map_ptr->getTsdfLayerPtr();
   // Looping over the current submaps
   for (const auto& id_submap_pair : id_to_submap_) {
     // Getting the tsdf submap and its pose
     const GenericMap<VoxelType>& map = (id_submap_pair.second)->getMap();
     const Transformation& T_G_S = (id_submap_pair.second)->getPose();
     // Merging layers the submap into the global layer
-    mergeLayerAintoLayerB(map.getLayer(), T_G_S,
-                          combined_layer_ptr);
+    mergeLayerAintoLayerB(map.getLayer(), T_G_S, combined_layer_ptr);
   }
   // Returning the new map
   return projected_map_ptr;
 }
 
 template <typename VoxelType>
-bool GenericSubmapCollection<VoxelType>::setSubmapPose(const SubmapID submap_id,
-                                                 const Transformation& pose) {
+bool GenericSubmapCollection<VoxelType>::setSubmapPose(
+    const SubmapID submap_id, const Transformation& pose) {
   // Looking for the submap
   const auto submap_ptr_it = id_to_submap_.find(submap_id);
   if (submap_ptr_it != id_to_submap_.end()) {
@@ -283,8 +286,8 @@ void GenericSubmapCollection<VoxelType>::getSubmapPoses(
 }
 
 template <typename VoxelType>
-typename GenericSubmap<VoxelType>::Ptr GenericSubmapCollection<VoxelType>::getSubmapPtr(
-    const SubmapID submap_id) {
+typename GenericSubmap<VoxelType>::Ptr
+GenericSubmapCollection<VoxelType>::getSubmapPtr(const SubmapID submap_id) {
   const auto submap_ptr_it = id_to_submap_.find(submap_id);
   if (submap_ptr_it != id_to_submap_.end()) {
     return submap_ptr_it->second;
@@ -294,7 +297,8 @@ typename GenericSubmap<VoxelType>::Ptr GenericSubmapCollection<VoxelType>::getSu
 }
 
 template <typename VoxelType>
-typename GenericSubmap<VoxelType>::ConstPtr GenericSubmapCollection<VoxelType>::getSubmapConstPtr(
+typename GenericSubmap<VoxelType>::ConstPtr
+GenericSubmapCollection<VoxelType>::getSubmapConstPtr(
     const SubmapID submap_id) const {
   const auto submap_ptr_it = id_to_submap_.find(submap_id);
   if (submap_ptr_it != id_to_submap_.end()) {
@@ -367,7 +371,8 @@ bool GenericSubmapCollection<VoxelType>::LoadFromFile(
   GenericSubmapCollectionProto submap_collection_proto;
   if (!voxblox::utils::readProtoMsgFromStream(
           &proto_file, &submap_collection_proto, &tmp_byte_offset)) {
-    LOG(ERROR) << "Could not read generic submap collection map protobuf message.";
+    LOG(ERROR)
+        << "Could not read generic submap collection map protobuf message.";
     return false;
   }
 
@@ -379,8 +384,10 @@ bool GenericSubmapCollection<VoxelType>::LoadFromFile(
        sub_map_index < submap_collection_proto.num_submaps(); ++sub_map_index) {
     LOG(INFO) << "Loading submap number: " << sub_map_index;
     // Loading the submaps
-    typename GenericSubmap<VoxelType>::Ptr submap_ptr = GenericSubmap<VoxelType>::LoadFromStream(
-        (*submap_collection_ptr)->getConfig(), &proto_file, &tmp_byte_offset);
+    typename GenericSubmap<VoxelType>::Ptr submap_ptr =
+        GenericSubmap<VoxelType>::LoadFromStream(
+            (*submap_collection_ptr)->getConfig(), &proto_file,
+            &tmp_byte_offset);
     if (submap_ptr == nullptr) {
       LOG(ERROR) << "Could not load the submap from stream.";
       return false;
@@ -407,8 +414,10 @@ void GenericSubmapCollection<VoxelType>::fuseSubmapPair(
   if ((id_submap_pair_1_it != id_to_submap_.end()) &&
       (id_submap_pair_2_it != id_to_submap_.end())) {
     // Getting the submaps
-    typename GenericSubmap<VoxelType>::Ptr submap_ptr_1 = (*id_submap_pair_1_it).second;
-    typename GenericSubmap<VoxelType>::Ptr submap_ptr_2 = (*id_submap_pair_2_it).second;
+    typename GenericSubmap<VoxelType>::Ptr submap_ptr_1 =
+        (*id_submap_pair_1_it).second;
+    typename GenericSubmap<VoxelType>::Ptr submap_ptr_2 =
+        (*id_submap_pair_2_it).second;
     // Checking that we're not trying to fuse a submap into itself. This can
     // occur due to fusing submap pairs in a triangle.
     if (submap_ptr_1->getID() == submap_ptr_2->getID()) {
@@ -452,7 +461,8 @@ size_t GenericSubmapCollection<VoxelType>::getMemorySize() const {
   return size;
 }
 template <typename VoxelType>
-std::vector<SubmapID> GenericSubmapCollection<VoxelType>::getChildMapIDs(SubmapID parent) {
+std::vector<SubmapID> GenericSubmapCollection<VoxelType>::getChildMapIDs(
+    SubmapID parent) {
   std::vector<SubmapID> vec;
   if (!has_parent_) {
     vec.push_back(parent);
@@ -460,13 +470,13 @@ std::vector<SubmapID> GenericSubmapCollection<VoxelType>::getChildMapIDs(SubmapI
   }
 
   auto res = parent_to_child_.find(parent);
-  if (res != parent_to_child_.end())
-    vec = res->second;
+  if (res != parent_to_child_.end()) vec = res->second;
   return vec;
 }
 
 template <typename VoxelType>
-std::vector<typename GenericSubmap<VoxelType>::Ptr> GenericSubmapCollection<VoxelType>::getChildMaps(SubmapID parent) {
+std::vector<typename GenericSubmap<VoxelType>::Ptr>
+GenericSubmapCollection<VoxelType>::getChildMaps(SubmapID parent) {
   std::vector<typename GenericSubmap<VoxelType>::Ptr> vec;
   if (!has_parent_) {
     vec.push_back(id_to_submap_.find(parent)->second);
@@ -475,13 +485,15 @@ std::vector<typename GenericSubmap<VoxelType>::Ptr> GenericSubmapCollection<Voxe
 
   for (auto child : getChildMapIDs(parent)) {
     vec.push_back((id_to_submap_.find(child)->second));
-  }  
+  }
   return vec;
 }
 
-//like before but use parent transform and do id handling
+// like before but use parent transform and do id handling
 template <typename VoxelType>
-void GenericSubmapCollection<VoxelType>::createNewChildSubMap(const Transformation& T_G_P, const SubmapID submap_id, const SubmapID parent) {
+void GenericSubmapCollection<VoxelType>::createNewChildSubMap(
+    const Transformation& T_G_P, const SubmapID submap_id,
+    const SubmapID parent) {
   has_parent_ = true;
   last_parent_id_ = parent;
   last_parent_transform_ = T_G_P;
@@ -489,7 +501,8 @@ void GenericSubmapCollection<VoxelType>::createNewChildSubMap(const Transformati
 }
 
 template <typename VoxelType>
-SubmapID GenericSubmapCollection<VoxelType>::createNewChildSubMap(const Transformation& T_G_P, const SubmapID parent) {
+SubmapID GenericSubmapCollection<VoxelType>::createNewChildSubMap(
+    const Transformation& T_G_P, const SubmapID parent) {
   SubmapID new_ID = 0;
   if (!id_to_submap_.empty()) {
     new_ID = id_to_submap_.rbegin()->first + 1;

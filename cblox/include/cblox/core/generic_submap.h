@@ -3,10 +3,10 @@
 
 #include "cblox/Submap.pb.h"
 #include "cblox/core/common.h"
-#include "cblox/core/submap.h"
 #include "cblox/core/generic_map.h"
+#include "cblox/core/submap.h"
 
-//generic version of tsdf submap
+// generic version of tsdf submap
 
 namespace cblox {
 
@@ -18,8 +18,8 @@ class GenericSubmap : public Submap {
   typedef std::shared_ptr<GenericSubmap<VoxelType>> Ptr;
   typedef std::shared_ptr<const GenericSubmap<VoxelType>> ConstPtr;
   typedef typename GenericMap<VoxelType>::Config Config;
-  //TODO rethink if different maps need different configs
-  //typedef GenericMap<VoxelType>::Config Config;
+  // TODO rethink if different maps need different configs
+  // typedef GenericMap<VoxelType>::Config Config;
 
   GenericSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config)
       : Submap(T_M_S, submap_id) {
@@ -70,15 +70,15 @@ class GenericSubmap : public Submap {
 
   // Load a submap from stream.
   // Note(alexmillane): Returns a nullptr if load is unsuccessful.
-  static std::shared_ptr<GenericSubmap<VoxelType>> LoadFromStream(const Config& config,
-                                        std::fstream* proto_file_ptr,
-                                        uint64_t* tmp_byte_offset_ptr);
+  static std::shared_ptr<GenericSubmap<VoxelType>> LoadFromStream(
+      const Config& config, std::fstream* proto_file_ptr,
+      uint64_t* tmp_byte_offset_ptr);
 
  protected:
   std::shared_ptr<GenericMap<VoxelType>> map_;
   std::pair<int64_t, int64_t> mapping_interval_;
 };
 
-}
+}  // namespace cblox
 
-#endif // CBLOX_CORE_GENERIC_SUBMAP_H_
+#endif  // CBLOX_CORE_GENERIC_SUBMAP_H_

@@ -3,7 +3,7 @@
 #include "cblox/utils/quat_transformation_protobuf_utils.h"
 
 namespace cblox {
-    
+
 template <typename VoxelType>
 void GenericSubmap<VoxelType>::finishSubmap() {
   // Empty implementation.
@@ -18,8 +18,7 @@ template <typename VoxelType>
 void GenericSubmap<VoxelType>::getProto(SubmapProto* proto) const {
   CHECK_NOTNULL(proto);
   // Getting the relevant data
-  size_t num_blocks =
-      map_->getLayer().getNumberOfAllocatedBlocks();
+  size_t num_blocks = map_->getLayer().getNumberOfAllocatedBlocks();
   QuatTransformationProto* transformation_proto_ptr =
       new QuatTransformationProto();
   conversions::transformKindrToProto(T_M_S_, transformation_proto_ptr);
@@ -44,8 +43,8 @@ bool GenericSubmap<VoxelType>::saveToStream(std::fstream* outfile_ptr) const {
   // Saving the blocks
   constexpr bool kIncludeAllBlocks = true;
   const Layer<VoxelType>& layer = map_->getLayer();
-  if (!layer.saveBlocksToStream(kIncludeAllBlocks,
-                                     voxblox::BlockIndexList(), outfile_ptr)) {
+  if (!layer.saveBlocksToStream(kIncludeAllBlocks, voxblox::BlockIndexList(),
+                                outfile_ptr)) {
     LOG(ERROR) << "Could not write sub map blocks to stream.";
     outfile_ptr->close();
     return false;
@@ -57,8 +56,8 @@ bool GenericSubmap<VoxelType>::saveToStream(std::fstream* outfile_ptr) const {
 template <typename VoxelType>
 std::shared_ptr<GenericSubmap<VoxelType>>
 GenericSubmap<VoxelType>::LoadFromStream(const Config& config,
-                                           std::fstream* proto_file_ptr,
-                                           uint64_t* tmp_byte_offset_ptr) {
+                                         std::fstream* proto_file_ptr,
+                                         uint64_t* tmp_byte_offset_ptr) {
   CHECK_NOTNULL(proto_file_ptr);
   CHECK_NOTNULL(tmp_byte_offset_ptr);
 
@@ -82,27 +81,26 @@ GenericSubmap<VoxelType>::LoadFromStream(const Config& config,
             << ", " << q.x() << ", " << q.y() << ", " << q.z() << " ]";
 
   // Creating a new submap to hold the data
-  auto submap_ptr =
-      std::make_shared<GenericSubmap<VoxelType>>(T_M_S, submap_proto.id(), config);
+  auto submap_ptr = std::make_shared<GenericSubmap<VoxelType>>(
+      T_M_S, submap_proto.id(), config);
 
   // Getting the tsdf blocks for this submap (the tsdf layer)
   LOG(INFO) << "Tsdf number of allocated blocks: " << submap_proto.num_blocks();
   if (!voxblox::io::LoadBlocksFromStream(
           submap_proto.num_blocks(),
           Layer<VoxelType>::BlockMergingStrategy::kReplace, proto_file_ptr,
-          submap_ptr->getMapPtr()->getLayerPtr(),
-          tmp_byte_offset_ptr)) {
+          submap_ptr->getMapPtr()->getLayerPtr(), tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not load the tsdf blocks from stream.";
     return nullptr;
   }
 
   return submap_ptr;
 }
-}
+}  // namespace cblox
 
-#include "voxblox/core/voxel.h"
 #include "cblox/core/voxel.h"
 #include "voxblox/core/tsdf_map.h"
+#include "voxblox/core/voxel.h"
 
 // explicit instantiations
 template class cblox::GenericSubmap<voxblox::TsdfVoxel>;

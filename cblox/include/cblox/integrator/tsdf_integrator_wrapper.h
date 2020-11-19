@@ -3,14 +3,13 @@
 
 #include <voxblox/integrator/tsdf_integrator.h>
 
-
 namespace cblox {
 
 struct TsdfIntegrationData {
-    //TsdfIntegrationData()
-    voxblox::Pointcloud points_C;
-    voxblox::Colors colors;
-    bool freespace_points;
+  // TsdfIntegrationData()
+  voxblox::Pointcloud points_C;
+  voxblox::Colors colors;
+  bool freespace_points;
 };
 
 struct TsdfConfig {
@@ -18,7 +17,8 @@ struct TsdfConfig {
   voxblox::TsdfIntegratorBase::Config config;
   std::shared_ptr<GenericSubmapCollection<TsdfVoxel>> collection;
 
-  TsdfConfig(std::string t, voxblox::TsdfIntegratorBase::Config& c, std::shared_ptr<GenericSubmapCollection<TsdfVoxel>> coll) {
+  TsdfConfig(std::string t, voxblox::TsdfIntegratorBase::Config& c,
+             std::shared_ptr<GenericSubmapCollection<TsdfVoxel>> coll) {
     type = t;
     config = c;
     collection = coll;
@@ -26,30 +26,34 @@ struct TsdfConfig {
 };
 
 class TsdfIntegratorWrapper {
-  public:
-    TsdfIntegratorWrapper(//const std::string& integrator_type, 
-                          const TsdfConfig config) : 
-                          collection_(config.collection) {
-        integrator_ = voxblox::TsdfIntegratorFactory::create(/*integrator_type*/ config.type, config.config, config.collection->getActiveMapPtr()->getLayerPtr());
-    }
+ public:
+  TsdfIntegratorWrapper(  // const std::string& integrator_type,
+      const TsdfConfig config)
+      : collection_(config.collection) {
+    integrator_ = voxblox::TsdfIntegratorFactory::create(
+        /*integrator_type*/ config.type, config.config,
+        config.collection->getActiveMapPtr()->getLayerPtr());
+  }
 
-    void integrate(const voxblox::Transformation& T_G_C, const TsdfIntegrationData& data) {
-      //TODO rethink layer updating
-      setActiveLayers();
-      //locking
-      std::unique_lock<std::mutex> lock(collection_->collection_mutex_);
-      integrator_->integratePointCloud(T_G_C, data.points_C, data.colors, data.freespace_points);
-      lock.unlock();
-    }
+  void integrate(const voxblox::Transformation& T_G_C,
+                 const TsdfIntegrationData& data) {
+    // TODO rethink layer updating
+    setActiveLayers();
+    // locking
+    std::unique_lock<std::mutex> lock(collection_->collection_mutex_);
+    integrator_->integratePointCloud(T_G_C, data.points_C, data.colors,
+                                     data.freespace_points);
+    lock.unlock();
+  }
 
-    void setActiveLayers() {
-        integrator_->setLayer(collection_->getActiveMapPtr()->getLayerPtr());
-    }
-  protected:
-    voxblox::TsdfIntegratorBase::Ptr integrator_;
-    std::shared_ptr<GenericSubmapCollection<TsdfVoxel>> collection_; 
+  void setActiveLayers() {
+    integrator_->setLayer(collection_->getActiveMapPtr()->getLayerPtr());
+  }
 
+ protected:
+  voxblox::TsdfIntegratorBase::Ptr integrator_;
+  std::shared_ptr<GenericSubmapCollection<TsdfVoxel>> collection_;
 };
-}
+}  // namespace cblox
 
-#endif //CBLOX_INTEGRATOR_TSDF_INTEGRATOR_WRAPPER_H_
+#endif  // CBLOX_INTEGRATOR_TSDF_INTEGRATOR_WRAPPER_H_

@@ -11,9 +11,9 @@
 
 #include <cblox/core/generic_submap_collection.h>
 #include <cblox/mesh/submap_mesher.h>
+#include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
-#include <ros/ros.h>
 
 #include <voxblox/core/color.h>
 
@@ -31,13 +31,12 @@ class GenericActiveSubmapVisualizer {
   typedef std::shared_ptr<const GenericActiveSubmapVisualizer> ConstPtr;
 
   // Constructor
-  GenericActiveSubmapVisualizer(const MeshIntegratorConfig& mesh_config,
-                         const std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>&
-                             geometry_submap_collection_ptr,
-                         std::string topic,
-                         ros::NodeHandle nh,
-                         ros::NodeHandle nh_private,
-                         double update_interval)
+  GenericActiveSubmapVisualizer(
+      const MeshIntegratorConfig& mesh_config,
+      const std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>&
+          geometry_submap_collection_ptr,
+      std::string topic, ros::NodeHandle nh, ros::NodeHandle nh_private,
+      double update_interval)
       : mesh_config_(mesh_config),
         geometry_submap_collection_ptr_(geometry_submap_collection_ptr),
         color_layer_(false),
@@ -52,25 +51,27 @@ class GenericActiveSubmapVisualizer {
         remove_alpha_(false),
         geometry_id_(0),
         color_id_(0),
-        message_id_(0) 
-        {
-            publisher_ = nh_private_.advertise<visualization_msgs::MarkerArray>(topic, 1);
-            if (update_interval > 0.0) {
-                //moved from server to here
-                update_mesh_timer_ = nh_private.createTimer(ros::Duration(update_interval), 
-                    &GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::updateMeshCallback, this);
-            }
-        }
+        message_id_(0) {
+    publisher_ =
+        nh_private_.advertise<visualization_msgs::MarkerArray>(topic, 1);
+    if (update_interval > 0.0) {
+      // moved from server to here
+      update_mesh_timer_ = nh_private.createTimer(
+          ros::Duration(update_interval),
+          &GenericActiveSubmapVisualizer<GeometryVoxelType,
+                                         ColorVoxelType>::updateMeshCallback,
+          this);
+    }
+  }
 
-    GenericActiveSubmapVisualizer(const MeshIntegratorConfig& mesh_config,
-                         const std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>&
-                             geometry_submap_collection_ptr,
-                         const std::shared_ptr<GenericSubmapCollection<ColorVoxelType>>&
-                             color_submap_collection_ptr,
-                         std::string topic,
-                         ros::NodeHandle nh,
-                         ros::NodeHandle nh_private,
-                         double update_interval) 
+  GenericActiveSubmapVisualizer(
+      const MeshIntegratorConfig& mesh_config,
+      const std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>&
+          geometry_submap_collection_ptr,
+      const std::shared_ptr<GenericSubmapCollection<ColorVoxelType>>&
+          color_submap_collection_ptr,
+      std::string topic, ros::NodeHandle nh, ros::NodeHandle nh_private,
+      double update_interval)
       : mesh_config_(mesh_config),
         geometry_submap_collection_ptr_(geometry_submap_collection_ptr),
         color_layer_(true),
@@ -87,14 +88,17 @@ class GenericActiveSubmapVisualizer {
         geometry_id_(0),
         color_id_(0),
         message_id_(0) {
-            publisher_ = nh_private_.advertise<visualization_msgs::MarkerArray>(topic, 1);
-            if (update_interval > 0.0) {
-                //moved from server to here
-                update_mesh_timer_ = nh_private.createTimer(ros::Duration(update_interval), 
-                    &GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::updateMeshCallback, this);
-            }
-        }
-
+    publisher_ =
+        nh_private_.advertise<visualization_msgs::MarkerArray>(topic, 1);
+    if (update_interval > 0.0) {
+      // moved from server to here
+      update_mesh_timer_ = nh_private.createTimer(
+          ros::Duration(update_interval),
+          &GenericActiveSubmapVisualizer<GeometryVoxelType,
+                                         ColorVoxelType>::updateMeshCallback,
+          this);
+    }
+  }
 
   void switchToSubmap(const SubmapID submap_id);
   void switchToActiveSubmap();
@@ -107,7 +111,8 @@ class GenericActiveSubmapVisualizer {
   void setVerbose(const bool& verbose) { verbose_ = verbose; }
   void setOpacity(const float& opacity) { opacity_ = opacity; }
 
-  void setColorFunction(voxblox::Color (*color_function)(const ColorVoxelType*));
+  void setColorFunction(
+      voxblox::Color (*color_function)(const ColorVoxelType*));
   void setUseColorMap();
   void setUseDefault();
   void setRemoveAlpha(bool val);
@@ -142,10 +147,12 @@ class GenericActiveSubmapVisualizer {
   int active_submap_color_idx_;
 
   // The integrator
-  std::unique_ptr<MeshIntegrator<GeometryVoxelType>> active_submap_mesh_integrator_ptr_;
+  std::unique_ptr<MeshIntegrator<GeometryVoxelType>>
+      active_submap_mesh_integrator_ptr_;
 
   // The submap collection
-  std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>> geometry_submap_collection_ptr_;
+  std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
+      geometry_submap_collection_ptr_;
   SubmapID active_submap_id_;
 
   SubmapID color_active_submap_id_;
@@ -162,7 +169,8 @@ class GenericActiveSubmapVisualizer {
   float opacity_;
 
   bool color_layer_;
-  std::shared_ptr<GenericSubmapCollection<ColorVoxelType>> color_submap_collection_ptr_;
+  std::shared_ptr<GenericSubmapCollection<ColorVoxelType>>
+      color_submap_collection_ptr_;
 
   bool use_function_;
   bool use_color_map_;

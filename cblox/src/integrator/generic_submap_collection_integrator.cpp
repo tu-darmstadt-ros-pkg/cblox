@@ -6,88 +6,96 @@
 namespace cblox {
 
 template <typename IntegratorType, typename IntegrationData, typename VoxelType>
-void GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData, VoxelType>::
-integrate(
-    const Transformation& T_G_C, 
-    const IntegrationData& data) {
-    CHECK(!submap_collection_ptr_->empty())
+void GenericSubmapCollectionIntegrator<
+    IntegratorType, IntegrationData,
+    VoxelType>::integrate(const Transformation& T_G_C,
+                          const IntegrationData& data) {
+  CHECK(!submap_collection_ptr_->empty())
       << "Can't integrate. No submaps in collection.";
-    CHECK(integrator_)
-      << "Can't integrate. Need to update integration target.";
-    
+  CHECK(integrator_) << "Can't integrate. Need to update integration target.";
 
-    const Transformation T_S_C = getSubmapRelativePose(T_G_C);
+  const Transformation T_S_C = getSubmapRelativePose(T_G_C);
 
-    //TODO rethink mutex
-    
-    integrator_->integrate(T_S_C, data);
-    }
+  // TODO rethink mutex
 
-template <typename IntegratorType, typename IntegrationData, typename VoxelType>
-void GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData, VoxelType>::
-switchToActiveSubmap() {
-    updateIntegratorTarget(submap_collection_ptr_->getActiveSubmapPtr()->getMapPtr());
-    T_G_S_active_ = submap_collection_ptr_->getActiveSubmapPose();
-    //TODO check if this can be done with a simple layer??, maybe reuse tsdf map?
+  integrator_->integrate(T_S_C, data);
 }
 
 template <typename IntegratorType, typename IntegrationData, typename VoxelType>
-void GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData, VoxelType>::
-initializeIntegrator(const std::shared_ptr<GenericMap<VoxelType>>& map_ptr) {
-    CHECK(map_ptr);
-    //TODO, create integrator here
-    //void (*integration_function)(VoxelType&, IntegrationData&);
-    //or maybe try to declare them explicit instead of passing?
-    
-    //TODO config passing in this class is needed
-
-    //or integrator must be instantiated elsewhere
-
-    //TODO pass everything in config
-
-    Layer<VoxelType> *layer = new Layer<VoxelType>(0.2, 16u);
-    voxblox::TsdfIntegratorBase::Config config;
-    config.default_truncation_distance = 0.4;
-    //integrator_.reset(new IntegratorType(NULL, &layer, integration_function));
-    //integrator_.reset(new IntegratorType(config, layer));
-    //TODO repair this with use of config structs!!!
-
+void GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData,
+                                       VoxelType>::switchToActiveSubmap() {
+  updateIntegratorTarget(
+      submap_collection_ptr_->getActiveSubmapPtr()->getMapPtr());
+  T_G_S_active_ = submap_collection_ptr_->getActiveSubmapPose();
+  // TODO check if this can be done with a simple layer??, maybe reuse tsdf map?
 }
 
 template <typename IntegratorType, typename IntegrationData, typename VoxelType>
-void GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData, VoxelType>::
-updateIntegratorTarget(const std::shared_ptr<GenericMap<VoxelType>>& map_ptr) {
-    CHECK(map_ptr);
+void GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData,
+                                       VoxelType>::
+    initializeIntegrator(
+        const std::shared_ptr<GenericMap<VoxelType>>& map_ptr) {
+  CHECK(map_ptr);
+  // TODO, create integrator here
+  // void (*integration_function)(VoxelType&, IntegrationData&);
+  // or maybe try to declare them explicit instead of passing?
 
-    if (integrator_ == nullptr) {
-        initializeIntegrator(map_ptr);
-    } else {
-        std::cout << "updated integrator target" << std::endl;
-        integrator_->setActiveLayers();
-    }
+  // TODO config passing in this class is needed
+
+  // or integrator must be instantiated elsewhere
+
+  // TODO pass everything in config
+
+  Layer<VoxelType>* layer = new Layer<VoxelType>(0.2, 16u);
+  voxblox::TsdfIntegratorBase::Config config;
+  config.default_truncation_distance = 0.4;
+  // integrator_.reset(new IntegratorType(NULL, &layer, integration_function));
+  // integrator_.reset(new IntegratorType(config, layer));
+  // TODO repair this with use of config structs!!!
 }
 
 template <typename IntegratorType, typename IntegrationData, typename VoxelType>
-Transformation GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData, VoxelType>::
-getSubmapRelativePose(const Transformation& T_G_C) const {
-    return (T_G_S_active_.inverse() * T_G_C);
+void GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData,
+                                       VoxelType>::
+    updateIntegratorTarget(
+        const std::shared_ptr<GenericMap<VoxelType>>& map_ptr) {
+  CHECK(map_ptr);
+
+  if (integrator_ == nullptr) {
+    initializeIntegrator(map_ptr);
+  } else {
+    std::cout << "updated integrator target" << std::endl;
+    integrator_->setActiveLayers();
+  }
 }
-
-
 
 template <typename IntegratorType, typename IntegrationData, typename VoxelType>
-void GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData, VoxelType>::
-setIntegrator(std::shared_ptr<IntegratorType> integ) {
-    integrator_ = integ;
+Transformation GenericSubmapCollectionIntegrator<
+    IntegratorType, IntegrationData,
+    VoxelType>::getSubmapRelativePose(const Transformation& T_G_C) const {
+  return (T_G_S_active_.inverse() * T_G_C);
 }
 
-} //namespace cblox
+template <typename IntegratorType, typename IntegrationData, typename VoxelType>
+void GenericSubmapCollectionIntegrator<
+    IntegratorType, IntegrationData,
+    VoxelType>::setIntegrator(std::shared_ptr<IntegratorType> integ) {
+  integrator_ = integ;
+}
 
-#include "cblox/integrator/tsdf_integrator_wrapper.h"
+}  // namespace cblox
+
+#include "cblox/core/tsdf_submap.h"
 #include "cblox/integrator/rgb_projection_integrator.h"
 #include "cblox/integrator/thermal_projection_integrator.h"
-#include "cblox/core/tsdf_submap.h"
-//explicit instantiations
-template class cblox::GenericSubmapCollectionIntegrator<cblox::TsdfIntegratorWrapper, cblox::TsdfIntegrationData, voxblox::TsdfVoxel>;
-template class cblox::GenericSubmapCollectionIntegrator<cblox::RGBProjectionIntegrator<voxblox::TsdfVoxel>, cblox::ProjectionData<voxblox::Color>, voxblox::RGBVoxel>;
-template class cblox::GenericSubmapCollectionIntegrator<cblox::ThermalProjectionIntegrator<voxblox::TsdfVoxel>, cblox::ProjectionData<float>, voxblox::IntensityVoxel>;  
+#include "cblox/integrator/tsdf_integrator_wrapper.h"
+// explicit instantiations
+template class cblox::GenericSubmapCollectionIntegrator<
+    cblox::TsdfIntegratorWrapper, cblox::TsdfIntegrationData,
+    voxblox::TsdfVoxel>;
+template class cblox::GenericSubmapCollectionIntegrator<
+    cblox::RGBProjectionIntegrator<voxblox::TsdfVoxel>,
+    cblox::ProjectionData<voxblox::Color>, voxblox::RGBVoxel>;
+template class cblox::GenericSubmapCollectionIntegrator<
+    cblox::ThermalProjectionIntegrator<voxblox::TsdfVoxel>,
+    cblox::ProjectionData<float>, voxblox::IntensityVoxel>;

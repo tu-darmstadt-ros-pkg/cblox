@@ -1,7 +1,6 @@
 #ifndef CBLOX_ROS_LIDAR_SENSOR_INL_H_
 #define CBLOX_ROS_LIDAR_SENSOR_INL_H_
 
-
 #include <pcl/conversions.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -12,95 +11,104 @@ namespace cblox {
 
 template <typename SubmapType, typename GeometryVoxelType>
 LIDARSensor<SubmapType, GeometryVoxelType>::LIDARSensor(
-                                            ros::NodeHandle& nh,
-                                            ros::NodeHandle& nh_private,
-                                            std::string pointcloud_topic,
-                                            std::string world_frame,
-                                            std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>> submap_collection_ptr)
-                                            : Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::PointCloud2::Ptr, GeometryVoxelType, TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType, GeometryVoxelType>
-                                            (nh, nh_private, world_frame, submap_collection_ptr),
-                                            color_map_(new voxblox::GrayscaleColorMap()) {
-    //submap_collection_ptr_ = submap_collection_ptr;
+    ros::NodeHandle& nh, ros::NodeHandle& nh_private,
+    std::string pointcloud_topic, std::string world_frame,
+    std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
+        submap_collection_ptr)
+    : Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType,
+             sensor_msgs::PointCloud2::Ptr, GeometryVoxelType,
+             TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType,
+             GeometryVoxelType>(nh, nh_private, world_frame,
+                                submap_collection_ptr),
+      color_map_(new voxblox::GrayscaleColorMap()) {
+  // submap_collection_ptr_ = submap_collection_ptr;
 
-Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::PointCloud2::Ptr, GeometryVoxelType, TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType, GeometryVoxelType>::
-num_integrated_frames_per_submap_ = 200;
+  Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType,
+         sensor_msgs::PointCloud2::Ptr, GeometryVoxelType,
+         TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType,
+         GeometryVoxelType>::num_integrated_frames_per_submap_ = 200;
 
-    //TODO remove this workaround by fixing submapcollectionintegrator
-    voxblox::TsdfIntegratorBase::Config config;
-    config.default_truncation_distance = 0.4;
-    TsdfConfig c("simple", config, submap_collection_ptr);
-    std::shared_ptr<TsdfIntegratorWrapper> integ = std::make_shared<TsdfIntegratorWrapper>(c);
-    Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType, sensor_msgs::PointCloud2::Ptr, GeometryVoxelType, TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType, GeometryVoxelType>::submap_collection_integrator_->setIntegrator(integ);
-    subscribeAndAdvertise(pointcloud_topic);
+  // TODO remove this workaround by fixing submapcollectionintegrator
+  voxblox::TsdfIntegratorBase::Config config;
+  config.default_truncation_distance = 0.4;
+  TsdfConfig c("simple", config, submap_collection_ptr);
+  std::shared_ptr<TsdfIntegratorWrapper> integ =
+      std::make_shared<TsdfIntegratorWrapper>(c);
+  Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType,
+         sensor_msgs::PointCloud2::Ptr, GeometryVoxelType,
+         TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType,
+         GeometryVoxelType>::submap_collection_integrator_
+      ->setIntegrator(integ);
+  subscribeAndAdvertise(pointcloud_topic);
 }
 
 template <typename SubmapType, typename GeometryVoxelType>
-void LIDARSensor<SubmapType, GeometryVoxelType>::
-subscribeAndAdvertise(std::string pointcloud_topic) {
-    pointcloud_sub_ = this->nh_.subscribe(pointcloud_topic, 1000, &LIDARSensor<SubmapType, GeometryVoxelType>::pointcloudCb, this);
+void LIDARSensor<SubmapType, GeometryVoxelType>::subscribeAndAdvertise(
+    std::string pointcloud_topic) {
+  pointcloud_sub_ = this->nh_.subscribe(
+      pointcloud_topic, 1000,
+      &LIDARSensor<SubmapType, GeometryVoxelType>::pointcloudCb, this);
 }
 
 template <typename SubmapType, typename GeometryVoxelType>
-void LIDARSensor<SubmapType, GeometryVoxelType>::
-pointcloudCb(const sensor_msgs::PointCloud2::Ptr& msg) {
-    this->addMessageToQueue(msg);
-    this->serviceQueue();
+void LIDARSensor<SubmapType, GeometryVoxelType>::pointcloudCb(
+    const sensor_msgs::PointCloud2::Ptr& msg) {
+  this->addMessageToQueue(msg);
+  this->serviceQueue();
 }
-
 
 template <typename SubmapType, typename GeometryVoxelType>
-void LIDARSensor<SubmapType, GeometryVoxelType>::
-integrateMessage(const sensor_msgs::PointCloud2::Ptr msg, const Transformation& T_G_C){
-    //debug prints
-    int id = static_cast<int>(this->submap_collection_ptr_->getActiveSubmapID());
-    if (id >= 0) {
-    auto blocks = (this->submap_collection_ptr_->getActiveSubmap()).getNumberOfAllocatedBlocks();
-    }
-    //TODO freespace pointcloud
+void LIDARSensor<SubmapType, GeometryVoxelType>::integrateMessage(
+    const sensor_msgs::PointCloud2::Ptr msg, const Transformation& T_G_C) {
+  // debug prints
+  int id = static_cast<int>(this->submap_collection_ptr_->getActiveSubmapID());
+  if (id >= 0) {
+    auto blocks = (this->submap_collection_ptr_->getActiveSubmap())
+                      .getNumberOfAllocatedBlocks();
+  }
+  // TODO freespace pointcloud
 
-    //TODO think about adding extra step for message conversion
+  // TODO think about adding extra step for message conversion
 
-    //converting to voxblox pcl
-    Pointcloud points_C;
-    Colors colors;
-    convertPointcloudMsg(*color_map_, msg, &points_C, &colors);
-    
-    //TODO verbose
-    bool verbose_ = false;
+  // converting to voxblox pcl
+  Pointcloud points_C;
+  Colors colors;
+  convertPointcloudMsg(*color_map_, msg, &points_C, &colors);
 
-    if (verbose_) {
-        ROS_INFO("[CbloxServer] Integrating a pointcloud with %lu points.",
-                 points_C.size());
-    }
+  // TODO verbose
+  bool verbose_ = false;
 
-    if (!this->mapInitialized()) {
-        ROS_INFO("[CbloxServer] Initializing map.");
-        this->initializeMap(T_G_C);
-    }
+  if (verbose_) {
+    ROS_INFO("[CbloxServer] Integrating a pointcloud with %lu points.",
+             points_C.size());
+  }
 
-    ros::WallTime start = ros::WallTime::now();
-    TsdfIntegrationData data;
-    data.points_C = points_C;
-    data.colors = colors;
-    data.freespace_points = false;
+  if (!this->mapInitialized()) {
+    ROS_INFO("[CbloxServer] Initializing map.");
+    this->initializeMap(T_G_C);
+  }
 
-    this->submap_collection_integrator_->integrate(T_G_C, data);
+  ros::WallTime start = ros::WallTime::now();
+  TsdfIntegrationData data;
+  data.points_C = points_C;
+  data.colors = colors;
+  data.freespace_points = false;
 
-    ros::WallTime end = ros::WallTime::now();
-    /*num_integrated_frames_current_submap_++;
-    if (verbose_) {
-        ROS_INFO(
-            "[CbloxServer] Finished integrating in %f seconds, have %lu blocks. "
-            "%u frames integrated to current submap.",
-            (end - start).toSec(),
-            submap_collection_ptr_->getActiveMap()
-                .getTsdfLayer()
-                .getNumberOfAllocatedBlocks(),
-            num_integrated_frames_current_submap_);
-    }*/
+  this->submap_collection_integrator_->integrate(T_G_C, data);
 
+  ros::WallTime end = ros::WallTime::now();
+  /*num_integrated_frames_current_submap_++;
+  if (verbose_) {
+      ROS_INFO(
+          "[CbloxServer] Finished integrating in %f seconds, have %lu blocks. "
+          "%u frames integrated to current submap.",
+          (end - start).toSec(),
+          submap_collection_ptr_->getActiveMap()
+              .getTsdfLayer()
+              .getNumberOfAllocatedBlocks(),
+          num_integrated_frames_current_submap_);
+  }*/
 }
-
 
 /*template <typename SubmapType, typename GeometryVoxelType>
 void LIDARSensor<SubmapType, GeometryVoxelType>::
@@ -108,7 +116,6 @@ updateIntegratorSubmap() {
     submap_collection_integrator_->switchToActiveSubmap();
 }*/
 
-    
-}
+}  // namespace cblox
 
-#endif // CBLOS_ROS_LIDAR_SENSOR_INL_H_
+#endif  // CBLOS_ROS_LIDAR_SENSOR_INL_H_
