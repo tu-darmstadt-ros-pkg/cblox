@@ -30,6 +30,15 @@ class GenericActiveSubmapVisualizer {
   typedef std::shared_ptr<GenericActiveSubmapVisualizer> Ptr;
   typedef std::shared_ptr<const GenericActiveSubmapVisualizer> ConstPtr;
 
+  struct Config {
+    MeshIntegratorConfig mesh_config;
+    typename GenericSubmapCollection<GeometryVoxelType>::Ptr
+        geometry_submap_collection_ptr;
+    typename GenericSubmapCollection<ColorVoxelType>::Ptr
+        color_submap_collection_ptr;
+    std::string topic = "mesh";
+    double update_interval = 10.0;
+  };
   // Constructor
   GenericActiveSubmapVisualizer(
       const MeshIntegratorConfig& mesh_config,
@@ -99,6 +108,13 @@ class GenericActiveSubmapVisualizer {
           this);
     }
   }
+
+  GenericActiveSubmapVisualizer(const ros::NodeHandle& nh,
+                                const ros::NodeHandle& nh_private, Config c)
+      : GenericActiveSubmapVisualizer(c.mesh_config,
+                                      c.geometry_submap_collection_ptr,
+                                      c.color_submap_collection_ptr, c.topic,
+                                      nh, nh_private, c.update_interval) {}
 
   void switchToSubmap(const SubmapID submap_id);
   void switchToActiveSubmap();

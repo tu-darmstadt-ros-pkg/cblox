@@ -23,14 +23,27 @@ class ThermalSensor
                     ProjectionData<float>, GeometryVoxelType,
                     voxblox::IntensityVoxel> {
  public:
+  typedef std::shared_ptr<ThermalSensor<SubmapType, GeometryVoxelType>> Ptr;
+  struct Config {
+    std::string camera_topic = "";
+    std::string camera_info_topic = "";
+    std::string frame = "";
+    double sub_sample_factor = 1.0;
+    typename GenericSubmapCollection<GeometryVoxelType>::Ptr
+        coll_submap_collection_ptr;
+    typename GenericSubmapCollection<voxblox::IntensityVoxel>::Ptr
+        thermal_submap_collection_ptr;
+  };
   ThermalSensor(
-      ros::NodeHandle& nh, ros::NodeHandle& nh_private,
+      const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
       std::string camera_image_topic, std::string camera_info_topic,
-      std::string world_frame,
+      std::string world_frame, double subsample_factor,
       std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
           coll_submap_collection_ptr,
       std::shared_ptr<GenericSubmapCollection<voxblox::IntensityVoxel>>
           thermal_submap_collection_ptr);
+  ThermalSensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
+                Config c);
 
   virtual ~ThermalSensor() {}
 

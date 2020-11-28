@@ -33,6 +33,8 @@
 #include "cblox/core/map_config.h"
 
 #include <cblox/mesh/submap_mesher.h>
+
+#include <cblox_ros/config_parser.h>
 //#include <cblox_ros/rgb_sensor.h>
 
 // TODO replace tsdf with geometry
@@ -49,7 +51,7 @@ class GenericSubmapServer {
   // void add_sensor(std::shared_ptr<RGBSensor<SubmapType, CollisionVoxelType>>
   // rgb_sensor);
 
-  void readConfig();
+  void readConfig(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private);
 
   // voxblox::Color func3(const voxblox::IntensityVoxel* v);
 
@@ -76,6 +78,10 @@ class GenericSubmapServer {
       GenericSubmap<voxblox::IntensityVoxel>, voxblox::TsdfVoxel>>>
       thermal_sensors_;
   // TODO error on compile with submap server
+
+  std::shared_ptr<MapVariantsMap> maps_;
+  std::shared_ptr<SensorVariantsMap> sensors_;
+  std::shared_ptr<VisualizerVariantsMap> visualizers_;
 
   // voxblox::IronbowColorMap m_;
   // std::shared_ptr<RGBSensor<SubmapType, CollisionVoxelType>> rgb_sensor_;

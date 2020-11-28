@@ -64,13 +64,14 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::
       publishCurrentMesh();
       lock1.unlock();
     }
+  } else {
+    switchToActiveSubmap();
   }
 }
 
 template <typename GeometryVoxelType, typename ColorVoxelType>
 void GenericActiveSubmapVisualizer<GeometryVoxelType,
                                    ColorVoxelType>::publishCurrentMesh() {
-  std::cout << "publish" << std::endl;
   // saving and reusing meshes? TODO
   // only working if subscribers exists
   if (publisher_.getNumSubscribers() < 1) {
@@ -88,9 +89,9 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType,
     it = geometry_ids.begin();
     geometry_id_ = *it;
   }
-  std::cout << geometry_id_ << std::endl;
+  // std::cout << geometry_id_ << std::endl;
 
-  std::cout << "starting publish" << std::endl;
+  // std::cout << "starting publish" << std::endl;
   while (it != geometry_ids.end()) {
     switchToSubmap(*it);
     updateMeshLayer();
@@ -105,7 +106,7 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType,
     geometry_id_ = *it;
     it++;
   }
-  std::cout << "end publish" << std::endl;
+  // std::cout << "end publish" << std::endl;
 }
 
 template <typename GeometryVoxelType, typename ColorVoxelType>
@@ -201,7 +202,6 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::
     ROS_INFO("Not able to color without color layer");
     return;
   }
-  std::cout << "recoloring" << std::endl;
   // TODO get color layers here by using new function in map, default in same
   // layer if empty
   // TODO remove color id

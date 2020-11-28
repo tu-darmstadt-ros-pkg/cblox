@@ -6,7 +6,7 @@ namespace cblox {
 GenericSubmapServer::GenericSubmapServer(const ros::NodeHandle& nh,
                                          const ros::NodeHandle& nh_private)
     : nh_(nh), nh_private_(nh_private) {
-  readConfig();
+  readConfig(nh, nh_private);
 }
 /*template <typename SubmapType, typename CollisionVoxelType>
 void GenericSubmapServer<SubmapType,
@@ -57,7 +57,20 @@ voxblox::Color func3(const voxblox::IntensityVoxel* v) {
   return c;
 }
 
-void GenericSubmapServer::readConfig() {
+void GenericSubmapServer::readConfig(const ros::NodeHandle& nh,
+                                     const ros::NodeHandle& nh_private) {
+  /*std::shared_ptr<MapVariantsMap> map_collection;
+  std::shared_ptr<SensorVariantsMap> sensor_collection;
+  std::shared_ptr<VisualizerVariantsMap> visualizer_collection;*/
+  maps_ = std::make_shared<MapVariantsMap>();
+  sensors_ = std::make_shared<SensorVariantsMap>();
+  visualizers_ = std::make_shared<VisualizerVariantsMap>();
+  ConfigParser::parseConfig(nh, nh_private, maps_, sensors_, visualizers_);
+  // maps_ = map_collection;
+  // sensors_ = sensor_collection;
+  // visualizers_ = visualizer_collection;
+  std::cout << sensors_->size() << std::endl;
+  /*
   Transformation t;
   GenericMap<voxblox::TsdfVoxel>::Config c;
   c.voxel_size = 0.1;
@@ -90,7 +103,7 @@ void GenericSubmapServer::readConfig() {
       nh_, nh_private_, "/realsense_d435_back/color/image_raw",
       "/realsense_d435_back/color/camera_info", "world", tsdf_maps_[0], rgb);
   rgb_sensors_.push_back(rgb_sensor);
-  std::cout << "added rgb" << std::endl;
+  std::cout << "added rgb" << std::endl; */
 
   /*    auto thermal_sensor =
      std::make_shared<ThermalSensor<GenericSubmap<voxblox::IntensityVoxel>,
@@ -99,7 +112,7 @@ void GenericSubmapServer::readConfig() {
       thermal_sensors_.push_back(thermal_sensor);
       std::cout << "added thermal" << std::endl;*/
 
-  voxblox::MeshIntegratorConfig mesh_config =
+  /*voxblox::MeshIntegratorConfig mesh_config =
       voxblox::getMeshIntegratorConfigFromRosParam(nh_private_);
   auto visualizer = std::make_shared<
       GenericActiveSubmapVisualizer<voxblox::TsdfVoxel, voxblox::TsdfVoxel>>(
@@ -115,7 +128,7 @@ void GenericSubmapServer::readConfig() {
   rgb_sensor->register_visualizer(visualizer2);
   voxblox::Color (*f2)(const voxblox::RGBVoxel*){&func2};
   visualizer2->setColorFunction(f2);
-  visualizer2->setRemoveAlpha(true);
+  visualizer2->setRemoveAlpha(true);*/
 
   /*    auto visualizer3 =
      std::make_shared<GenericActiveSubmapVisualizer<voxblox::TsdfVoxel,

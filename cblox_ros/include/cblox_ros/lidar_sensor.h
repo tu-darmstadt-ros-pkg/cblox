@@ -16,10 +16,21 @@ class LIDARSensor
                     TsdfIntegratorWrapper, TsdfIntegrationData,
                     GeometryVoxelType, GeometryVoxelType> {
  public:
-  LIDARSensor(ros::NodeHandle& nh, ros::NodeHandle& nh_private,
+  typedef std::shared_ptr<LIDARSensor<SubmapType, GeometryVoxelType>> Ptr;
+  struct Config {
+    std::string pointcloud_topic = "";
+    std::string frame = "";
+    std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
+        submap_collection_ptr;
+  };
+
+  LIDARSensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
               std::string pointcloud_topic, std::string world_frame,
               std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
                   submap_collection_ptr);
+
+  LIDARSensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
+              LIDARSensor<SubmapType, GeometryVoxelType>::Config c);
 
   virtual ~LIDARSensor() {}
 

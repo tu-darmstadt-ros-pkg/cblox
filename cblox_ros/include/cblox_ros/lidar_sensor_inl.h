@@ -11,7 +11,7 @@ namespace cblox {
 
 template <typename SubmapType, typename GeometryVoxelType>
 LIDARSensor<SubmapType, GeometryVoxelType>::LIDARSensor(
-    ros::NodeHandle& nh, ros::NodeHandle& nh_private,
+    const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
     std::string pointcloud_topic, std::string world_frame,
     std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
         submap_collection_ptr)
@@ -41,6 +41,13 @@ LIDARSensor<SubmapType, GeometryVoxelType>::LIDARSensor(
       ->setIntegrator(integ);
   subscribeAndAdvertise(pointcloud_topic);
 }
+
+template <typename SubmapType, typename GeometryVoxelType>
+LIDARSensor<SubmapType, GeometryVoxelType>::LIDARSensor(
+    const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
+    LIDARSensor<SubmapType, GeometryVoxelType>::Config c)
+    : LIDARSensor(nh, nh_private, c.pointcloud_topic, c.frame,
+                  c.submap_collection_ptr) {}
 
 template <typename SubmapType, typename GeometryVoxelType>
 void LIDARSensor<SubmapType, GeometryVoxelType>::subscribeAndAdvertise(

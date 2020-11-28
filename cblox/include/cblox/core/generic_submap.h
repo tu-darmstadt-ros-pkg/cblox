@@ -31,7 +31,7 @@ class GenericSubmap : public Submap {
       LOG(WARNING) << "Underlying tsdf map from SubmapID: " << submap_id_
                    << " is NOT unique. Therefore its memory may leak.";
     } else {
-      LOG(INFO) << "TsdfSubmap " << submap_id_ << " is being deleted.";
+      LOG(INFO) << "Submap " << submap_id_ << " is being deleted.";
     }
   }
 

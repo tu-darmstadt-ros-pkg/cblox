@@ -178,7 +178,8 @@ void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
   num_integrated_frames_current_submap_ = 0;
 
   // Updating the active submap mesher
-  if (visualizer_registered_) visualizer_ptr_->switchToActiveSubmap();
+  // TODO removed, check if needed
+  // if (visualizer_registered_) visualizer_ptr_->switchToActiveSubmap();
   // TODO visualize
 
   // Publish the baseframes

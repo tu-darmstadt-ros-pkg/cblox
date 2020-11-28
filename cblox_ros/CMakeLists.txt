@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(cblox_ros)
 
 find_package(catkin_simple REQUIRED)
+find_package(Boost REQUIRED system)
 catkin_simple(ALL_DEPS_REQUIRED)
 
 add_definitions(-std=c++11 -Wall -Wextra)
@@ -17,6 +18,7 @@ cs_add_library(${PROJECT_NAME}
 
     src/cblox_factory.cpp
     src/generic_active_submap_visualizer.cc
+    src/config_parser.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 

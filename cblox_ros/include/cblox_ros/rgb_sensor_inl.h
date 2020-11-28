@@ -5,9 +5,9 @@ namespace cblox {
 // TODO fix to correct integrators once they are implemented
 template <typename SubmapType, typename GeometryVoxelType>
 RGBSensor<SubmapType, GeometryVoxelType>::RGBSensor(
-    ros::NodeHandle& nh, ros::NodeHandle& nh_private,
+    const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
     std::string camera_image_topic, std::string camera_info_topic,
-    std::string world_frame,
+    std::string world_frame, double subsample_factor,
     std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
         coll_submap_collection_ptr,
     std::shared_ptr<GenericSubmapCollection<voxblox::RGBVoxel>>
@@ -20,17 +20,17 @@ RGBSensor<SubmapType, GeometryVoxelType>::RGBSensor(
           rgb_submap_collection_ptr),
       nh_(nh),
       nh_private_(nh_private),
-      world_frame_("world"),
-      subsample_factor_(4),
+      world_frame_(world_frame),
+      subsample_factor_(subsample_factor),
       valid_info_(false),
       collision_submap_collection_ptr_(coll_submap_collection_ptr) {
   auto integ = std::make_shared<RGBProjectionIntegrator<GeometryVoxelType>>(
       coll_submap_collection_ptr, rgb_submap_collection_ptr);
-  Sensor<RGBSensor<SubmapType, GeometryVoxelType>, SubmapType,
+  /*Sensor<RGBSensor<SubmapType, GeometryVoxelType>, SubmapType,
          sensor_msgs::Image::Ptr, voxblox::RGBVoxel,
          RGBProjectionIntegrator<GeometryVoxelType>, ProjectionData<Color>,
-         GeometryVoxelType, voxblox::RGBVoxel>::submap_collection_integrator_
-      ->setIntegrator(integ);
+         GeometryVoxelType, voxblox::RGBVoxel>::*/
+  this->submap_collection_integrator_->setIntegrator(integ);
   subscribeAndAdvertise(camera_image_topic, camera_info_topic);
 
   last_parent_id_ = coll_submap_collection_ptr->getActiveSubmapID();
@@ -38,6 +38,13 @@ RGBSensor<SubmapType, GeometryVoxelType>::RGBSensor(
   // creating child map instead of normal map
   rgb_submap_collection_ptr->createNewChildSubMap(t, last_parent_id_);
 }
+
+template <typename SubmapType, typename GeometryVoxelType>
+RGBSensor<SubmapType, GeometryVoxelType>::RGBSensor(
+    const ros::NodeHandle& nh, const ros::NodeHandle& nh_private, Config c)
+    : RGBSensor(nh, nh_private, c.camera_topic, c.camera_info_topic, c.frame,
+                c.sub_sample_factor, c.coll_submap_collection_ptr,
+                c.rgb_submap_collection_ptr) {}
 
 template <typename SubmapType, typename GeometryVoxelType>
 void RGBSensor<SubmapType, GeometryVoxelType>::subscribeAndAdvertise(
