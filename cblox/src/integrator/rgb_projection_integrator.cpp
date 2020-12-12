@@ -5,10 +5,11 @@ namespace cblox {
 template <typename VoxelType1>
 RGBProjectionIntegrator<VoxelType1>::RGBProjectionIntegrator(
     std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection,
-    std::shared_ptr<GenericSubmapCollection<voxblox::RGBVoxel>> data_collection)
+    std::shared_ptr<GenericSubmapCollection<voxblox::RGBVoxel>> data_collection,
+    ProjectionIntegratorConfig integrator_config)
     : ProjectionIntegrator<RGBProjectionIntegrator<VoxelType1>, VoxelType1,
                            voxblox::RGBVoxel, Color>(collision_collection,
-                                                     data_collection)
+                                                     data_collection, integrator_config)
 // msg_transformation_(msg_transformation)
 {}
 

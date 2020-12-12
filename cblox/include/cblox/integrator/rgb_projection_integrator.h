@@ -15,10 +15,13 @@ class RGBProjectionIntegrator
   RGBProjectionIntegrator(
       std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection,
       std::shared_ptr<GenericSubmapCollection<voxblox::RGBVoxel>>
-          data_collection);
+          data_collection,
+      ProjectionIntegratorConfig integrator_config);
 
   RGBProjectionIntegrator(
       ProjectionConfig<VoxelType1, voxblox::RGBVoxel, Color> c);
+
+  typedef ProjectionConfig<VoxelType1, voxblox::RGBVoxel, Color> ConfigType;
 
   void integrationFunction(voxblox::RGBVoxel& voxel, Color& data);
 };

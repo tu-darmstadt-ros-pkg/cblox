@@ -21,15 +21,26 @@ Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
       msg_delay_(ros::Duration(1.0)),
       num_integrated_frames_current_submap_(0),
       num_integrated_frames_per_submap_(kDefaultNumFramesPerSubmap_i),
-      visualizer_registered_(false) {
-  submap_collection_integrator_.reset(
-      new GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData,
-                                            VoxelType>(submap_collection_ptr));
+      visualizer_registered_(false),
+      map_initialized_(false) {
+  
   // submap_collection_ptr_ = submap_collection_ptr;
   // submap_collection_integrator_.reset(
   //    new GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData,
   //    VoxelType, SubmapType> (submap_collection_ptr));
 };
+
+template <typename T, typename SubmapType, typename MsgType, typename VoxelType,
+          typename IntegratorType, typename IntegrationData,
+          typename GeometryVoxelType, typename ColorVoxelType>
+void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
+            GeometryVoxelType, ColorVoxelType>::resetIntegrator(typename GenericSubmapCollection<VoxelType>::Ptr
+               submap_collection_ptr, typename IntegratorType::ConfigType integrator_config) {
+              
+              submap_collection_integrator_.reset(
+                new GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData,
+                                            VoxelType>(submap_collection_ptr, integrator_config));
+            }
 
 template <typename T, typename SubmapType, typename MsgType, typename VoxelType,
           typename IntegratorType, typename IntegrationData,
@@ -208,6 +219,7 @@ void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
             GeometryVoxelType,
             ColorVoxelType>::initializeMap(const Transformation& T_G_C) {
   createNewSubmap(T_G_C, ros::Time::now());
+  map_initialized_ = true;
 }
 
 template <typename T, typename SubmapType, typename MsgType, typename VoxelType,

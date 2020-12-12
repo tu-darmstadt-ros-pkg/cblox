@@ -275,11 +275,13 @@ ConfigParser::parseLidarSensor(
     sc.frame = static_cast<std::string>(sensor_config["frame"]);
   }
   sc.submap_collection_ptr = tsdf_map;
-  // TODO integrator config
+  
+  //integrator config
+  auto integ_config = parseTsdfIntegratorConfig(integrator_config);
 
   auto lidar_sensor = std::make_shared<
       LIDARSensor<GenericSubmap<voxblox::TsdfVoxel>, voxblox::TsdfVoxel>>(
-      nh, nh_private, sc);
+      nh, nh_private, sc, integ_config);
 
   return lidar_sensor;
 }
@@ -308,11 +310,12 @@ ConfigParser::parseRgbSensor(
   }
   sc.coll_submap_collection_ptr = tsdf_map;
   sc.rgb_submap_collection_ptr = rgb_map;
-  // TODO integrator config
 
+  //integrator config
+  auto integ_config = parseProjectionConfig(integrator_config);
   auto rgb_sensor = std::make_shared<
       RGBSensor<GenericSubmap<voxblox::RGBVoxel>, voxblox::TsdfVoxel>>(
-      nh, nh_private, sc);
+      nh, nh_private, sc, integ_config);
 
   return rgb_sensor;
 }
@@ -343,13 +346,107 @@ ConfigParser::parseThermalSensor(
   }
   sc.coll_submap_collection_ptr = tsdf_map;
   sc.thermal_submap_collection_ptr = thermal_map;
-  // TODO integrator config
-
+  
+  //integrator config
+  auto integ_config = parseProjectionConfig(integrator_config);
   auto thermal_sensor =
       std::make_shared<ThermalSensor<GenericSubmap<voxblox::IntensityVoxel>,
-                                     voxblox::TsdfVoxel>>(nh, nh_private, sc);
+                                     voxblox::TsdfVoxel>>(nh, nh_private, sc, integ_config);
 
   return thermal_sensor;
+}
+
+voxblox::TsdfIntegratorBase::Config
+ConfigParser::parseTsdfIntegratorConfig(XmlRpc::XmlRpcValue integrator_config) {
+  voxblox::TsdfIntegratorBase::Config config;
+  if (integrator_config.hasMember("default_truncation_distance")) {
+    config.default_truncation_distance =
+      static_cast<double>(integrator_config["default_truncation_distance"]);
+  }
+  if (integrator_config.hasMember("max_weight")) {
+    config.max_weight =
+        static_cast<double>(integrator_config["max_weight"]);
+  }
+  if (integrator_config.hasMember("voxel_carving_enabled")) {
+    config.voxel_carving_enabled =
+        static_cast<bool>(integrator_config["voxel_carving_enabled"]);
+  }
+  if (integrator_config.hasMember("min_ray_length_m")) {
+    config.min_ray_length_m =
+        static_cast<double>(integrator_config["min_ray_length_m"]);
+  }
+  if (integrator_config.hasMember("max_ray_length_m")) {
+    config.max_ray_length_m =
+        static_cast<double>(integrator_config["max_ray_length_m"]);
+  }
+  if (integrator_config.hasMember("use_const_weight")) {
+    config.use_const_weight =
+        static_cast<bool>(integrator_config["use_const_weight"]);
+  }
+  if (integrator_config.hasMember("allow_clear")) {
+    config.allow_clear =
+        static_cast<bool>(integrator_config["allow_clear"]);
+  }
+  if (integrator_config.hasMember("use_weight_dropoff")) {
+    config.use_weight_dropoff =
+        static_cast<bool>(integrator_config["use_weight_dropoff"]);
+  }
+  if (integrator_config.hasMember("use_sparsity_compensation_factor")) {
+    config.use_sparsity_compensation_factor =
+        static_cast<bool>(integrator_config["use_sparsity_compensation_factor"]);
+  }
+  if (integrator_config.hasMember("sparsity_compensation_factor")) {
+    config.sparsity_compensation_factor =
+        static_cast<double>(integrator_config["sparsity_compensation_factor"]);
+  }
+  if (integrator_config.hasMember("integrator_threads")) {
+    config.integrator_threads =
+        static_cast<int>(integrator_config["integrator_threads"]);
+  }
+  if (integrator_config.hasMember("integration_order_mode")) {
+    config.integration_order_mode =
+        static_cast<std::string>(integrator_config["integration_order_mode"]);
+  }
+  if (integrator_config.hasMember("enable_anti_grazing")) {
+    config.enable_anti_grazing =
+        static_cast<bool>(integrator_config["enable_anti_grazing"]);
+  }
+  if (integrator_config.hasMember("start_voxel_subsampling_factor")) {
+    config.start_voxel_subsampling_factor =
+        static_cast<double>(integrator_config["start_voxel_subsampling_factor"]);
+  }
+  if (integrator_config.hasMember("max_consecutive_ray_collisions")) {
+    config.max_consecutive_ray_collisions =
+        static_cast<int>(integrator_config["max_consecutive_ray_collisions"]);
+  }
+  if (integrator_config.hasMember("clear_checks_every_n_frames")) {
+    config.clear_checks_every_n_frames =
+        static_cast<int>(integrator_config["clear_checks_every_n_frames"]);
+  }
+  if (integrator_config.hasMember("max_integration_time_s")) {
+    config.max_integration_time_s =
+        static_cast<double>(integrator_config["max_integration_time_s"]);
+  }
+  return config;
+}
+
+ProjectionIntegratorConfig
+ConfigParser::parseProjectionConfig(XmlRpc::XmlRpcValue integrator_config) {
+  ProjectionIntegratorConfig config;
+  if (integrator_config.hasMember("max_weight")) {
+    config.max_weight =
+        static_cast<double>(integrator_config["max_weight"]);
+  }
+  if (integrator_config.hasMember("max_distance")) {
+    config.max_distance =
+        static_cast<double>(integrator_config["max_distance"]);
+  }
+  if (integrator_config.hasMember("prop_voxel_radius")) {
+    config.prop_voxel_radius =
+        static_cast<int>(integrator_config["prop_voxel_radius"]);
+  }
+
+  return config;
 }
 
 void ConfigParser::parseVisualizers(
@@ -550,5 +647,7 @@ ConfigParser::parseThermalVisualizer(
 
   return visualizer;
 }
+
+
 
 }  // namespace cblox

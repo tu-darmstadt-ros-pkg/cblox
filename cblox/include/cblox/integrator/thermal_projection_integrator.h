@@ -14,10 +14,14 @@ class ThermalProjectionIntegrator
   ThermalProjectionIntegrator(
       std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection,
       std::shared_ptr<GenericSubmapCollection<voxblox::IntensityVoxel>>
-          data_collection);
+          data_collection,
+      ProjectionIntegratorConfig integrator_config);
 
   ThermalProjectionIntegrator(
       ProjectionConfig<VoxelType1, voxblox::IntensityVoxel, float> c);
+
+  typedef ProjectionConfig<VoxelType1, voxblox::IntensityVoxel, float> ConfigType;
+  
 
   void integrationFunction(voxblox::IntensityVoxel& voxel, float& data);
 };

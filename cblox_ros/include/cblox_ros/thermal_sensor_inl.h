@@ -11,7 +11,8 @@ ThermalSensor<SubmapType, GeometryVoxelType>::ThermalSensor(
     std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
         coll_submap_collection_ptr,
     std::shared_ptr<GenericSubmapCollection<voxblox::IntensityVoxel>>
-        thermal_submap_collection_ptr)
+        thermal_submap_collection_ptr,
+    ProjectionIntegratorConfig& integrator_config)
     : Sensor<ThermalSensor<SubmapType, GeometryVoxelType>, SubmapType,
              sensor_msgs::Image::Ptr, voxblox::IntensityVoxel,
              ThermalProjectionIntegrator<GeometryVoxelType>,
@@ -24,9 +25,17 @@ ThermalSensor<SubmapType, GeometryVoxelType>::ThermalSensor(
       subsample_factor_(subsample_factor),
       valid_info_(false),
       collision_submap_collection_ptr_(coll_submap_collection_ptr) {
-  auto integ = std::make_shared<ThermalProjectionIntegrator<GeometryVoxelType>>(
-      coll_submap_collection_ptr, thermal_submap_collection_ptr);
-  this->submap_collection_integrator_->setIntegrator(integ);
+
+  ProjectionConfig<GeometryVoxelType, voxblox::IntensityVoxel, float> config;
+  config.collision_collection = coll_submap_collection_ptr;
+  config.data_collection = thermal_submap_collection_ptr;
+  config.integrator_config = integrator_config;
+
+  this->resetIntegrator(thermal_submap_collection_ptr, config);
+  //TODO remove
+  /*auto integ = std::make_shared<ThermalProjectionIntegrator<GeometryVoxelType>>(config);
+  this->submap_collection_integrator_->setIntegrator(integ);*/
+
   subscribeAndAdvertise(camera_image_topic, camera_info_topic);
 
   last_parent_id_ = coll_submap_collection_ptr->getActiveSubmapID();
@@ -37,10 +46,10 @@ ThermalSensor<SubmapType, GeometryVoxelType>::ThermalSensor(
 
 template <typename SubmapType, typename GeometryVoxelType>
 ThermalSensor<SubmapType, GeometryVoxelType>::ThermalSensor(
-    const ros::NodeHandle& nh, const ros::NodeHandle& nh_private, Config c)
+    const ros::NodeHandle& nh, const ros::NodeHandle& nh_private, Config c, ProjectionIntegratorConfig& integrator_config)
     : ThermalSensor(nh, nh_private, c.camera_topic, c.camera_info_topic,
                     c.frame, c.sub_sample_factor, c.coll_submap_collection_ptr,
-                    c.thermal_submap_collection_ptr) {}
+                    c.thermal_submap_collection_ptr, integrator_config) {}
 
 template <typename SubmapType, typename GeometryVoxelType>
 void ThermalSensor<SubmapType, GeometryVoxelType>::subscribeAndAdvertise(

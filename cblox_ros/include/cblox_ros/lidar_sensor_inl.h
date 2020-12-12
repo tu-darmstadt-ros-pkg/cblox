@@ -14,7 +14,8 @@ LIDARSensor<SubmapType, GeometryVoxelType>::LIDARSensor(
     const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
     std::string pointcloud_topic, std::string world_frame,
     std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
-        submap_collection_ptr)
+        submap_collection_ptr,
+    voxblox::TsdfIntegratorBase::Config& integrator_config)
     : Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType,
              sensor_msgs::PointCloud2::Ptr, GeometryVoxelType,
              TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType,
@@ -29,25 +30,27 @@ LIDARSensor<SubmapType, GeometryVoxelType>::LIDARSensor(
          GeometryVoxelType>::num_integrated_frames_per_submap_ = 200;
 
   // TODO remove this workaround by fixing submapcollectionintegrator
-  voxblox::TsdfIntegratorBase::Config config;
-  config.default_truncation_distance = 0.4;
-  TsdfConfig c("simple", config, submap_collection_ptr);
-  std::shared_ptr<TsdfIntegratorWrapper> integ =
+  //voxblox::TsdfIntegratorBase::Config config;
+  //config.default_truncation_distance = 0.4;
+  TsdfConfig c("simple", integrator_config, submap_collection_ptr);
+  /*std::shared_ptr<TsdfIntegratorWrapper> integ =
       std::make_shared<TsdfIntegratorWrapper>(c);
   Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType,
          sensor_msgs::PointCloud2::Ptr, GeometryVoxelType,
          TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType,
          GeometryVoxelType>::submap_collection_integrator_
-      ->setIntegrator(integ);
+      ->setIntegrator(integ);*/
+  this->resetIntegrator(submap_collection_ptr, c);
   subscribeAndAdvertise(pointcloud_topic);
 }
 
 template <typename SubmapType, typename GeometryVoxelType>
 LIDARSensor<SubmapType, GeometryVoxelType>::LIDARSensor(
     const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
-    LIDARSensor<SubmapType, GeometryVoxelType>::Config c)
+    LIDARSensor<SubmapType, GeometryVoxelType>::Config c, 
+    voxblox::TsdfIntegratorBase::Config& integrator_config)
     : LIDARSensor(nh, nh_private, c.pointcloud_topic, c.frame,
-                  c.submap_collection_ptr) {}
+                  c.submap_collection_ptr, integrator_config) {}
 
 template <typename SubmapType, typename GeometryVoxelType>
 void LIDARSensor<SubmapType, GeometryVoxelType>::subscribeAndAdvertise(

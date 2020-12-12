@@ -24,8 +24,8 @@ void GenericSubmapCollectionIntegrator<
 template <typename IntegratorType, typename IntegrationData, typename VoxelType>
 void GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData,
                                        VoxelType>::switchToActiveSubmap() {
-  updateIntegratorTarget(
-      submap_collection_ptr_->getActiveSubmapPtr()->getMapPtr());
+  updateIntegratorTarget();
+      //submap_collection_ptr_->getActiveSubmapPtr()->getMapPtr());
   T_G_S_active_ = submap_collection_ptr_->getActiveSubmapPose();
   // TODO check if this can be done with a simple layer??, maybe reuse tsdf map?
 }
@@ -33,9 +33,8 @@ void GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData,
 template <typename IntegratorType, typename IntegrationData, typename VoxelType>
 void GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData,
                                        VoxelType>::
-    initializeIntegrator(
-        const std::shared_ptr<GenericMap<VoxelType>>& map_ptr) {
-  CHECK(map_ptr);
+    initializeIntegrator() {
+  //CHECK(map_ptr);
   // TODO, create integrator here
   // void (*integration_function)(VoxelType&, IntegrationData&);
   // or maybe try to declare them explicit instead of passing?
@@ -46,23 +45,26 @@ void GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData,
 
   // TODO pass everything in config
 
-  Layer<VoxelType>* layer = new Layer<VoxelType>(0.2, 16u);
-  voxblox::TsdfIntegratorBase::Config config;
-  config.default_truncation_distance = 0.4;
+  //Layer<VoxelType>* layer = new Layer<VoxelType>(0.2, 16u);
+  //voxblox::TsdfIntegratorBase::Config config;
+  //config.default_truncation_distance = 0.4;
   // integrator_.reset(new IntegratorType(NULL, &layer, integration_function));
   // integrator_.reset(new IntegratorType(config, layer));
   // TODO repair this with use of config structs!!!
+
+  integrator_.reset(new IntegratorType(config_));
 }
 
+//TODO removed option to go to older submaps, currently only using newest ones. check if that deature is needed
 template <typename IntegratorType, typename IntegrationData, typename VoxelType>
 void GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData,
                                        VoxelType>::
-    updateIntegratorTarget(
-        const std::shared_ptr<GenericMap<VoxelType>>& map_ptr) {
-  CHECK(map_ptr);
+    updateIntegratorTarget() {
+  //CHECK(map_ptr);
 
   if (integrator_ == nullptr) {
-    initializeIntegrator(map_ptr);
+    initializeIntegrator();
+    integrator_->setActiveLayers();
   } else {
     std::cout << "updated integrator target" << std::endl;
     integrator_->setActiveLayers();

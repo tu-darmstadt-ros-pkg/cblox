@@ -27,10 +27,12 @@ class LIDARSensor
   LIDARSensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
               std::string pointcloud_topic, std::string world_frame,
               std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
-                  submap_collection_ptr);
+                  submap_collection_ptr,
+              voxblox::TsdfIntegratorBase::Config& integrator_config);
 
   LIDARSensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
-              LIDARSensor<SubmapType, GeometryVoxelType>::Config c);
+              LIDARSensor<SubmapType, GeometryVoxelType>::Config c,
+              voxblox::TsdfIntegratorBase::Config& integrator_config);
 
   virtual ~LIDARSensor() {}
 

@@ -35,6 +35,8 @@ class TsdfIntegratorWrapper {
         config.collection->getActiveMapPtr()->getLayerPtr());
   }
 
+  typedef TsdfConfig ConfigType;
+
   void integrate(const voxblox::Transformation& T_G_C,
                  const TsdfIntegrationData& data) {
     // TODO rethink layer updating

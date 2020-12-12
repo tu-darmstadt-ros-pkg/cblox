@@ -13,8 +13,9 @@ class GenericSubmapCollectionIntegrator {
  public:
   GenericSubmapCollectionIntegrator(
       const std::shared_ptr<GenericSubmapCollection<VoxelType>>&
-          submap_collection_ptr)
-      : submap_collection_ptr_(submap_collection_ptr) {}
+          submap_collection_ptr,
+      const typename IntegratorType::ConfigType config)
+      : submap_collection_ptr_(submap_collection_ptr), config_(config) {}
   // TODO Integrator base??, maybe change interface??
 
   void integrate(const Transformation& T_G_C, const IntegrationData& data);
@@ -25,11 +26,9 @@ class GenericSubmapCollectionIntegrator {
   void setIntegrator(std::shared_ptr<IntegratorType> integ);
 
  protected:
-  void initializeIntegrator(
-      const std::shared_ptr<GenericMap<VoxelType>>& map_ptr);
+  void initializeIntegrator();
 
-  void updateIntegratorTarget(
-      const std::shared_ptr<GenericMap<VoxelType>>& map_ptr);
+  void updateIntegratorTarget();
 
   Transformation getSubmapRelativePose(const Transformation& T_G_C) const;
 
@@ -40,6 +39,8 @@ class GenericSubmapCollectionIntegrator {
   std::shared_ptr<IntegratorType> integrator_;
 
   void (*integration_function_)(VoxelType&, IntegrationData&);
+
+  typename IntegratorType::ConfigType config_;
 };
 
 }  // namespace cblox

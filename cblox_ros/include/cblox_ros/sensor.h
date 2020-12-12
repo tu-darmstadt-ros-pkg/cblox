@@ -59,7 +59,7 @@ class Sensor {
                            Transformation* T_G_C);
 
   // TODO
-  bool mapInitialized() const { return !submap_collection_ptr_->empty(); }
+  bool mapInitialized() const { return map_initialized_; }
   bool newSubmapRequired() const;
   void createNewSubmap(const Transformation& T_G_C, const ros::Time& timestamp);
   void initializeMap(const Transformation& T_G_C);
@@ -79,6 +79,8 @@ class Sensor {
       std::shared_ptr<
           GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>>
           visualizer);
+
+  void resetIntegrator(typename GenericSubmapCollection<VoxelType>::Ptr submap_collection_ptr, typename IntegratorType::ConfigType integrator_config);
 
  protected:
   // Node handles
@@ -111,6 +113,8 @@ class Sensor {
   int num_integrated_frames_current_submap_;
   // The number of frames integrated into a submap before requesting a new one.
   int num_integrated_frames_per_submap_;
+
+  bool map_initialized_;
 };
 }  // namespace cblox
 

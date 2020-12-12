@@ -95,6 +95,12 @@ class ConfigParser {
       typename GenericSubmapCollection<voxblox::IntensityVoxel>::Ptr
           thermal_map);
 
+  static voxblox::TsdfIntegratorBase::Config
+    parseTsdfIntegratorConfig(XmlRpc::XmlRpcValue integrator_config);
+
+  static ProjectionIntegratorConfig
+    parseProjectionConfig(XmlRpc::XmlRpcValue integrator_config);
+
   static voxblox::MeshIntegratorConfig parseMeshConfig(
       XmlRpc::XmlRpcValue config);
   static void parseVisualizers(

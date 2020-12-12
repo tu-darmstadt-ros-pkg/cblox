@@ -6,10 +6,11 @@ template <typename VoxelType1>
 ThermalProjectionIntegrator<VoxelType1>::ThermalProjectionIntegrator(
     std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection,
     std::shared_ptr<GenericSubmapCollection<voxblox::IntensityVoxel>>
-        data_collection)
+        data_collection,
+    ProjectionIntegratorConfig integrator_config)
     : ProjectionIntegrator<ThermalProjectionIntegrator<VoxelType1>, VoxelType1,
                            voxblox::IntensityVoxel, float>(collision_collection,
-                                                           data_collection)
+                                                           data_collection, integrator_config)
 // msg_transformation_(msg_transformation)
 {}
 

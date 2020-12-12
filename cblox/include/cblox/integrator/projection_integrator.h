@@ -22,10 +22,17 @@ struct ProjectionData {
   std::vector<Data> data;
 };
 
+struct ProjectionIntegratorConfig {
+    float max_distance = 20.0;
+    float max_weight = 100.0;
+    int prop_voxel_radius = 2;
+};
+
 template <typename VoxelType1, typename VoxelType2, typename Data>
 struct ProjectionConfig {
   std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection;
   std::shared_ptr<GenericSubmapCollection<VoxelType2>> data_collection;
+  ProjectionIntegratorConfig integrator_config;
 };
 
 // TODO maybe derive from interpolator???
@@ -39,7 +46,9 @@ class ProjectionIntegrator {
   ProjectionIntegrator(
       std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection,
       std::shared_ptr<GenericSubmapCollection<VoxelType2>>
-          data_collection  // Layer<VoxelType2>* integration_layer
+          data_collection,
+      ProjectionIntegratorConfig integrator_config
+        // Layer<VoxelType2>* integration_layer
       //(*integration_function)(VoxelType2&, IntegrationData&)
   );
 

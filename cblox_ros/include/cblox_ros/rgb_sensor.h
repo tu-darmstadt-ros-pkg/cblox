@@ -41,10 +41,11 @@ class RGBSensor
             std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
                 coll_submap_collection_ptr,
             std::shared_ptr<GenericSubmapCollection<voxblox::RGBVoxel>>
-                rgb_submap_collection_ptr);
+                rgb_submap_collection_ptr,
+            ProjectionIntegratorConfig& integrator_config);
 
   RGBSensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
-            Config c);
+            Config c, ProjectionIntegratorConfig& integrator_config);
 
   virtual ~RGBSensor() {}
 

@@ -10,10 +10,11 @@ namespace cblox {
 template <typename T, typename VoxelType1, typename VoxelType2, typename Data>
 ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::ProjectionIntegrator(
     std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection,
-    std::shared_ptr<GenericSubmapCollection<VoxelType2>> data_collection)
-    : max_distance_(20.0),
-      max_weight_(100.0),
-      prop_voxel_radius_(2),
+    std::shared_ptr<GenericSubmapCollection<VoxelType2>> data_collection,
+    ProjectionIntegratorConfig integrator_config)
+    : max_distance_(integrator_config.max_distance),
+      max_weight_(integrator_config.max_weight),
+      prop_voxel_radius_(integrator_config.prop_voxel_radius),
       collision_collection_(collision_collection),
       data_collection_(data_collection),
       integration_layer_(data_collection->getActiveMapPtr()->getLayerPtr())
@@ -23,9 +24,9 @@ ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::ProjectionIntegrator(
 template <typename T, typename VoxelType1, typename VoxelType2, typename Data>
 ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::ProjectionIntegrator(
     ProjectionConfig<VoxelType1, VoxelType2, Data> config)
-    : max_distance_(20.0),
-      max_weight_(100.0),
-      prop_voxel_radius_(2),
+    : max_distance_(config.integrator_config.max_distance),
+      max_weight_(config.integrator_config.max_weight),
+      prop_voxel_radius_(config.integrator_config.prop_voxel_radius),
       collision_collection_(config.collision_collection),
       data_collection_(config.data_collection),
       integration_layer_(
