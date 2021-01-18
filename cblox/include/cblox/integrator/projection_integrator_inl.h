@@ -46,6 +46,7 @@ void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::integrate(
       collision_collection_->getActiveSubmapPose().inverse();
 
   // lock TODO rethink
+  //maybe lock before getting layers?
   std::unique_lock<std::mutex> lock1(collision_collection_->collection_mutex_,
                                      std::defer_lock);
   std::unique_lock<std::mutex> lock2(data_collection_->collection_mutex_,
@@ -60,16 +61,22 @@ void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::integrate(
 
 // TODO rename transformations
 
+//vectors in world frame are transformed into mesh frame (also origin is in mesh frame)
+//after that they are transformed back into the projected layer frame
 template <typename T, typename VoxelType1, typename VoxelType2, typename Data>
 void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::addBearingVectors(
     const Point& origin, const Pointcloud& bearing_vectors,
     const std::vector<Data>& data, const Transformation& T_S_C,
     const Transformation& T_S2_C) {
   // timing::Timer intensity_timer("intensity/integrate");
-
+  int hit = 0.0;
+  int loss = 0.0;
   CHECK_EQ(bearing_vectors.size(), data.size())
       << "Intensity and bearing vector size does not match!";
   const FloatingPoint voxel_size = collision_layer_->voxel_size();
+
+  Transformation T_w_d = collision_collection_->getActiveSubmapPose();
+  //std::cout << "proj m: " << T_S_C.getRotationMatrix() << std::endl;
 
   for (size_t i = 0; i < bearing_vectors.size(); ++i) {
     Point surface_intersection = Point::Zero();
@@ -81,16 +88,21 @@ void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::addBearingVectors(
         max_distance_, &surface_intersection);
 
     if (!success) {
+      loss+=1.0;
       continue;
     }
+    hit+=1.0;
 
-    surface_intersection = T_S_C * T_S2_C.inverse() * surface_intersection;
 
+    //TODO this transforms back into color layer coordinates, but we want to keep
+    Point real_surface_intersection = T_w_d.inverse() * T_S2_C.inverse() * surface_intersection;
+    //std::cout << "projecting: " << surface_intersection << std::endl;
+    
     // Now look up the matching voxels in the intensity layer and mark them.
     // Let's just start with 1.
     typename Block<VoxelType2>::Ptr block_ptr =
-        integration_layer_->allocateBlockPtrByCoordinates(surface_intersection);
-    VoxelType2& voxel = block_ptr->getVoxelByCoordinates(surface_intersection);
+        integration_layer_->allocateBlockPtrByCoordinates(real_surface_intersection);
+    VoxelType2& voxel = block_ptr->getVoxelByCoordinates(real_surface_intersection);
 
     //(*integration_function_)(voxel, data[i]);
     integrationFunction(voxel, data[i]);
@@ -101,16 +113,19 @@ void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::addBearingVectors(
     for (int voxel_offset = -prop_voxel_radius_;
          voxel_offset <= prop_voxel_radius_; voxel_offset++) {
       close_voxel =
-          surface_intersection + bearing_vectors[i] * voxel_offset * voxel_size;
+          surface_intersection + T_S2_C * bearing_vectors[i] * voxel_offset * voxel_size;
+      Point real_close_voxel = T_w_d.inverse() * T_S2_C.inverse() * close_voxel;
       typename Block<VoxelType2>::Ptr new_block_ptr =
-          integration_layer_->allocateBlockPtrByCoordinates(close_voxel);
-      VoxelType2& new_voxel = block_ptr->getVoxelByCoordinates(close_voxel);
+          integration_layer_->allocateBlockPtrByCoordinates(real_close_voxel);
+      VoxelType2& new_voxel = block_ptr->getVoxelByCoordinates(real_close_voxel);
       if (new_voxel.weight < 1e-6) {
         //(*integration_function_)(voxel, data[i]);
         integrationFunction(voxel, data[i]);
       }
     }
   }
+  /*std::cout << "hit/loss projecting" << std::endl;
+  std::cout << hit << " " << loss << std::endl;*/
 }
 
 template <typename T, typename VoxelType1, typename VoxelType2, typename Data>

@@ -50,7 +50,7 @@ class GenericActiveSubmapVisualizer {
         geometry_submap_collection_ptr_(geometry_submap_collection_ptr),
         color_layer_(false),
         color_cycle_length_(kDefaultColorCycleLength),
-        current_color_idx_(0),
+        //current_color_idx_(0),
         verbose_(false),
         opacity_(1.0),
         nh_(nh),
@@ -86,7 +86,7 @@ class GenericActiveSubmapVisualizer {
         color_layer_(true),
         color_submap_collection_ptr_(color_submap_collection_ptr),
         color_cycle_length_(kDefaultColorCycleLength),
-        current_color_idx_(0),
+        //current_color_idx_(0),
         verbose_(false),
         opacity_(1.0),
         nh_(nh),
@@ -99,6 +99,8 @@ class GenericActiveSubmapVisualizer {
         message_id_(0) {
     publisher_ =
         nh_private_.advertise<visualization_msgs::MarkerArray>(topic, 1);
+        std::cout << "update interval" << std::endl;
+        std::cout << update_interval << std::endl;
     if (update_interval > 0.0) {
       // moved from server to here
       update_mesh_timer_ = nh_private.createTimer(
@@ -135,8 +137,8 @@ class GenericActiveSubmapVisualizer {
 
  private:
   // Functions called when swapping active submaps
-  void createMeshLayer();
-  void recoverMeshLayer();
+  //void createMeshLayer();
+  //void recoverMeshLayer();
   void updateIntegrator();
 
   // The active mesh is produced in the submap frame (S), and is transformed
@@ -145,7 +147,7 @@ class GenericActiveSubmapVisualizer {
                                        MeshLayer* mesh_layer_G_ptr) const;
   void colorMeshWithCurrentIndex(MeshLayer* mesh_layer_ptr) const;
 
-  void recolorWithColorFunction(MeshLayer* mesh_layer_ptr) const;
+  bool recolorWithColorFunction(MeshLayer* mesh_layer_ptr) const;
 
   void removeAlphaChanneled(MeshLayer* mesh_layer_ptr) const;
 
@@ -174,12 +176,12 @@ class GenericActiveSubmapVisualizer {
   SubmapID color_active_submap_id_;
 
   // Storing the mesh layers
-  std::map<SubmapID, std::shared_ptr<MeshLayer>> mesh_layers_;
-  std::map<SubmapID, int> mesh_color_indices_;
+  //std::map<SubmapID, std::shared_ptr<MeshLayer>> mesh_layers_;
+  //std::map<SubmapID, int> mesh_color_indices_;
 
   // Color stuff
   const int color_cycle_length_;
-  int current_color_idx_;
+  //int current_color_idx_;
 
   bool verbose_;
   float opacity_;

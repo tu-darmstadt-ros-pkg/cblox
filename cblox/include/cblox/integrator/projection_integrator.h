@@ -23,7 +23,7 @@ struct ProjectionData {
 };
 
 struct ProjectionIntegratorConfig {
-    float max_distance = 20.0;
+    float max_distance = 40.0;
     float max_weight = 100.0;
     int prop_voxel_radius = 2;
 };

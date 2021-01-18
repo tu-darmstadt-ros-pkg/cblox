@@ -35,6 +35,21 @@ static voxblox::Color func2(const voxblox::RGBVoxel* v) {
   return c;
 }
 
+static voxblox::Color func4(const voxblox::TsdfVoxel* v) {
+  voxblox::Color c;
+  c.r = 0;
+  c.g = 0;
+  c.b = 0;
+  c.a = 0;
+  if (v == nullptr) {
+    return c;
+  }
+  c.r = 255;
+  c.a = 255;
+
+  return c;
+}
+
 void ConfigParser::parseConfig(
     const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
     std::shared_ptr<MapVariantsMap> map_collection,
@@ -502,6 +517,9 @@ void ConfigParser::parseVisualizers(
                     typename GenericActiveSubmapVisualizer<
                         voxblox::TsdfVoxel, voxblox::TsdfVoxel>::Ptr>(
               static_cast<std::string>(visualizer[1]), vis));
+
+      //voxblox::Color (*f4)(const voxblox::TsdfVoxel*){&func4};
+      //vis->setColorFunction(f4);
     }
 
     if (type.compare("rgb") == 0) {

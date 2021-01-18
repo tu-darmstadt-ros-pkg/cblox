@@ -27,11 +27,14 @@ voxblox::Color func(const voxblox::TsdfVoxel* v) {
 }
 
 voxblox::Color func2(const voxblox::RGBVoxel* v) {
+  std::cout << "func2" << std::endl;
   voxblox::Color c;
   c.r = 0;
   c.g = 0;
   c.b = 0;
   c.a = 0;
+
+  //debug
   if (v == nullptr) {
     return c;
   }

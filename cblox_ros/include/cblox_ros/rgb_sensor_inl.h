@@ -75,6 +75,8 @@ void RGBSensor<SubmapType, GeometryVoxelType>::infoCb(
   valid_info_ = true;
 }
 
+//vector in world frame from world center to image points
+//passing transform to color layer frame to transform points into correct coordinates
 template <typename SubmapType, typename GeometryVoxelType>
 void RGBSensor<SubmapType, GeometryVoxelType>::integrateMessage(
     const sensor_msgs::Image::Ptr msg, const Transformation T_G_C) {
@@ -116,7 +118,7 @@ void RGBSensor<SubmapType, GeometryVoxelType>::integrateMessage(
       // TODO subsampling
       if (m % subsample_factor_ == 0) {
         cv::Vec3b v = cv_ptr->image.at<cv::Vec3b>(i, j);
-        data.data.push_back(Color(v[0], v[1], v[2]));
+        data.data.push_back(Color(v[0], v[1], v[2], 255));
         data.bearing_vectors.push_back(
             T_G_C.getRotation().toImplementation() *
             Point(j - half_col, i - half_row, fx_).normalized());
@@ -130,8 +132,12 @@ void RGBSensor<SubmapType, GeometryVoxelType>::integrateMessage(
   // passing identity matrix here, as data is in world frame
   Transformation identity;
 
+  //TODO testing
+  //Transformation to layer with parent transform??
+  Transformation t = this->submap_collection_ptr_->getActiveSubmapPose();
+
   // start integration
-  this->submap_collection_integrator_->integrate(identity, data);
+  this->submap_collection_integrator_->integrate(t, data);
 }
 
 }  // namespace cblox

@@ -11,6 +11,7 @@
 
 #include "cblox/GenericSubmapCollection.pb.h"
 #include "cblox/core/common.h"
+#include "voxblox/mesh/mesh_layer.h"
 
 namespace cblox {
 
@@ -170,11 +171,20 @@ class GenericSubmapCollection
   std::vector<typename GenericSubmap<VoxelType>::Ptr> getChildMaps(
       SubmapID parent);
 
+  std::vector<typename GenericSubmap<VoxelType>::Ptr> getAllMaps();
+
   void createNewChildSubMap(const Transformation& T_P_S,
                             const SubmapID submap_id, const SubmapID parent);
 
   SubmapID createNewChildSubMap(const Transformation& T_P_S,
                                 const SubmapID parent);
+
+
+  std::shared_ptr<voxblox::MeshLayer> getSubmapMeshLayer(const SubmapID submap_id);
+
+  std::shared_ptr<voxblox::MeshLayer> createSubmapMeshLayer(const SubmapID submap_id);
+
+  std::shared_ptr<voxblox::MeshLayer> recoverSubmapMeshLayer(const SubmapID submap_id);
 
  private:
   // TODO(alexmillane): Get some concurrency guards
@@ -195,6 +205,8 @@ class GenericSubmapCollection
 
   SubmapID last_parent_id_;
   Transformation last_parent_transform_;
+
+  std::map<SubmapID, std::shared_ptr<voxblox::MeshLayer>> mesh_collection_;
 };
 
 }  // namespace cblox

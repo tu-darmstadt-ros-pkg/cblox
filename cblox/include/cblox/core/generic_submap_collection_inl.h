@@ -47,11 +47,6 @@ bool GenericSubmapCollection<VoxelType>::exists(
 template <typename VoxelType>
 void GenericSubmapCollection<VoxelType>::createNewSubmap(
     const Transformation& T_G_S, const SubmapID submap_id) {
-  // Checking if the submap already exists
-  // NOTE(alexmillane): This hard fails the program if the submap already
-  // exists. This is fairly brittle behaviour and we may want to change it at a
-  // later date. Currently the onus is put in the caller to exists() before
-  // creating a submap.
 
   const auto it = id_to_submap_.find(submap_id);
   CHECK(it == id_to_submap_.end());
@@ -69,8 +64,9 @@ void GenericSubmapCollection<VoxelType>::createNewSubmap(
   active_submap_id_ = submap_id;
 
   if (has_parent_) {
-    if (parent_to_child_.find(last_parent_id_) == parent_to_child_.end())
+    if (parent_to_child_.find(last_parent_id_) == parent_to_child_.end()) {
       parent_to_child_.emplace(last_parent_id_, std::vector<SubmapID>());
+    }
     parent_to_child_.find(last_parent_id_)->second.push_back(submap_id);
   }
 }
@@ -468,7 +464,6 @@ std::vector<SubmapID> GenericSubmapCollection<VoxelType>::getChildMapIDs(
     vec.push_back(parent);
     return vec;
   }
-
   auto res = parent_to_child_.find(parent);
   if (res != parent_to_child_.end()) vec = res->second;
   return vec;
@@ -486,6 +481,18 @@ GenericSubmapCollection<VoxelType>::getChildMaps(SubmapID parent) {
   for (auto child : getChildMapIDs(parent)) {
     vec.push_back((id_to_submap_.find(child)->second));
   }
+  return vec;
+}
+
+template <typename VoxelType>
+std::vector<typename GenericSubmap<VoxelType>::Ptr>
+GenericSubmapCollection<VoxelType>::getAllMaps() {
+  std::vector<typename GenericSubmap<VoxelType>::Ptr> vec;
+  for( auto it = id_to_submap_.begin(); it != id_to_submap_.end(); ++it ) {
+        vec.push_back( it->second );
+        std::cout << it->first << std::endl;
+    }
+    std::cout << active_submap_id_ << std::endl;
   return vec;
 }
 
@@ -507,9 +514,32 @@ SubmapID GenericSubmapCollection<VoxelType>::createNewChildSubMap(
   if (!id_to_submap_.empty()) {
     new_ID = id_to_submap_.rbegin()->first + 1;
   }
-  createNewChildSubMap(T_G_P, new_ID, last_parent_id_);
+  createNewChildSubMap(T_G_P, new_ID, parent);
   return new_ID;
 }
+
+
+template <typename VoxelType>
+std::shared_ptr<voxblox::MeshLayer> GenericSubmapCollection<VoxelType>::getSubmapMeshLayer(const SubmapID submap_id) {
+  if (mesh_collection_.find(submap_id) == mesh_collection_.end()) {
+    return createSubmapMeshLayer(submap_id);
+  } else {
+    return recoverSubmapMeshLayer(submap_id);
+  }
+}
+
+template <typename VoxelType>
+std::shared_ptr<voxblox::MeshLayer> GenericSubmapCollection<VoxelType>::createSubmapMeshLayer(const SubmapID submap_id) {
+  std::shared_ptr<voxblox::MeshLayer> mesh = std::make_shared<voxblox::MeshLayer>(block_size());
+  mesh_collection_.insert (std::pair<SubmapID, std::shared_ptr<voxblox::MeshLayer>>(submap_id, mesh));
+  return mesh;
+}
+
+template <typename VoxelType>
+std::shared_ptr<voxblox::MeshLayer> GenericSubmapCollection<VoxelType>::recoverSubmapMeshLayer(const SubmapID submap_id) {
+  return mesh_collection_[submap_id];
+}
+
 }  // namespace cblox
 
 #endif  // CBLOX_CORE_GENERIC_SUBMAP_COLLECTION_INL_H_

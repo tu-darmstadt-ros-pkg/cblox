@@ -12,19 +12,9 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::
     switchToSubmap(const SubmapID submap_id) {
   CHECK(geometry_submap_collection_ptr_);
   active_submap_id_ = submap_id;
-  if (mesh_layers_.find(submap_id) == mesh_layers_.end()) {
-    if (verbose_) {
-      ROS_INFO_STREAM("Creating mesh layer for submap id: " << submap_id);
-    }
-    createMeshLayer();
-    updateIntegrator();
-  } else {
-    if (verbose_) {
-      ROS_INFO_STREAM("Recovering mesh layer for submap id: " << submap_id);
-    }
-    recoverMeshLayer();
-    updateIntegrator();
-  }
+  active_submap_color_idx_ = submap_id % color_cycle_length_;
+  active_submap_mesh_layer_ptr_ = geometry_submap_collection_ptr_->getSubmapMeshLayer(submap_id);
+  updateIntegrator();
 }
 
 template <typename GeometryVoxelType, typename ColorVoxelType>
@@ -43,6 +33,7 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType,
 template <typename GeometryVoxelType, typename ColorVoxelType>
 void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::
     updateMeshCallback(const ros::TimerEvent&) {
+  std::cout << "timed callback" << std::endl;
   if (active_submap_mesh_integrator_ptr_ != nullptr) {
     // TODO rethink mutex
 
@@ -72,6 +63,7 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::
 template <typename GeometryVoxelType, typename ColorVoxelType>
 void GenericActiveSubmapVisualizer<GeometryVoxelType,
                                    ColorVoxelType>::publishCurrentMesh() {
+  std::cout << "publishing mesh" << std::endl;
   // saving and reusing meshes? TODO
   // only working if subscribers exists
   if (publisher_.getNumSubscribers() < 1) {
@@ -100,9 +92,14 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType,
     marker.header.frame_id = "world";
     marker.id = message_id_;
     message_id_++;
-    visualization_msgs::MarkerArray marker_array;
-    marker_array.markers.push_back(marker);
-    publisher_.publish(marker_array);
+    //check for size, if 0 skip
+    if(marker.points.size() > 0) {
+      visualization_msgs::MarkerArray marker_array;
+      marker_array.markers.push_back(marker);
+      publisher_.publish(marker_array);
+    } else {
+      ROS_INFO("Map marker %d is empty and not published!", *it);
+    }
     geometry_id_ = *it;
     it++;
   }
@@ -113,34 +110,6 @@ template <typename GeometryVoxelType, typename ColorVoxelType>
 void GenericActiveSubmapVisualizer<GeometryVoxelType,
                                    ColorVoxelType>::publishCompleteMesh() {
   // TODO
-}
-
-template <typename GeometryVoxelType, typename ColorVoxelType>
-void GenericActiveSubmapVisualizer<GeometryVoxelType,
-                                   ColorVoxelType>::createMeshLayer() {
-  // Active layer stuff
-  CHECK(geometry_submap_collection_ptr_);
-  active_submap_mesh_layer_ptr_.reset(
-      new voxblox::MeshLayer(geometry_submap_collection_ptr_->block_size()));
-  active_submap_color_idx_ = current_color_idx_;
-  // Saving mesh layer and color for later recovery
-  mesh_layers_[active_submap_id_] = active_submap_mesh_layer_ptr_;
-  mesh_color_indices_[active_submap_id_] = active_submap_color_idx_;
-  // Updating the color index for the next map.
-  current_color_idx_ = (current_color_idx_ + 1) % color_cycle_length_;
-}
-
-template <typename GeometryVoxelType, typename ColorVoxelType>
-void GenericActiveSubmapVisualizer<GeometryVoxelType,
-                                   ColorVoxelType>::recoverMeshLayer() {
-  auto mesh_it = mesh_layers_.find(active_submap_id_);
-  auto color_it = mesh_color_indices_.find(active_submap_id_);
-  CHECK(mesh_it != mesh_layers_.end())
-      << "Tried to recover layer not already created";
-  CHECK(color_it != mesh_color_indices_.end())
-      << "Tried to recover layer not already created";
-  active_submap_mesh_layer_ptr_ = mesh_it->second;
-  active_submap_color_idx_ = color_it->second;
 }
 
 template <typename GeometryVoxelType, typename ColorVoxelType>
@@ -163,7 +132,7 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType,
 
   // Updating the mesh layer
   // TODO save mesh layers so this can be easier
-  constexpr bool only_mesh_updated_blocks = false;  // true;
+  constexpr bool only_mesh_updated_blocks = true;//false;  // true;
   constexpr bool clear_updated_flag = true;         // TODO reuse
   active_submap_mesh_integrator_ptr_->generateMesh(only_mesh_updated_blocks,
                                                    clear_updated_flag);
@@ -193,14 +162,15 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::
 }
 
 // like previous function but with use of the color function and layer
+//reverses points from mesh world into color frame to get collisions
 template <typename GeometryVoxelType, typename ColorVoxelType>
-void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::
+bool GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::
     recolorWithColorFunction(MeshLayer* mesh_layer_ptr) const {
   CHECK_NOTNULL(mesh_layer_ptr);
-
+  std::cout << "recoloring" << std::endl;
   if (!color_layer_) {
     ROS_INFO("Not able to color without color layer");
-    return;
+    return false;
   }
   // TODO get color layers here by using new function in map, default in same
   // layer if empty
@@ -216,35 +186,62 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::
 
   std::vector<typename GenericSubmap<ColorVoxelType>::Ptr> color_layers =
       color_submap_collection_ptr_->getChildMaps(active_submap_id_);
+      //color_submap_collection_ptr_->getAllMaps();
+
+  if (color_layers.size() == 0) {
+    ROS_INFO("couldn't find any child maps from the color map");
+    return false;
+  }
+  
+
 
   // TODO make sure color layers Transforms are aligned (in submaps)
-  if (color_layers.size() == 0) return;
+  if (color_layers.size() == 0) return false;
   Transformation T_w_s = (color_layers[0]->getPose());
 
+  //std::cout << "coloring m: " << T_w_s.getRotationMatrix() << std::endl;
+  double hit = 0.0;
+  double hit2 = 0.0;
+  double loss = 0.0;
   // Loop over Index
+  //std::cout << "coloring" << std::endl;
   voxblox::BlockIndexList index_list;
   mesh_layer_ptr->getAllAllocatedMeshes(&index_list);
   for (const voxblox::BlockIndex& block_index : index_list) {
+    
     Mesh::Ptr mesh_ptr = mesh_layer_ptr->getMeshPtrByIndex(block_index);
-    voxblox::Point origin = mesh_ptr->origin;
 
     for (int i = 0; i < mesh_ptr->vertices.size(); i++) {
-      // std::cout << mesh_ptr->vertices[i] << std::endl;
+      //std::cout << "coloring " << mesh_ptr->vertices[i] << std::endl;
       voxblox::Point vertex = T_w_s.inverse() * mesh_ptr->vertices[i];
-
+      //std::cout << "coloring: " << vertex << std::endl;
       // loop over all color layers here
       voxblox::Color color(0.0, 0.0, 0.0, 0.0);
+      //TODO maybe merge color based on weight.
+      //This would need higher logic
       for (auto color_layer : color_layers) {
         const ColorVoxelType* voxel =
             color_layer->getMap().getLayer().getVoxelPtrByCoordinates(vertex);
         voxblox::Color c = (*color_function_)(voxel);
         if (c.a > 0) {
           color = c;
+          hit2+=1.0;
         }
+      }
+
+      if(color.a > 0) {
+        hit+=1.0;
+      }
+      else {
+        loss+=1.0;
       }
       mesh_ptr->colors[i] = color;
     }
   }
+  /*std::cout << "hit/loss coloring" << std::endl;
+  std::cout << hit << " " << loss << std::endl;
+  std::cout << hit2 << std::endl;*/
+  return true;
 }
 
 template <typename GeometryVoxelType, typename ColorVoxelType>
@@ -255,10 +252,19 @@ MeshLayer::Ptr GenericActiveSubmapVisualizer<
       geometry_submap_collection_ptr_->block_size());
   transformMeshLayerToGlobalFrame(*active_submap_mesh_layer_ptr_,
                                   mesh_layer_G_ptr.get());
+
+  std::cout << "before coloring" << std::endl;
   // Coloring the mesh
   if (use_color_map_) colorMeshWithCurrentIndex(mesh_layer_G_ptr.get());
 
-  if (use_function_) recolorWithColorFunction(mesh_layer_G_ptr.get());
+  if (use_function_) {
+    if(!recolorWithColorFunction(mesh_layer_G_ptr.get())) {
+      mesh_layer_G_ptr = std::make_shared<MeshLayer>(
+      geometry_submap_collection_ptr_->block_size());
+      return  mesh_layer_G_ptr;
+      //if recoloring was unsuccessful, return empty mesh
+    }
+  }
 
   if (remove_alpha_) removeAlphaChanneled(mesh_layer_G_ptr.get());
 
