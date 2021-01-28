@@ -73,14 +73,12 @@ void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
   while (getMessageFromQueue(&msg_queue_, &msg, &T_G_C)) {
     //Check first if new map is needed, so the map is always not empty
     // TODO this should be aligned to the existing behavior
-    if (newSubmapRequired()) {
-      createNewSubmap(T_G_C, msg->header.stamp);
-    }
 
     // TODO somehow the correct submaps need to be determined
     processMessage(msg, T_G_C);
-
-    
+    if (newSubmapRequired()) {
+      createNewSubmap(T_G_C, msg->header.stamp);
+    }
   }
 }
 
@@ -183,6 +181,7 @@ void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
   }
   std::cout << "created submap" << std::endl;
   // Creating the submap
+
   const SubmapID submap_id = submap_collection_ptr_->createNewSubmap(T_G_C);
   // Activating the submap in the frame integrator
   // updateIntegratorSubmap();

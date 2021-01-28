@@ -9,13 +9,13 @@ namespace cblox {
 
 template <typename T, typename VoxelType1, typename VoxelType2, typename Data>
 ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::ProjectionIntegrator(
-    std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection,
+    std::shared_ptr<GenericSubmapCollection<VoxelType1>> geometry_collection,
     std::shared_ptr<GenericSubmapCollection<VoxelType2>> data_collection,
     ProjectionIntegratorConfig integrator_config)
     : max_distance_(integrator_config.max_distance),
       max_weight_(integrator_config.max_weight),
       prop_voxel_radius_(integrator_config.prop_voxel_radius),
-      collision_collection_(collision_collection),
+      geometry_collection_(geometry_collection),
       data_collection_(data_collection),
       integration_layer_(data_collection->getActiveMapPtr()->getLayerPtr())
 // msg_transformation_(msg_transformation)
@@ -27,7 +27,7 @@ ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::ProjectionIntegrator(
     : max_distance_(config.integrator_config.max_distance),
       max_weight_(config.integrator_config.max_weight),
       prop_voxel_radius_(config.integrator_config.prop_voxel_radius),
-      collision_collection_(config.collision_collection),
+      geometry_collection_(config.geometry_collection),
       data_collection_(config.data_collection),
       integration_layer_(
           config.data_collection->getActiveMapPtr()->getLayerPtr()) {}
@@ -36,26 +36,16 @@ ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::ProjectionIntegrator(
 
 template <typename T, typename VoxelType1, typename VoxelType2, typename Data>
 void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::integrate(
-    const Transformation& T_S_C, const ProjectionData<Data>& data) {
+    const Transformation& T_G_C, const ProjectionData<Data>& data) {
   // get active collision layer
+  // ignoring transform, as data was already projected to world
 
   // TODO rethink updating of layers
-  setActiveLayers();
-  // collision_layer_ = collision_collection_->getActiveMapPtr()->getLayerPtr();
-  Transformation T_S2_C =
-      collision_collection_->getActiveSubmapPose().inverse();
+  setLayers(data.geometry_id, data.id);
+  setTransformations(data.geometry_id, data.id);
 
-  // lock TODO rethink
-  //maybe lock before getting layers?
-  std::unique_lock<std::mutex> lock1(collision_collection_->collection_mutex_,
-                                     std::defer_lock);
-  std::unique_lock<std::mutex> lock2(data_collection_->collection_mutex_,
-                                     std::defer_lock);
-  std::lock(lock1, lock2);
-  addBearingVectors(data.origin, data.bearing_vectors, data.data, T_S_C,
-                    T_S2_C);
-  lock1.unlock();
-  lock2.unlock();
+  addBearingVectors(data.origin, data.bearing_vectors, data.data);
+
   // using transform to project back from world frame after collision
 }
 
@@ -66,17 +56,22 @@ void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::integrate(
 template <typename T, typename VoxelType1, typename VoxelType2, typename Data>
 void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::addBearingVectors(
     const Point& origin, const Pointcloud& bearing_vectors,
-    const std::vector<Data>& data, const Transformation& T_S_C,
-    const Transformation& T_S2_C) {
+    const std::vector<Data>& data) {
+  // creating mutex
+  std::unique_lock<std::mutex> lock1(geometry_collection_->collection_mutex_,
+                                     std::defer_lock);
+  std::unique_lock<std::mutex> lock2(data_collection_->collection_mutex_,
+                                     std::defer_lock);
+  std::lock(lock1, lock2);
+  // TODO check if locks should be set directly
+
+  // TODO change mutex to only lock on access of maps, directly pass ids of
+  // map/submap pair, dont use get active/set active
+
   // timing::Timer intensity_timer("intensity/integrate");
-  int hit = 0.0;
-  int loss = 0.0;
   CHECK_EQ(bearing_vectors.size(), data.size())
       << "Intensity and bearing vector size does not match!";
   const FloatingPoint voxel_size = collision_layer_->voxel_size();
-
-  Transformation T_w_d = collision_collection_->getActiveSubmapPose();
-  //std::cout << "proj m: " << T_S_C.getRotationMatrix() << std::endl;
 
   for (size_t i = 0; i < bearing_vectors.size(); ++i) {
     Point surface_intersection = Point::Zero();
@@ -84,27 +79,22 @@ void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::addBearingVectors(
     // finding an intersection with a surface.
     // like intensity integrator
     bool success = voxblox::getSurfaceDistanceAlongRay<VoxelType1>(
-        *collision_layer_, T_S2_C * origin, T_S2_C * bearing_vectors[i],
-        max_distance_, &surface_intersection);
+        *collision_layer_, T_Geometry_W_ * origin,
+        T_Geometry_W_.getRotationMatrix() * bearing_vectors[i], max_distance_,
+        &surface_intersection);
 
     if (!success) {
-      loss+=1.0;
       continue;
     }
-    hit+=1.0;
-
 
     //TODO this transforms back into color layer coordinates, but we want to keep
-    Point real_surface_intersection = T_w_d.inverse() * T_S2_C.inverse() * surface_intersection;
-    //std::cout << "projecting: " << surface_intersection << std::endl;
-    
-    // Now look up the matching voxels in the intensity layer and mark them.
-    // Let's just start with 1.
+    Point real_surface_intersection =
+        T_W_Data_.inverse() * T_Geometry_W_.inverse() * surface_intersection;
+
     typename Block<VoxelType2>::Ptr block_ptr =
         integration_layer_->allocateBlockPtrByCoordinates(real_surface_intersection);
     VoxelType2& voxel = block_ptr->getVoxelByCoordinates(real_surface_intersection);
 
-    //(*integration_function_)(voxel, data[i]);
     integrationFunction(voxel, data[i]);
 
     // Now check the surrounding voxels along the bearing vector. If they have
@@ -112,26 +102,48 @@ void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::addBearingVectors(
     Point close_voxel = surface_intersection;
     for (int voxel_offset = -prop_voxel_radius_;
          voxel_offset <= prop_voxel_radius_; voxel_offset++) {
-      close_voxel =
-          surface_intersection + T_S2_C * bearing_vectors[i] * voxel_offset * voxel_size;
-      Point real_close_voxel = T_w_d.inverse() * T_S2_C.inverse() * close_voxel;
+      close_voxel = surface_intersection + T_Geometry_W_ * bearing_vectors[i] *
+                                               voxel_offset * voxel_size;
+      Point real_close_voxel =
+          T_W_Data_.inverse() * T_Geometry_W_.inverse() * close_voxel;
       typename Block<VoxelType2>::Ptr new_block_ptr =
           integration_layer_->allocateBlockPtrByCoordinates(real_close_voxel);
       VoxelType2& new_voxel = block_ptr->getVoxelByCoordinates(real_close_voxel);
       if (new_voxel.weight < 1e-6) {
-        //(*integration_function_)(voxel, data[i]);
         integrationFunction(voxel, data[i]);
       }
     }
   }
-  /*std::cout << "hit/loss projecting" << std::endl;
-  std::cout << hit << " " << loss << std::endl;*/
+
+  // TODO maybe improve by locking and relocking only on data access?
+  lock1.unlock();
+  lock2.unlock();
 }
 
+// sets the layers of geometry and data to the newest. This is not
+// multithreading safe though
 template <typename T, typename VoxelType1, typename VoxelType2, typename Data>
 void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::setActiveLayers() {
   integration_layer_ = data_collection_->getActiveMapPtr()->getLayerPtr();
-  collision_layer_ = collision_collection_->getActiveMapPtr()->getLayerPtr();
+  collision_layer_ = geometry_collection_->getActiveMapPtr()->getLayerPtr();
+}
+
+// sets the layers of geometry and data to the desired ones
+template <typename T, typename VoxelType1, typename VoxelType2, typename Data>
+void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::setLayers(
+    SubmapID geometry_id, SubmapID data_id) {
+  integration_layer_ = data_collection_->getMapPtr(data_id)->getLayerPtr();
+  collision_layer_ =
+      geometry_collection_->getMapPtr(geometry_id)->getLayerPtr();
+}
+
+// set transformations
+template <typename T, typename VoxelType1, typename VoxelType2, typename Data>
+void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::setTransformations(
+    SubmapID geometry_id, SubmapID data_id) {
+  T_Geometry_W_ =
+      geometry_collection_->getSubmap(geometry_id).getPose().inverse();
+  T_W_Data_ = data_collection_->getSubmap(data_id).getPose();
 }
 
 }  // namespace cblox

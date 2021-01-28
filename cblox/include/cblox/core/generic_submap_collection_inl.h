@@ -54,6 +54,7 @@ void GenericSubmapCollection<VoxelType>::createNewSubmap(
   Transformation T_G;
   if (has_parent_) {
     T_G = last_parent_transform_;
+
   } else {
     T_G = T_G_S;
   }
@@ -490,9 +491,7 @@ GenericSubmapCollection<VoxelType>::getAllMaps() {
   std::vector<typename GenericSubmap<VoxelType>::Ptr> vec;
   for( auto it = id_to_submap_.begin(); it != id_to_submap_.end(); ++it ) {
         vec.push_back( it->second );
-        std::cout << it->first << std::endl;
     }
-    std::cout << active_submap_id_ << std::endl;
   return vec;
 }
 

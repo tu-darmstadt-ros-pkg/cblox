@@ -103,7 +103,7 @@ void LIDARSensor<SubmapType, GeometryVoxelType>::integrateMessage(
   data.points_C = points_C;
   data.colors = colors;
   data.freespace_points = false;
-
+  data.id = this->submap_collection_ptr_->getActiveSubmapID();
   this->submap_collection_integrator_->integrate(T_G_C, data);
 
   ros::WallTime end = ros::WallTime::now();

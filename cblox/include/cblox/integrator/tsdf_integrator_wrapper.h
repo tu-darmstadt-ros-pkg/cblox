@@ -10,6 +10,7 @@ struct TsdfIntegrationData {
   voxblox::Pointcloud points_C;
   voxblox::Colors colors;
   bool freespace_points;
+  SubmapID id;
 };
 
 struct TsdfConfig {
@@ -37,9 +38,9 @@ class TsdfIntegratorWrapper {
 
   typedef TsdfConfig ConfigType;
 
-  void integrate(const voxblox::Transformation& T_G_C,
-                 const TsdfIntegrationData& data) {
+  void integrate(const Transformation& T_G_C, const TsdfIntegrationData& data) {
     // TODO rethink layer updating
+
     setActiveLayers();
     // locking
     std::unique_lock<std::mutex> lock(collection_->collection_mutex_);

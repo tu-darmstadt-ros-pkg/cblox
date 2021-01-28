@@ -1,6 +1,6 @@
 #Maps as list of list, sub lists include a name, layer type, layer Config (as dict)
 maps: 
-  [["tsdf1", "tsdf", {voxel_size: 0.4, voxels_per_side: 16}], 
+  [["tsdf1", "tsdf", {voxel_size: 0.1, voxels_per_side: 16}], 
    ["rgb1", "rgb", {voxel_size: 0.4, voxels_per_side: 16}],
    ["thermal1", "thermal", {voxel_size: 0.4, voxels_per_side: 16}]]
 
@@ -92,7 +92,7 @@ visualizers:
   #integrator_threads: 1,
   }
   ],
-  ["visualizer3",
+    ["visualizer3",
   "thermal",
   {
   collision_layer_type: "tsdf", collision_layer: "tsdf1",

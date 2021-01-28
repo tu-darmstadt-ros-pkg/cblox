@@ -20,6 +20,8 @@ struct ProjectionData {
   Point origin;
   Pointcloud bearing_vectors;
   std::vector<Data> data;
+  SubmapID id;
+  SubmapID geometry_id;
 };
 
 struct ProjectionIntegratorConfig {
@@ -30,7 +32,7 @@ struct ProjectionIntegratorConfig {
 
 template <typename VoxelType1, typename VoxelType2, typename Data>
 struct ProjectionConfig {
-  std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection;
+  std::shared_ptr<GenericSubmapCollection<VoxelType1>> geometry_collection;
   std::shared_ptr<GenericSubmapCollection<VoxelType2>> data_collection;
   ProjectionIntegratorConfig integrator_config;
 };
@@ -44,11 +46,10 @@ class ProjectionIntegrator {
 
   // TODO add integration function
   ProjectionIntegrator(
-      std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection,
-      std::shared_ptr<GenericSubmapCollection<VoxelType2>>
-          data_collection,
+      std::shared_ptr<GenericSubmapCollection<VoxelType1>> geometry_collection,
+      std::shared_ptr<GenericSubmapCollection<VoxelType2>> data_collection,
       ProjectionIntegratorConfig integrator_config
-        // Layer<VoxelType2>* integration_layer
+      // Layer<VoxelType2>* integration_layer
       //(*integration_function)(VoxelType2&, IntegrationData&)
   );
 
@@ -63,9 +64,7 @@ class ProjectionIntegrator {
   void integrate(const Transformation& T_G_C, const ProjectionData<Data>& data);
 
   void addBearingVectors(const Point& origin, const Pointcloud& bearing_vectors,
-                         const std::vector<Data>& data,
-                         const Transformation& T_S_C,
-                         const Transformation& T_S2_C);
+                         const std::vector<Data>& data);
 
   // void (*integration_function_)(VoxelType2&, IntegrationData&);
 
@@ -80,15 +79,21 @@ class ProjectionIntegrator {
 
   void setActiveLayers();
 
+  void setLayers(SubmapID geometry_id, SubmapID data_id);
+
+  void setTransformations(SubmapID geometry_id, SubmapID data_id);
+
  protected:
   FloatingPoint max_distance_;
   FloatingPoint max_weight_;
 
   int prop_voxel_radius_;
-  std::shared_ptr<GenericSubmapCollection<VoxelType1>> collision_collection_;
+  std::shared_ptr<GenericSubmapCollection<VoxelType1>> geometry_collection_;
   std::shared_ptr<GenericSubmapCollection<VoxelType2>> data_collection_;
   Layer<VoxelType1>* collision_layer_;
   Layer<VoxelType2>* integration_layer_;
+  Transformation T_Geometry_W_;
+  Transformation T_W_Data_;
 };
 
 }  // namespace cblox

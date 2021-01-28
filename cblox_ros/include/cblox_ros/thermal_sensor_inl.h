@@ -27,7 +27,7 @@ ThermalSensor<SubmapType, GeometryVoxelType>::ThermalSensor(
       collision_submap_collection_ptr_(coll_submap_collection_ptr) {
 
   ProjectionConfig<GeometryVoxelType, voxblox::IntensityVoxel, float> config;
-  config.collision_collection = coll_submap_collection_ptr;
+  config.geometry_collection = coll_submap_collection_ptr;
   config.data_collection = thermal_submap_collection_ptr;
   config.integrator_config = integrator_config;
 
@@ -126,12 +126,14 @@ void ThermalSensor<SubmapType, GeometryVoxelType>::integrateMessage(
   }
 
   data.origin = T_G_C.getPosition();
+  data.geometry_id = last_parent_id_;
+  data.id = this->submap_collection_ptr_->getActiveSubmapID();
 
-  // passing identity matrix here, as data is in world frame
-  Transformation identity;
+  // empty transformation as unused in this case
+  Transformation trans;
 
   // start integration
-  this->submap_collection_integrator_->integrate(identity, data);
+  this->submap_collection_integrator_->integrate(trans, data);
 }
 
 }  // namespace cblox

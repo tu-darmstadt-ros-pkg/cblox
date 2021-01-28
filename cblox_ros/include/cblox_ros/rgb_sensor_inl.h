@@ -27,7 +27,7 @@ RGBSensor<SubmapType, GeometryVoxelType>::RGBSensor(
       collision_submap_collection_ptr_(coll_submap_collection_ptr) {
 
   ProjectionConfig<GeometryVoxelType, voxblox::RGBVoxel, Color> config;
-  config.collision_collection = coll_submap_collection_ptr;
+  config.geometry_collection = coll_submap_collection_ptr;
   config.data_collection = rgb_submap_collection_ptr;
   config.integrator_config = integrator_config;
 
@@ -129,15 +129,14 @@ void RGBSensor<SubmapType, GeometryVoxelType>::integrateMessage(
 
   data.origin = T_G_C.getPosition();
 
-  // passing identity matrix here, as data is in world frame
-  Transformation identity;
+  data.geometry_id = last_parent_id_;
+  data.id = this->submap_collection_ptr_->getActiveSubmapID();
 
-  //TODO testing
-  //Transformation to layer with parent transform??
-  Transformation t = this->submap_collection_ptr_->getActiveSubmapPose();
+  // empty transformation as unused in this case
+  Transformation trans;
 
   // start integration
-  this->submap_collection_integrator_->integrate(t, data);
+  this->submap_collection_integrator_->integrate(trans, data);
 }
 
 }  // namespace cblox

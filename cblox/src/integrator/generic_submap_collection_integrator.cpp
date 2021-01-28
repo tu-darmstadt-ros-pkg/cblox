@@ -18,6 +18,7 @@ void GenericSubmapCollectionIntegrator<
 
   // TODO rethink mutex
 
+  // std::cout << "general integrating" << std::endl;
   integrator_->integrate(T_S_C, data);
 }
 
