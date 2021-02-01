@@ -1,6 +1,6 @@
 #Maps as list of list, sub lists include a name, layer type, layer Config (as dict)
 maps: 
-  [["tsdf1", "tsdf", {voxel_size: 0.1, voxels_per_side: 16}], 
+  [["tsdf1", "tsdf", {voxel_size: 0.4, voxels_per_side: 16}], #voxel_size 0.1 
    ["rgb1", "rgb", {voxel_size: 0.4, voxels_per_side: 16}],
    ["thermal1", "thermal", {voxel_size: 0.4, voxels_per_side: 16}]]
 
@@ -10,7 +10,9 @@ sensors:
     "lidar_sensor1", 
     {collision_type: "tsdf", collision_layer: "tsdf1",
     pointcloud_topic: "/colored_cloud", 
-    frame: "world"}, #TODO add integrator type
+    frame: "world",
+    frames_per_submap: 20
+    }, #TODO add integrator type
     {default_truncation_distance: 0.4, #not all have to be set
     max_weight: 10000.0,
     voxel_carving_enabled: true,
@@ -37,7 +39,8 @@ sensors:
     camera_topic: "/realsense_d435_back/color/image_raw",
     camera_info_topic: "/realsense_d435_back/color/camera_info",
     frame: "world",
-    sub_sample_factor: 1.0
+    sub_sample_factor: 1.0,
+    frames_per_submap: 20
     },
     {max_distance: 40.0, 
     max_weight: 100.0,
@@ -52,7 +55,8 @@ sensors:
     camera_topic: "/arm_thermal_cam/image_raw",
     camera_info_topic: "/arm_thermal_cam/camera_info",
     frame: "world",
-    sub_sample_factor: 1.0
+    sub_sample_factor: 1.0,
+    frames_per_submap: 20
     },
     {max_distance: 20.0, 
     max_weight: 100.0,

@@ -33,8 +33,8 @@ class Sensor {
                     // submap_collection_ptr,
       const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
       std::string world_frame,
-      std::shared_ptr<GenericSubmapCollection<VoxelType>>
-          submap_collection_ptr);
+      std::shared_ptr<GenericSubmapCollection<VoxelType>> submap_collection_ptr,
+      int frames_per_submap);
 
   virtual ~Sensor(){};
 

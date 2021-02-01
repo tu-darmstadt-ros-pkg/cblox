@@ -22,13 +22,15 @@ class LIDARSensor
     std::string frame = "";
     std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
         submap_collection_ptr;
+    int frames_per_submap = 20;
   };
 
   LIDARSensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
               std::string pointcloud_topic, std::string world_frame,
               std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
                   submap_collection_ptr,
-              voxblox::TsdfIntegratorBase::Config& integrator_config);
+              voxblox::TsdfIntegratorBase::Config& integrator_config,
+              int frames_per_submap);
 
   LIDARSensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
               LIDARSensor<SubmapType, GeometryVoxelType>::Config c,

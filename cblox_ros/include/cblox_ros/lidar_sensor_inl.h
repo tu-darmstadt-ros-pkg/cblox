@@ -15,12 +15,13 @@ LIDARSensor<SubmapType, GeometryVoxelType>::LIDARSensor(
     std::string pointcloud_topic, std::string world_frame,
     std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
         submap_collection_ptr,
-    voxblox::TsdfIntegratorBase::Config& integrator_config)
+    voxblox::TsdfIntegratorBase::Config& integrator_config,
+    int frames_per_submap)
     : Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType,
              sensor_msgs::PointCloud2::Ptr, GeometryVoxelType,
              TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType,
              GeometryVoxelType>(nh, nh_private, world_frame,
-                                submap_collection_ptr),
+                                submap_collection_ptr, frames_per_submap),
       color_map_(new voxblox::GrayscaleColorMap()) {
   // submap_collection_ptr_ = submap_collection_ptr;
 
@@ -47,10 +48,11 @@ LIDARSensor<SubmapType, GeometryVoxelType>::LIDARSensor(
 template <typename SubmapType, typename GeometryVoxelType>
 LIDARSensor<SubmapType, GeometryVoxelType>::LIDARSensor(
     const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
-    LIDARSensor<SubmapType, GeometryVoxelType>::Config c, 
+    LIDARSensor<SubmapType, GeometryVoxelType>::Config c,
     voxblox::TsdfIntegratorBase::Config& integrator_config)
     : LIDARSensor(nh, nh_private, c.pointcloud_topic, c.frame,
-                  c.submap_collection_ptr, integrator_config) {}
+                  c.submap_collection_ptr, integrator_config,
+                  c.frames_per_submap) {}
 
 template <typename SubmapType, typename GeometryVoxelType>
 void LIDARSensor<SubmapType, GeometryVoxelType>::subscribeAndAdvertise(

@@ -11,7 +11,8 @@ Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
     Sensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
            std::string world_frame,
            std::shared_ptr<GenericSubmapCollection<VoxelType>>
-               submap_collection_ptr)
+               submap_collection_ptr,
+           int frames_per_submap)
     : nh_(nh),
       nh_private_(nh_private),
       world_frame_("world"),
@@ -20,15 +21,16 @@ Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
       last_msg_stamp_(ros::Time(0)),
       msg_delay_(ros::Duration(1.0)),
       num_integrated_frames_current_submap_(0),
-      num_integrated_frames_per_submap_(kDefaultNumFramesPerSubmap_i),
+      num_integrated_frames_per_submap_(frames_per_submap),
       visualizer_registered_(false),
-      map_initialized_(false) {
-  
-  // submap_collection_ptr_ = submap_collection_ptr;
-  // submap_collection_integrator_.reset(
-  //    new GenericSubmapCollectionIntegrator<IntegratorType, IntegrationData,
-  //    VoxelType, SubmapType> (submap_collection_ptr));
-};
+      map_initialized_(false){
+
+          // submap_collection_ptr_ = submap_collection_ptr;
+          // submap_collection_integrator_.reset(
+          //    new GenericSubmapCollectionIntegrator<IntegratorType,
+          //    IntegrationData,
+          //    VoxelType, SubmapType> (submap_collection_ptr));
+      };
 
 template <typename T, typename SubmapType, typename MsgType, typename VoxelType,
           typename IntegratorType, typename IntegrationData,

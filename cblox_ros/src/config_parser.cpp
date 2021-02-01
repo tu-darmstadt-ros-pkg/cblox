@@ -289,6 +289,9 @@ ConfigParser::parseLidarSensor(
   if (sensor_config.hasMember("frame")) {
     sc.frame = static_cast<std::string>(sensor_config["frame"]);
   }
+  if (sensor_config.hasMember("frames_per_submap")) {
+    sc.frame = static_cast<int>(sensor_config["frames_per_submap"]);
+  }
   sc.submap_collection_ptr = tsdf_map;
   
   //integrator config
@@ -322,6 +325,9 @@ ConfigParser::parseRgbSensor(
   if (sensor_config.hasMember("sub_sample_factor")) {
     sc.sub_sample_factor =
         static_cast<double>(sensor_config["sub_sample_factor"]);
+  }
+  if (sensor_config.hasMember("frames_per_submap")) {
+    sc.frame = static_cast<int>(sensor_config["frames_per_submap"]);
   }
   sc.coll_submap_collection_ptr = tsdf_map;
   sc.rgb_submap_collection_ptr = rgb_map;
@@ -358,6 +364,9 @@ ConfigParser::parseThermalSensor(
   if (sensor_config.hasMember("sub_sample_factor")) {
     sc.sub_sample_factor =
         static_cast<double>(sensor_config["sub_sample_factor"]);
+  }
+  if (sensor_config.hasMember("frames_per_submap")) {
+    sc.frame = static_cast<int>(sensor_config["frames_per_submap"]);
   }
   sc.coll_submap_collection_ptr = tsdf_map;
   sc.thermal_submap_collection_ptr = thermal_map;

@@ -60,6 +60,32 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::
 }
 
 template <typename GeometryVoxelType, typename ColorVoxelType>
+bool GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::
+    republishMeshCallback(std_srvs::Empty::Request& /*request*/,
+                          std_srvs::Empty::Response& /*response*/) {
+  // locking like before to ensure no race conditions/segment faults are created
+  if (typeid(geometry_submap_collection_ptr_.get()) !=
+      typeid(color_submap_collection_ptr_.get())) {
+    // TODO rethink mutex
+    std::unique_lock<std::mutex> lock1(
+        geometry_submap_collection_ptr_->collection_mutex_, std::defer_lock);
+    std::unique_lock<std::mutex> lock2(
+        color_submap_collection_ptr_->collection_mutex_, std::defer_lock);
+    std::lock(lock1, lock2);
+    publishCompleteMesh();
+    lock1.unlock();
+    lock2.unlock();
+  } else {
+    std::unique_lock<std::mutex> lock1(
+        geometry_submap_collection_ptr_->collection_mutex_);
+    // lock1.lock();
+    publishCompleteMesh();
+    lock1.unlock();
+  }
+  return true;
+}
+
+template <typename GeometryVoxelType, typename ColorVoxelType>
 void GenericActiveSubmapVisualizer<GeometryVoxelType,
                                    ColorVoxelType>::publishCurrentMesh() {
   // saving and reusing meshes? TODO
@@ -80,6 +106,8 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType,
     geometry_id_ = *it;
   }
 
+  // moved out of loop
+  visualization_msgs::MarkerArray marker_array;
   while (it != geometry_ids.end()) {
     switchToSubmap(*it);
     updateMeshLayer();
@@ -90,22 +118,30 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType,
     message_id_++;
     //check for size, if 0 skip
     if(marker.points.size() > 0) {
-      visualization_msgs::MarkerArray marker_array;
       marker_array.markers.push_back(marker);
-      publisher_.publish(marker_array);
-      ROS_INFO("published mesh");
+
     } else {
       ROS_INFO("Map marker %d is empty and not published!", *it);
     }
     geometry_id_ = *it;
     it++;
   }
+  publisher_.publish(marker_array);
+  ROS_INFO("published mesh");
 }
 
 template <typename GeometryVoxelType, typename ColorVoxelType>
 void GenericActiveSubmapVisualizer<GeometryVoxelType,
                                    ColorVoxelType>::publishCompleteMesh() {
-  // TODO
+  visualization_msgs::MarkerArray marker_array;
+  visualization_msgs::Marker marker;
+  marker.action = 3;
+  marker_array.markers.push_back(marker);
+  publisher_.publish(marker_array);
+
+  // set geometry_id_ to 0 and publish mesh
+  geometry_id_ = 0;
+  publishCurrentMesh();
 }
 
 template <typename GeometryVoxelType, typename ColorVoxelType>

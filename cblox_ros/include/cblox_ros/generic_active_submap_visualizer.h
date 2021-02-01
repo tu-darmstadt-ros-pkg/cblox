@@ -15,6 +15,7 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 
+#include <std_srvs/Empty.h>
 #include <voxblox/core/color.h>
 
 namespace cblox {
@@ -101,13 +102,21 @@ class GenericActiveSubmapVisualizer {
         nh_private_.advertise<visualization_msgs::MarkerArray>(topic, 1);
         std::cout << "update interval" << std::endl;
         std::cout << update_interval << std::endl;
-    if (update_interval > 0.0) {
-      // moved from server to here
-      update_mesh_timer_ = nh_private.createTimer(
-          ros::Duration(update_interval),
-          &GenericActiveSubmapVisualizer<GeometryVoxelType,
-                                         ColorVoxelType>::updateMeshCallback,
-          this);
+
+        std::string service_topic = "republish_";
+        service_topic += topic;  // TODO this might be changed later
+        republish_map_serv_ = nh_private_.advertiseService(
+            service_topic,
+            &GenericActiveSubmapVisualizer<
+                GeometryVoxelType, ColorVoxelType>::republishMeshCallback,
+            this);
+        if (update_interval > 0.0) {
+          // moved from server to here
+          update_mesh_timer_ = nh_private.createTimer(
+              ros::Duration(update_interval),
+              &GenericActiveSubmapVisualizer<
+                  GeometryVoxelType, ColorVoxelType>::updateMeshCallback,
+              this);
     }
   }
 
@@ -157,6 +166,9 @@ class GenericActiveSubmapVisualizer {
 
   void updateMeshCallback(const ros::TimerEvent&);
 
+  bool republishMeshCallback(std_srvs::Empty::Request& /*request*/,
+                             std_srvs::Empty::Response& /*response*/);
+
   // Config
   const MeshIntegratorConfig mesh_config_;
 
@@ -198,6 +210,7 @@ class GenericActiveSubmapVisualizer {
   ros::Publisher publisher_;
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;
+  ros::ServiceServer republish_map_serv_;
 
   unsigned int geometry_id_;
   unsigned int color_id_;
