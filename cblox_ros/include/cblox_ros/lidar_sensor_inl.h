@@ -16,7 +16,7 @@ LIDARSensor<SubmapType, GeometryVoxelType>::LIDARSensor(
     std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
         submap_collection_ptr,
     voxblox::TsdfIntegratorBase::Config& integrator_config,
-    int frames_per_submap)
+    int frames_per_submap, std::string integrator_type)
     : Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType,
              sensor_msgs::PointCloud2::Ptr, GeometryVoxelType,
              TsdfIntegratorWrapper, TsdfIntegrationData, GeometryVoxelType,
@@ -33,7 +33,7 @@ LIDARSensor<SubmapType, GeometryVoxelType>::LIDARSensor(
   // TODO remove this workaround by fixing submapcollectionintegrator
   //voxblox::TsdfIntegratorBase::Config config;
   //config.default_truncation_distance = 0.4;
-  TsdfConfig c("simple", integrator_config, submap_collection_ptr);
+  TsdfConfig c(integrator_type, integrator_config, submap_collection_ptr);
   /*std::shared_ptr<TsdfIntegratorWrapper> integ =
       std::make_shared<TsdfIntegratorWrapper>(c);
   Sensor<LIDARSensor<SubmapType, GeometryVoxelType>, SubmapType,
@@ -52,7 +52,7 @@ LIDARSensor<SubmapType, GeometryVoxelType>::LIDARSensor(
     voxblox::TsdfIntegratorBase::Config& integrator_config)
     : LIDARSensor(nh, nh_private, c.pointcloud_topic, c.frame,
                   c.submap_collection_ptr, integrator_config,
-                  c.frames_per_submap) {}
+                  c.frames_per_submap, c.integrator_type) {}
 
 template <typename SubmapType, typename GeometryVoxelType>
 void LIDARSensor<SubmapType, GeometryVoxelType>::subscribeAndAdvertise(

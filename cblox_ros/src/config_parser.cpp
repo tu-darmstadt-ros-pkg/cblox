@@ -15,6 +15,7 @@ static voxblox::Color func3(const voxblox::IntensityVoxel* v) {
   }
   if (v->weight > 0.0) {
     voxblox::IronbowColorMap m;
+    // std::cout << v->intensity << std::endl;
     return m.colorLookup(v->intensity);
   }
 
@@ -290,7 +291,11 @@ ConfigParser::parseLidarSensor(
     sc.frame = static_cast<std::string>(sensor_config["frame"]);
   }
   if (sensor_config.hasMember("frames_per_submap")) {
-    sc.frame = static_cast<int>(sensor_config["frames_per_submap"]);
+    sc.frames_per_submap = static_cast<int>(sensor_config["frames_per_submap"]);
+  }
+  if (sensor_config.hasMember("integrator_type")) {
+    sc.integrator_type =
+        static_cast<std::string>(sensor_config["integrator_type"]);
   }
   sc.submap_collection_ptr = tsdf_map;
   
@@ -368,6 +373,16 @@ ConfigParser::parseThermalSensor(
   if (sensor_config.hasMember("frames_per_submap")) {
     sc.frame = static_cast<int>(sensor_config["frames_per_submap"]);
   }
+  if (sensor_config.hasMember("normalize")) {
+    sc.normalize = static_cast<bool>(sensor_config["normalize"]);
+  }
+  if (sensor_config.hasMember("min_intensity")) {
+    sc.min_intensity = static_cast<double>(sensor_config["min_intensity"]);
+  }
+  if (sensor_config.hasMember("max_intensity")) {
+    sc.max_intensity = static_cast<double>(sensor_config["max_intensity"]);
+  }
+
   sc.coll_submap_collection_ptr = tsdf_map;
   sc.thermal_submap_collection_ptr = thermal_map;
   
@@ -446,6 +461,10 @@ ConfigParser::parseTsdfIntegratorConfig(XmlRpc::XmlRpcValue integrator_config) {
   if (integrator_config.hasMember("clear_checks_every_n_frames")) {
     config.clear_checks_every_n_frames =
         static_cast<int>(integrator_config["clear_checks_every_n_frames"]);
+  }
+  if (integrator_config.hasMember("max_integration_time_s")) {
+    config.max_integration_time_s =
+        static_cast<double>(integrator_config["max_integration_time_s"]);
   }
   if (integrator_config.hasMember("max_integration_time_s")) {
     config.max_integration_time_s =

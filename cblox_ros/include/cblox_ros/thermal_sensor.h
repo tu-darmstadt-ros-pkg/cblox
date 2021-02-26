@@ -28,22 +28,26 @@ class ThermalSensor
     std::string camera_topic = "";
     std::string camera_info_topic = "";
     std::string frame = "";
-    double sub_sample_factor = 1.0;
+    FloatingPoint sub_sample_factor = 1.0;
     typename GenericSubmapCollection<GeometryVoxelType>::Ptr
         coll_submap_collection_ptr;
     typename GenericSubmapCollection<voxblox::IntensityVoxel>::Ptr
         thermal_submap_collection_ptr;
     int frames_per_submap = 20;
+    bool normalize = false;
+    FloatingPoint min_intensity = 0.0;
+    FloatingPoint max_intensity = 1.0;
   };
   ThermalSensor(
       const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
       std::string camera_image_topic, std::string camera_info_topic,
-      std::string world_frame, double subsample_factor,
+      std::string world_frame, FloatingPoint subsample_factor,
       std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
           coll_submap_collection_ptr,
       std::shared_ptr<GenericSubmapCollection<voxblox::IntensityVoxel>>
           thermal_submap_collection_ptr,
-      ProjectionIntegratorConfig& integrator_config, int frames_per_submap);
+      ProjectionIntegratorConfig& integrator_config, int frames_per_submap,
+      bool normalize, FloatingPoint min_intensity, FloatingPoint max_intensity);
   ThermalSensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
                 Config c, ProjectionIntegratorConfig& integrator_config);
 
@@ -70,7 +74,7 @@ class ThermalSensor
   std::string world_frame_;
 
   bool valid_info_;
-  double fx_;
+  FloatingPoint fx_;
 
   size_t subsample_factor_;
 
@@ -78,6 +82,11 @@ class ThermalSensor
       collision_submap_collection_ptr_;
 
   SubmapID last_parent_id_;
+
+  // normalizing
+  bool normalize_;
+  FloatingPoint min_intensity_;
+  FloatingPoint max_intensity_;
 };
 
 }  // namespace cblox

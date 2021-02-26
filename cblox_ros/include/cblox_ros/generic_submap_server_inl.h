@@ -14,7 +14,7 @@ CollisionVoxelType>::add_sensor(std::shared_ptr<RGBSensor<SubmapType,
 CollisionVoxelType>> rgb_sensor) { rgb_sensor_ = rgb_sensor;
 }*/
 
-voxblox::Color func(const voxblox::TsdfVoxel* v) {
+/*voxblox::Color func(const voxblox::TsdfVoxel* v) {
   voxblox::Color c;
   c.r = 0;
   c.g = 0;
@@ -54,11 +54,14 @@ voxblox::Color func3(const voxblox::IntensityVoxel* v) {
   }
   if (v->weight > 0.0) {
     voxblox::IronbowColorMap m;
+    std::cout << v->intensity << std::endl;
+    m.setMinValue(0.0);
+    m.setMaxValue(255.0);
     return m.colorLookup(v->intensity);
   }
 
   return c;
-}
+}*/
 
 void GenericSubmapServer::readConfig(const ros::NodeHandle& nh,
                                      const ros::NodeHandle& nh_private) {

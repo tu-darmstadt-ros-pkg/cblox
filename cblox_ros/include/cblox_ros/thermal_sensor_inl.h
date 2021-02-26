@@ -7,12 +7,13 @@ template <typename SubmapType, typename GeometryVoxelType>
 ThermalSensor<SubmapType, GeometryVoxelType>::ThermalSensor(
     const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
     std::string camera_image_topic, std::string camera_info_topic,
-    std::string world_frame, double subsample_factor,
+    std::string world_frame, FloatingPoint subsample_factor,
     std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
         coll_submap_collection_ptr,
     std::shared_ptr<GenericSubmapCollection<voxblox::IntensityVoxel>>
         thermal_submap_collection_ptr,
-    ProjectionIntegratorConfig& integrator_config, int frames_per_submap)
+    ProjectionIntegratorConfig& integrator_config, int frames_per_submap,
+    bool normalize, FloatingPoint min_intensity, FloatingPoint max_intensity)
     : Sensor<ThermalSensor<SubmapType, GeometryVoxelType>, SubmapType,
              sensor_msgs::Image::Ptr, voxblox::IntensityVoxel,
              ThermalProjectionIntegrator<GeometryVoxelType>,
@@ -24,7 +25,10 @@ ThermalSensor<SubmapType, GeometryVoxelType>::ThermalSensor(
       world_frame_(world_frame),
       subsample_factor_(subsample_factor),
       valid_info_(false),
-      collision_submap_collection_ptr_(coll_submap_collection_ptr) {
+      collision_submap_collection_ptr_(coll_submap_collection_ptr),
+      normalize_(normalize),
+      min_intensity_(min_intensity),
+      max_intensity_(max_intensity) {
   ProjectionConfig<GeometryVoxelType, voxblox::IntensityVoxel, float> config;
   config.geometry_collection = coll_submap_collection_ptr;
   config.data_collection = thermal_submap_collection_ptr;
@@ -50,7 +54,8 @@ ThermalSensor<SubmapType, GeometryVoxelType>::ThermalSensor(
     : ThermalSensor(nh, nh_private, c.camera_topic, c.camera_info_topic,
                     c.frame, c.sub_sample_factor, c.coll_submap_collection_ptr,
                     c.thermal_submap_collection_ptr, integrator_config,
-                    c.frames_per_submap) {}
+                    c.frames_per_submap, c.normalize, c.min_intensity,
+                    c.max_intensity) {}
 
 template <typename SubmapType, typename GeometryVoxelType>
 void ThermalSensor<SubmapType, GeometryVoxelType>::subscribeAndAdvertise(
@@ -99,6 +104,12 @@ void ThermalSensor<SubmapType, GeometryVoxelType>::integrateMessage(
   cv_bridge::CvImageConstPtr cv_ptr = cv_bridge::toCvShare(msg);
   CHECK(cv_ptr);
 
+  // std::cout << cv_ptr->encoding << std::endl;
+  // cv::Mat image;
+  // TODO fix for mono 16 //write subclass for correct image handling in
+  // sensors? trying to normalize image to range cv::normalize(cv_ptr->image,
+  // image,0.,255.,cv::NORM_MINMAX,CV_8U);
+
   const size_t num_pixels =
       cv_ptr->image.rows * cv_ptr->image.cols / subsample_factor_;
 
@@ -112,11 +123,28 @@ void ThermalSensor<SubmapType, GeometryVoxelType>::integrateMessage(
   size_t k = 0;
   size_t m = 0;
 
+  // double min_i = 1000000.0;
+  // double max_i = 0.0;
+  // like intensity server using image row
   for (int i = 0; i < cv_ptr->image.rows; i++) {
     for (int j = 0; j < cv_ptr->image.cols; j++) {
       // TODO subsampling
       if (m % subsample_factor_ == 0) {
-        float intensity = cv_ptr->image.at<float>(i, j);
+        // TODO workaround for now, this should be fixed when possible
+        // float intensity = cv_ptr->image.at<unsigned short>(i, j) / 65535.0;
+        FloatingPoint intensity = cv_ptr->image.at<unsigned short>(i, j);
+        /*if (intensity < min_i) {
+          min_i = intensity;
+        }
+        if ( intensity > max_i) {
+          max_i = intensity;
+        }
+        //std::cout << intensity << std::endl;
+        if (normalize_) {
+          intensity -= min_intensity_;
+          intensity /= (max_intensity_ - min_intensity_);
+        }*/
+
         data.data.push_back(intensity);
         data.bearing_vectors.push_back(
             T_G_C.getRotation().toImplementation() *
@@ -130,6 +158,7 @@ void ThermalSensor<SubmapType, GeometryVoxelType>::integrateMessage(
   data.geometry_id = last_parent_id_;
   data.id = this->submap_collection_ptr_->getActiveSubmapID();
 
+  // std::cout << "min/max" << min_i << " " << max_i << std::endl;
   // empty transformation as unused in this case
   Transformation trans;
 
