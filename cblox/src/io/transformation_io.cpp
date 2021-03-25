@@ -70,7 +70,7 @@ bool LoadTransformationArray(
 
   // Get number of messages
   uint32_t num_protos;
-  if (!voxblox::utils::readProtoMsgCountToStream(&proto_file, &num_protos,
+  if (!voxblox::utils::readProtoMsgCountFromStream(&proto_file, &num_protos,
                                                  &tmp_byte_offset)) {
     LOG(ERROR) << "Could not read number of messages.";
     return false;

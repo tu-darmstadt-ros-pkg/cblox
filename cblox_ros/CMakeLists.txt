@@ -5,7 +5,7 @@ find_package(catkin_simple REQUIRED)
 find_package(Boost REQUIRED system)
 catkin_simple(ALL_DEPS_REQUIRED)
 
-add_definitions(-std=c++11 -Wall -Wextra)
+add_definitions(-std=c++14 -Wall -Wextra)
 
 #############
 # LIBRARIES #
