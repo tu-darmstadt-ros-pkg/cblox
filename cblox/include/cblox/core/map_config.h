@@ -1,7 +1,7 @@
 #ifndef CBLOX_CORE_MAP_CONFIG_H_
 #define CBLOX_CORE_MAP_CONFIG_H_
 
-#include "voxblox/core/common.h"
+#include <voxblox/core/common.h>
 
 namespace cblox {
     //TODO

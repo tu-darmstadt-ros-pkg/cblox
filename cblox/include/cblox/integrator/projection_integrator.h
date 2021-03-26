@@ -6,12 +6,12 @@
 
 #include <Eigen/Core>
 
-#include "cblox/core/generic_submap_collection.h"
-#include "voxblox/core/layer.h"
-#include "voxblox/core/voxel.h"
-#include "voxblox/integrator/integrator_utils.h"
-#include "voxblox/utils/distance_utils.h"
-#include "voxblox/utils/timing.h"
+#include <cblox/core/generic_submap_collection.h>
+#include <voxblox/core/layer.h>
+#include <voxblox/core/voxel.h>
+#include <voxblox/integrator/integrator_utils.h>
+#include <voxblox/utils/distance_utils.h>
+#include <voxblox/utils/timing.h>
 
 namespace cblox {
 

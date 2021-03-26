@@ -1,7 +1,7 @@
 #include "cblox/integrator/generic_submap_collection_integrator.h"
 #include "cblox/core/generic_submap.h"
 
-#include "voxblox/integrator/tsdf_integrator.h"
+#include <voxblox/integrator/tsdf_integrator.h>
 
 namespace cblox {
 

@@ -1,7 +1,7 @@
 #ifndef CBLOX_INTEGRATOR_PROJECTION_INTEGRATOR_INL_H_
 #define CBLOX_INTEGRATOR_PROJECTION_INTEGRATOR_INL_H_
 
-#include "voxblox/utils/distance_utils.h"
+#include <voxblox/utils/distance_utils.h>
 
 // adapted from intensity integrator
 

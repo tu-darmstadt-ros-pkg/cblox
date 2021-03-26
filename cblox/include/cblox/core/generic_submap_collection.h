@@ -11,7 +11,7 @@
 
 #include "cblox/GenericSubmapCollection.pb.h"
 #include "cblox/core/common.h"
-#include "voxblox/mesh/mesh_layer.h"
+#include <voxblox/mesh/mesh_layer.h>
 
 namespace cblox {
 
