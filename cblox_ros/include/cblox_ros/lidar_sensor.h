@@ -5,7 +5,7 @@
 #include <voxblox/utils/color_maps.h>
 #include "cblox/integrator/generic_submap_collection_integrator.h"
 #include "cblox/integrator/tsdf_integrator_wrapper.h"
-#include "sensor.h"
+#include "cblox_ros/sensor.h"
 
 namespace cblox {
 

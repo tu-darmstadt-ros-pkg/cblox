@@ -34,7 +34,11 @@
 
 #include <cblox/mesh/submap_mesher.h>
 
+
+#include <cblox_ros/definitions.h>
 #include <cblox_ros/config_parser.h>
+
+#include <cblox_ros/pose_graph_updater.h>
 //#include <cblox_ros/rgb_sensor.h>
 
 // TODO replace tsdf with geometry
@@ -60,15 +64,15 @@ class GenericSubmapServer {
   ros::NodeHandle nh_private_;
 
   // use map or dict later TODO
-  std::vector<std::shared_ptr<GenericSubmapCollection<voxblox::TsdfVoxel>>>
+  /*std::vector<std::shared_ptr<GenericSubmapCollection<voxblox::TsdfVoxel>>>
       tsdf_maps_;
   std::vector<std::shared_ptr<GenericSubmapCollection<voxblox::RGBVoxel>>>
       rgb_maps_;
   std::vector<std::shared_ptr<GenericSubmapCollection<voxblox::IntensityVoxel>>>
-      intensity_maps_;
+      intensity_maps_;*/
 
   // std::vector<std::shared_ptr<RGBSensor>> rgb_sensors;
-  std::vector<std::shared_ptr<
+  /*std::vector<std::shared_ptr<
       LIDARSensor<GenericSubmap<voxblox::TsdfVoxel>, voxblox::TsdfVoxel>>>
       lidar_sensors_;
   std::vector<std::shared_ptr<
@@ -76,12 +80,13 @@ class GenericSubmapServer {
       rgb_sensors_;
   std::vector<std::shared_ptr<ThermalSensor<
       GenericSubmap<voxblox::IntensityVoxel>, voxblox::TsdfVoxel>>>
-      thermal_sensors_;
+      thermal_sensors_;*/
   // TODO error on compile with submap server
 
   std::shared_ptr<MapVariantsMap> maps_;
   std::shared_ptr<SensorVariantsMap> sensors_;
   std::shared_ptr<VisualizerVariantsMap> visualizers_;
+  PoseGraphUpdater::Ptr pose_graph_updater_;
 
   // voxblox::IronbowColorMap m_;
   // std::shared_ptr<RGBSensor<SubmapType, CollisionVoxelType>> rgb_sensor_;

@@ -3,7 +3,7 @@
   <param name="use_sim_time" value="true"/>
 
   <!-- Path to dataset -->
-  <arg name="dataset_path" default="/home/frederik/Downloads/2021-02-05-11-47-06.bag /home/frederik/Downloads/2021-02-05-11-47-39.bag /home/frederik/Downloads/2021-02-05-11-48-34.bag" />
+  <arg name="dataset_path" default="/home/frederik/Downloads/2021-03-18-16-34-45.bag" />
   <arg name="play_rate" default="0.1" />
 
   <!-- cblox Parameters -->
@@ -16,7 +16,7 @@
       <!-- Topics -->
       <remap from="pointcloud" to="/colored_cloud" />
       <remap from="cblox/tsdf_submap_out" to="cblox/tsdf_submap" />
-      <rosparam command="load" file="$(find cblox_ros)/config/feb.yaml"/>
+      <rosparam command="load" file="$(find cblox_ros)/config/mar.yaml"/>
       <!-- Voxblox params -->
       <!-- Removing params, because they should be set in config
       <param name="tsdf_voxel_size" value="$(arg voxel_size)" />

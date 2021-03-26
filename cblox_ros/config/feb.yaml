@@ -1,6 +1,6 @@
 #Maps as list of list, sub lists include a name, layer type, layer Config (as dict)
 maps: 
-  [["tsdf1", "tsdf", {voxel_size: 0.02, voxels_per_side: 16}], #voxel_size 0.1 
+  [["tsdf1", "tsdf", {voxel_size: 0.025, voxels_per_side: 16}], #voxel_size 0.1 
   ["rgb1", "rgb", {voxel_size: 0.4, voxels_per_side: 16}],
    ["thermal1", "thermal", {voxel_size: 0.1, voxels_per_side: 16}]]
 
@@ -59,7 +59,7 @@ sensors:
     sub_sample_factor: 1.0,
     frames_per_submap: 20,
     normalize: true,
-    min_intensity: 18000.0,
+    min_intensity: 19000.0,
     max_intensity: 21000.0,
     },
     {max_distance: 30.0, 

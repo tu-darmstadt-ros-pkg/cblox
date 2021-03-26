@@ -26,4 +26,6 @@
   <depend>voxblox_ros</depend>
   <depend>voxblox</depend>
 
+  <depend>cartographer_ros</depend>
+
 </package>

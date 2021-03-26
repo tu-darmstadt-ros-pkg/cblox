@@ -55,7 +55,8 @@ void ConfigParser::parseConfig(
     const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
     std::shared_ptr<MapVariantsMap> map_collection,
     std::shared_ptr<SensorVariantsMap> sensor_collection,
-    std::shared_ptr<VisualizerVariantsMap> visualizer_collection) {
+    std::shared_ptr<VisualizerVariantsMap> visualizer_collection,
+    PoseGraphUpdater::Ptr& pose_graph_updater) {
   std::cout << "parsing config" << std::endl;
 
   // Maps
@@ -91,6 +92,20 @@ void ConfigParser::parseConfig(
   } else {
     parseVisualizers(nh, nh_private, visualizers, visualizer_collection,
                      map_collection);
+  }
+
+  //PoseGraph Settings
+  XmlRpc::XmlRpcValue pose_graph_settings;
+  if (!nh_private.getParam("pose_graph_settings", pose_graph_settings)) {
+    ROS_ERROR("Couldn't load pose_graph_settings from config");
+  } else {
+    if (pose_graph_settings.hasMember("enabled") && static_cast<bool>(pose_graph_settings["enabled"])) {
+      pose_graph_updater = parsePoseGraphSettings(nh, nh_private, pose_graph_settings);
+
+      pose_graph_updater->initMaps(map_collection);
+      pose_graph_updater->initSensors(sensor_collection);
+      pose_graph_updater->initVisualizers(visualizer_collection);
+    }
   }
 }
 
@@ -692,6 +707,29 @@ ConfigParser::parseThermalVisualizer(
           nh, nh_private, c);
 
   return visualizer;
+}
+
+PoseGraphUpdater::Ptr 
+ConfigParser::parsePoseGraphSettings(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private, XmlRpc::XmlRpcValue pose_graph_settings) {
+  
+  std::string anouncement = "";
+  std::string list = "";
+  double angle = 0.0;
+  double distance = 0.0;
+  if (pose_graph_settings.hasMember("submap_anouncement_topic")) {
+    anouncement = static_cast<std::string>(pose_graph_settings["submap_anouncement_topic"]);
+  }
+  if (pose_graph_settings.hasMember("submap_list_topic")) {
+    list = static_cast<std::string>(pose_graph_settings["submap_list_topic"]);
+  }
+  if (pose_graph_settings.hasMember("min_remesh_angle_radians")) {
+    angle = static_cast<double>(pose_graph_settings["min_remesh_angle_radians"]);
+  }
+  if (pose_graph_settings.hasMember("min_remesh_distance_meters")) {
+    distance = static_cast<double>(pose_graph_settings["min_remesh_distance_meters"]);
+  }
+  auto pose_graph_updater = std::make_shared<PoseGraphUpdater> (nh, nh_private, anouncement, list, angle, distance);
+  return pose_graph_updater;
 }
 
 

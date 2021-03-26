@@ -71,7 +71,11 @@ void GenericSubmapServer::readConfig(const ros::NodeHandle& nh,
   maps_ = std::make_shared<MapVariantsMap>();
   sensors_ = std::make_shared<SensorVariantsMap>();
   visualizers_ = std::make_shared<VisualizerVariantsMap>();
-  ConfigParser::parseConfig(nh, nh_private, maps_, sensors_, visualizers_);
+  ConfigParser::parseConfig(nh, nh_private, maps_, sensors_, visualizers_, pose_graph_updater_);
+
+  if (pose_graph_updater_) {
+    std::cout << "Using pose graph data from cartographer" << std::endl;
+  }
   
 }
 
