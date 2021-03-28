@@ -1,8 +1,8 @@
 #Maps as list of list, sub lists include a name, layer type, layer Config (as dict)
 maps: 
-  [["tsdf1", "tsdf", {voxel_size: 0.025, voxels_per_side: 16}], #voxel_size 0.1 
+  [["tsdf1", "tsdf", {voxel_size: 0.1, voxels_per_side: 16}], #voxel_size 0.1 
   ["rgb1", "rgb", {voxel_size: 0.4, voxels_per_side: 16}],
-   ["thermal1", "thermal", {voxel_size: 0.1, voxels_per_side: 16}]]
+   ["thermal1", "thermal", {voxel_size: 0.4, voxels_per_side: 16}]]
 
 #Sensors as list of lists, sub lists include the sensor_type, a config with all inputs [layer types + name, topics, working frame], a config with the integrator parameters
 sensors:

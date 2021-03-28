@@ -243,7 +243,12 @@ template <typename T, typename SubmapType, typename MsgType, typename VoxelType,
 void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
             GeometryVoxelType,
             ColorVoxelType>::initializeMap(const Transformation& T_G_C) {
+              if(submap_collection_ptr_->size() > 0) {
+                std::cout << "tried to initialize map twice, aborting" << std::endl;
+                submap_collection_integrator_->switchToActiveSubmap();
+              }else {
   createNewSubmap(T_G_C, ros::Time::now());
+              }
   map_initialized_ = true;
 }
 
