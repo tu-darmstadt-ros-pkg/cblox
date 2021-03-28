@@ -45,28 +45,26 @@ bool GenericSubmapCollection<VoxelType>::exists(
 }
 
 template <typename VoxelType>
-void GenericSubmapCollection<VoxelType>::createNewSubmapPoseGraph(const Transformation& T_G_S, const SubmapID submap_id) {
-
+void GenericSubmapCollection<VoxelType>::createNewSubmapPoseGraph(
+    const Transformation& T_G_S, const SubmapID submap_id) {
   const auto it = id_to_submap_.find(submap_id);
   CHECK(it == id_to_submap_.end());
   // Creating the new submap and adding it to the list
-  
 
   typename GenericSubmap<VoxelType>::Ptr sub_map(
       new GenericSubmap<VoxelType>(T_G_S, submap_id, submap_config_));
   id_to_submap_.emplace(submap_id, std::move(sub_map));
-  
+
   // Updating the active submap
   active_submap_id_ = submap_id;
 
-  //this is a bit of a hack, as all submaps are synched and childmaps aren't really needed,
-  //but to not completely destory support
+  // this is a bit of a hack, as all submaps are synched and childmaps aren't
+  // really needed, but to not completely destory support
   if (has_parent_) {
     parent_to_child_.emplace(submap_id, std::vector<SubmapID>());
     parent_to_child_.find(submap_id)->second.push_back(submap_id);
   }
 }
-
 
 template <typename VoxelType>
 void GenericSubmapCollection<VoxelType>::createNewSubmap(

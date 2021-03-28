@@ -87,14 +87,15 @@ void ThermalSensor<SubmapType, GeometryVoxelType>::integrateMessage(
     const sensor_msgs::Image::Ptr msg, const Transformation T_G_C) {
   // check if parent map changed
 
-  if (!this->pose_graph_mode_){
-  if (last_parent_id_ !=
-      collision_submap_collection_ptr_->getActiveSubmapID()) {
-    last_parent_id_ = collision_submap_collection_ptr_->getActiveSubmapID();
-    Transformation t = collision_submap_collection_ptr_->getActiveSubmapPose();
-    // creating child map instead of normal map
-    this->submap_collection_ptr_->createNewChildSubMap(t, last_parent_id_);
-  }
+  if (!this->pose_graph_mode_) {
+    if (last_parent_id_ !=
+        collision_submap_collection_ptr_->getActiveSubmapID()) {
+      last_parent_id_ = collision_submap_collection_ptr_->getActiveSubmapID();
+      Transformation t =
+          collision_submap_collection_ptr_->getActiveSubmapPose();
+      // creating child map instead of normal map
+      this->submap_collection_ptr_->createNewChildSubMap(t, last_parent_id_);
+    }
   }
 
   if (!valid_info_) {

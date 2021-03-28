@@ -85,13 +85,14 @@ void RGBSensor<SubmapType, GeometryVoxelType>::integrateMessage(
   // create new submap
 
   if (!this->pose_graph_mode_) {
-  if (last_parent_id_ !=
-      collision_submap_collection_ptr_->getActiveSubmapID()) {
-    last_parent_id_ = collision_submap_collection_ptr_->getActiveSubmapID();
-    Transformation t = collision_submap_collection_ptr_->getActiveSubmapPose();
-    // creating child map instead of normal map
-    this->submap_collection_ptr_->createNewChildSubMap(t, last_parent_id_);
-  }
+    if (last_parent_id_ !=
+        collision_submap_collection_ptr_->getActiveSubmapID()) {
+      last_parent_id_ = collision_submap_collection_ptr_->getActiveSubmapID();
+      Transformation t =
+          collision_submap_collection_ptr_->getActiveSubmapPose();
+      // creating child map instead of normal map
+      this->submap_collection_ptr_->createNewChildSubMap(t, last_parent_id_);
+    }
   }
 
   if (!valid_info_) {

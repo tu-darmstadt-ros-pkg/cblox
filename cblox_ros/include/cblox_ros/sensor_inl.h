@@ -80,12 +80,11 @@ void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
     // TODO somehow the correct submaps need to be determined
     processMessage(msg, T_G_C);
 
-    //in posegraphmode instead of creating a new submap, for a new submap is checked as they 
-    //if (pose_graph_mode_) {
-      //set active submap in integrator
+    // in posegraphmode instead of creating a new submap, for a new submap is
+    // checked as they if (pose_graph_mode_) { set active submap in integrator
     //  submap_collection_integrator_->switchToActiveSubmap();
     //}
-    //else
+    // else
     if (newSubmapRequired()) {
       createNewSubmap(T_G_C, msg->header.stamp);
     }
@@ -169,11 +168,11 @@ template <typename T, typename SubmapType, typename MsgType, typename VoxelType,
           typename GeometryVoxelType, typename ColorVoxelType>
 bool Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
             GeometryVoxelType, ColorVoxelType>::newSubmapRequired() const {
-
   if (pose_graph_mode_) {
-    if(map_history_->size() > 0)
-      return (submap_collection_ptr_->getActiveSubmapID() != map_history_->back().id);
-    return false; //no return if no entry in history yet
+    if (map_history_->size() > 0)
+      return (submap_collection_ptr_->getActiveSubmapID() !=
+              map_history_->back().id);
+    return false;  // no return if no entry in history yet
   }
   return (num_integrated_frames_current_submap_ >
           num_integrated_frames_per_submap_);
@@ -199,12 +198,12 @@ void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
   // Creating the submap
 
   SubmapID submap_id;
-  //in posegraph mode create submaps, when the history is filled
+  // in posegraph mode create submaps, when the history is filled
   if (pose_graph_mode_ && map_history_->size() > 0) {
     submap_id = map_history_->back().id;
     Transformation T_w_m = map_history_->back().T_w_m;
     submap_collection_ptr_->createNewSubmapPoseGraph(T_w_m, submap_id);
-  }else {
+  } else {
     submap_id = submap_collection_ptr_->createNewSubmap(T_G_C);
   }
   // Activating the submap in the frame integrator
@@ -294,11 +293,13 @@ template <typename T, typename SubmapType, typename MsgType, typename VoxelType,
           typename IntegratorType, typename IntegrationData,
           typename GeometryVoxelType, typename ColorVoxelType>
 void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
-            GeometryVoxelType, ColorVoxelType>::set_pose_graph_mode(std::shared_ptr<MapHistory>& map_history) {
-    pose_graph_mode_ = true;
-    last_valid_message_ = ros::Time::now();
-    map_history_ = map_history;
-  }
+            GeometryVoxelType,
+            ColorVoxelType>::set_pose_graph_mode(std::shared_ptr<MapHistory>&
+                                                     map_history) {
+  pose_graph_mode_ = true;
+  last_valid_message_ = ros::Time::now();
+  map_history_ = map_history;
+}
 
 }  // namespace cblox
 

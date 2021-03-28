@@ -1,11 +1,11 @@
 #ifndef CBLOX_ROS_POSE_GRAPH_UPDATER_H_
 #define CBLOX_ROS_POSE_GRAPH_UPDATER_H_
 
-#include <ros/ros.h>
 #include <cartographer_ros_msgs/StampedSubmapEntry.h>
 #include <cartographer_ros_msgs/SubmapList.h>
 #include <cblox_ros/map_history.h>
 #include <minkindr_conversions/kindr_tf.h>
+#include <ros/ros.h>
 #include <tf/LinearMath/Transform.h>
 
 #include <cblox_ros/definitions.h>
@@ -61,17 +61,12 @@ class PoseGraphUpdater {
     std::shared_ptr<MapHistory> map_history_;
 };
 
-
-class init_sensor_visitor : public boost::static_visitor<>
-{
-public:
-
-    template<typename T>
-    void operator()(T & op, std::shared_ptr<MapHistory>& map_history) const
-    {
-        op->set_pose_graph_mode(map_history);
-    }
-    
+class init_sensor_visitor : public boost::static_visitor<> {
+ public:
+  template <typename T>
+  void operator()(T& op, std::shared_ptr<MapHistory>& map_history) const {
+    op->set_pose_graph_mode(map_history);
+  }
 };
 }  // namespace cblox
 
