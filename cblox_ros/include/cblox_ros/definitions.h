@@ -39,6 +39,9 @@ typedef boost::variant<typename GenericActiveSubmapVisualizer<
 typedef std::map<std::string, SubmapCollectionVariants> MapVariantsMap;
 typedef std::map<std::string, SensorVariants> SensorVariantsMap;
 typedef std::map<std::string, VisualizerVariants> VisualizerVariantsMap;
+
+
+
 }
 
 #endif  //CBLOX_ROS_DEFINITIONS_H_

@@ -13,6 +13,8 @@
 #include <ros/ros.h>
 #include <voxblox_ros/transformer.h>
 
+#include <cblox_ros/map_history.h>
+
 namespace cblox {
 
 // TODO fix redefining/missing
@@ -82,6 +84,8 @@ class Sensor {
 
   void resetIntegrator(typename GenericSubmapCollection<VoxelType>::Ptr submap_collection_ptr, typename IntegratorType::ConfigType integrator_config);
 
+  //set flags to be in pose_graph_mode
+  void set_pose_graph_mode(std::shared_ptr<MapHistory>& map_history);
  protected:
   // Node handles
   ros::NodeHandle nh_;
@@ -115,6 +119,11 @@ class Sensor {
   int num_integrated_frames_per_submap_;
 
   bool map_initialized_;
+
+  bool pose_graph_mode_;
+  ros::Time last_valid_message_;
+
+  std::shared_ptr<MapHistory> map_history_;
 };
 }  // namespace cblox
 

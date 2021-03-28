@@ -77,6 +77,9 @@ class GenericSubmapCollection
   void createNewSubmap(const Transformation& T_G_S, const SubmapID submap_id);
   SubmapID createNewSubmap(const Transformation& T_G_S);
 
+  //creates a new submap in cartographer aligned systems
+  void createNewSubmapPoseGraph(const Transformation& T_G_S, const SubmapID submap_id);
+
   void addSubmap(const typename GenericSubmap<VoxelType>::Ptr submap);
 
   // Create a new submap which duplicates an existing source submap

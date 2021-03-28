@@ -4,6 +4,9 @@
 #include <ros/ros.h>
 #include <cartographer_ros_msgs/StampedSubmapEntry.h>
 #include <cartographer_ros_msgs/SubmapList.h>
+#include <cblox_ros/map_history.h>
+#include <minkindr_conversions/kindr_tf.h>
+#include <tf/LinearMath/Transform.h>
 
 #include <cblox_ros/definitions.h>
 
@@ -54,6 +57,21 @@ class PoseGraphUpdater {
     //remeshing
     double min_remesh_angle_;
     double min_remesh_distance_;
+
+    std::shared_ptr<MapHistory> map_history_;
+};
+
+
+class init_sensor_visitor : public boost::static_visitor<>
+{
+public:
+
+    template<typename T>
+    void operator()(T & op, std::shared_ptr<MapHistory>& map_history) const
+    {
+        op->set_pose_graph_mode(map_history);
+    }
+    
 };
 }  // namespace cblox
 
