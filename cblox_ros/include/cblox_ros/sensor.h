@@ -85,7 +85,7 @@ class Sensor {
   void resetIntegrator(typename GenericSubmapCollection<VoxelType>::Ptr submap_collection_ptr, typename IntegratorType::ConfigType integrator_config);
 
   // set flags to be in pose_graph_mode
-  void set_pose_graph_mode(std::shared_ptr<MapHistory>& map_history);
+  void setPoseGraphMode(std::shared_ptr<MapHistory>& map_history);
 
  protected:
   // Node handles

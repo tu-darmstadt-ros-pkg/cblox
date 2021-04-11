@@ -65,9 +65,40 @@ class init_sensor_visitor : public boost::static_visitor<> {
  public:
   template <typename T>
   void operator()(T& op, std::shared_ptr<MapHistory>& map_history) const {
-    op->set_pose_graph_mode(map_history);
+    op->setPoseGraphMode(map_history);
   }
 };
+
+class init_visualizers_visitor : public boost::static_visitor<> {
+ public:
+  template <typename T>
+  void operator()(T& op, bool val) const {
+    op->setPublishInLocalFrame(val);
+  }
+};
+
+class update_transform_visitor : public boost::static_visitor<> {
+ public:
+  template <typename T>
+  void operator()(T& op,
+                  const cartographer_ros_msgs::SubmapList::Ptr& msg) const {
+    for (auto& entry : msg->submap) {
+      Transformation transform;
+      tf::Transform tf_trans;
+      tf::poseMsgToTF(entry.pose, tf_trans);
+      tf::transformTFToKindr(tf_trans, &transform);
+      auto sm = op->getSubmapPtr(entry.submap_index);
+
+      // in case submap wasn't created yet
+      if (!sm) {
+        // std::cout << "warning null ptr" << std::endl;
+        continue;
+      }
+      sm->setPose(transform);
+    }
+  }
+};
+
 }  // namespace cblox
 
 #endif // CBLOX_ROS_POSE_GRAPH_UPDATER_H_

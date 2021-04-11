@@ -33,14 +33,14 @@ namespace cblox {
         sensors_ = sensors;
         std::cout << "inited sensors" << std::endl;
 
-        auto bound_visitor = std::bind(init_sensor_visitor(),
-                                       std::placeholders::_1, map_history_);
+        auto init_sensors_bound_visitor = std::bind(
+            init_sensor_visitor(), std::placeholders::_1, map_history_);
 
         for (auto it = sensors_->begin(); it != sensors_->end(); it++) {
           // std::cout << it->first << std::endl;
 
           // it->second.set_posegraph_mode(map_history_);
-          boost::apply_visitor(bound_visitor, it->second);
+          boost::apply_visitor(init_sensors_bound_visitor, it->second);
         }
     }
 
@@ -49,11 +49,15 @@ namespace cblox {
         visualizers_ = visualizers;
         std::cout << "inited visualizers" << std::endl;
 
-        // for (auto it = visualizers_->begin(); it != visualizers_->end();
-        // it++) {
-        //    std::cout << it->first << std::endl;
-        // it.second.set_posegraph_mode();
-        //}
+        auto init_visualizers_bound_visitor =
+            std::bind(init_visualizers_visitor(), std::placeholders::_1, false);
+
+        for (auto it = visualizers_->begin(); it != visualizers_->end(); it++) {
+          // std::cout << it->first << std::endl;
+
+          // it->second.set_posegraph_mode(map_history_);
+          boost::apply_visitor(init_visualizers_bound_visitor, it->second);
+        }
     }
 
     //callbacks
@@ -87,6 +91,12 @@ namespace cblox {
       // TODO enable dropping of invalid messages (here and maybe also on
       // anouncement)
       std::cout << "list callback" << std::endl;
+
+      auto update_transform_bound_visitor =
+          std::bind(update_transform_visitor(), std::placeholders::_1, msg);
+      for (auto it = maps_->begin(); it != maps_->end(); it++) {
+        boost::apply_visitor(update_transform_bound_visitor, it->second);
+      }
     }
 
 }  // namespace cblox

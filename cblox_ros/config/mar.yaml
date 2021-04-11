@@ -1,12 +1,13 @@
 #Maps as list of list, sub lists include a name, layer type, layer Config (as dict)
 maps: 
-  [["tsdf1", "tsdf", {voxel_size: 0.1, voxels_per_side: 16}], #voxel_size 0.1 
-  ["rgb1", "rgb", {voxel_size: 0.4, voxels_per_side: 16}],
+  [["tsdf1", "tsdf", {voxel_size: 0.05, voxels_per_side: 16}], #voxel_size 0.1 
+  ["rgb1", "rgb", {voxel_size: 0.1, voxels_per_side: 16}],
    ["thermal1", "thermal", {voxel_size: 0.4, voxels_per_side: 16}]]
 
 #Sensors as list of lists, sub lists include the sensor_type, a config with all inputs [layer types + name, topics, working frame], a config with the integrator parameters
 sensors:
-  [["lidar_sensor",
+  [
+  ["lidar_sensor",
     "lidar_sensor1", 
     {collision_type: "tsdf", collision_layer: "tsdf1",
     pointcloud_topic: "/scan_cloud_filtered",
@@ -34,39 +35,56 @@ sensors:
     }
    ],
    ["rgb_sensor",
-    "rgb_sensor1",
+   "rgb_sensor1",
     {collision_type: "tsdf", collision_layer: "tsdf1",
     rgb_layer: "rgb1",
-    camera_topic: "/arm_wide_angle_cam/image_raw/compressed",
-    camera_info_topic: "/arm_wide_angle_cam/image_raw/camera_info",
+    camera_topic: "/camera360/pinhole_back/image_rect_color/image_raw",
+    camera_info_topic: "/camera360/pinhole_back/camera_info",
     frame: "world",
     sub_sample_factor: 1.0,
     frames_per_submap: 20
     },
-    {max_distance: 40.0, 
+   {max_distance: 40.0, 
     max_weight: 100.0,
     prop_voxel_radius: 4
     }
-   ],
-   ["thermal_sensor",
-    "thermal_sensor1",
-    {
-    collision_type: "tsdf", collision_layer: "tsdf1",
-    thermal_layer: "thermal1",
-    camera_topic: "/arm_thermal_cam/image_raw",
-    camera_info_topic: "/arm_thermal_cam/camera_info",
-    frame: "world",
-    sub_sample_factor: 1.0,
-    frames_per_submap: 20,
-    normalize: true,
-    min_intensity: 19000.0,
-    max_intensity: 21000.0,
-    },
-    {max_distance: 30.0, 
-    max_weight: 100.0,
-    prop_voxel_radius: 2
-    }
-   ]
+    ]
+    #,
+   #test if two sensors can work in one map, currently not working due to map creation?
+   #["rgb_sensor",
+   # "rgb_sensor2",
+   # {collision_type: "tsdf", collision_layer: "tsdf1",
+   # rgb_layer: "rgb1",
+   # camera_topic: "/camera360/pinhole_front/image_rect_color/image_raw",
+   # camera_info_topic: "/camera360/pinhole_front/camera_info",
+   # frame: "world",
+   # sub_sample_factor: 1.0,
+   # frames_per_submap: 20
+   # },
+   # {max_distance: 40.0,
+   # max_weight: 100.0,
+   # prop_voxel_radius: 4
+   # }
+   #]
+   #["thermal_sensor",
+   # "thermal_sensor1",
+   # {
+   # collision_type: "tsdf", collision_layer: "tsdf1",
+   # thermal_layer: "thermal1",
+   # camera_topic: "/arm_thermal_cam/image_raw",
+   # camera_info_topic: "/arm_thermal_cam/camera_info",
+   # frame: "world",
+   # sub_sample_factor: 1.0,
+   # frames_per_submap: 20,
+   # normalize: true,
+   #  min_intensity: 19000.0,
+   # max_intensity: 21000.0,
+   # },
+   # {max_distance: 30.0, 
+   # max_weight: 100.0,
+   # prop_voxel_radius: 2
+   # }
+   #]
   ]
 
     #visualizers as list of list, sub lists include a name , a config with two layers with types, update rate and a mesh config
@@ -99,20 +117,21 @@ visualizers:
   min_weight: 0.0001 #,
   #integrator_threads: 1,
   }
-  ],
-    ["visualizer3",
-  "thermal",
-  {
-  collision_layer_type: "tsdf", collision_layer: "tsdf1",
-  color_layer_type: "thermal", color_layer: "thermal1",
-  update_interval: 5.0,
-  topic: "mesh3"
-  },
-  {
-  use_color: true,
-  min_weight: 0.0001 #,
+  ]
+  #,
+  #  ["visualizer3",
+  #"thermal",
+  #{
+  #collision_layer_type: "tsdf", collision_layer: "tsdf1",
+  #color_layer_type: "thermal", color_layer: "thermal1",
+  #update_interval: 5.0,
+  #topic: "mesh3"
+  #},
+  #{
+  #use_color: true,
+  #min_weight: 0.0001 #,
   #integrator_threads: 1,
-  }]
+  #}]
   ]
 
 

@@ -66,6 +66,7 @@ template <typename SubmapType, typename GeometryVoxelType>
 void RGBSensor<SubmapType, GeometryVoxelType>::imageCb(
     const sensor_msgs::Image::Ptr& image_msg) {
   this->addMessageToQueue(image_msg);
+
   this->serviceQueue();
 }
 

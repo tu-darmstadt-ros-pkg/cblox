@@ -51,7 +51,7 @@ template <typename T, typename SubmapType, typename MsgType, typename VoxelType,
 void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
             GeometryVoxelType, ColorVoxelType>::addMessageToQueue(const MsgType&
                                                                       msg) {
-  // TODO handle delay different
+  // TODO handle delay different in config and bool to disable
   msg_delay_ = ros::Duration(0.1);
   if (msg->header.stamp - last_msg_stamp_ > msg_delay_) {
     last_msg_stamp_ = msg->header.stamp;
@@ -72,7 +72,6 @@ void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
   while (msg_queue_.size() >= kMaxQueueSize) {
     msg_queue_.pop();
   }
-
   while (getMessageFromQueue(&msg_queue_, &msg, &T_G_C)) {
     //Check first if new map is needed, so the map is always not empty
     // TODO this should be aligned to the existing behavior
@@ -106,17 +105,13 @@ bool Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
   *msg = queue->front();
   std::string frame_id = (*msg)->header.frame_id;
 
-  // TODO remove this dirty workaround for a bag
-  if (frame_id.compare("arm_thermal_cam") == 0) {
-    std::cout << "problematic frame" << std::endl;
-    frame_id = "arm_thermal_cam_frame";
-  }
   if (transformer_.lookupTransform(frame_id, world_frame_, (*msg)->header.stamp,
                                    T_G_C)) {
     queue->pop();
     return true;
   } else {
-    // std::cout << "couldn't lookup transform" << std::endl;
+    // std::cout << "couldn't lookup transform: " << frame_id << " " <<
+    // world_frame_ << std::endl;
     if (queue->size() >= (kMaxQueueSize - 1)) {
       ROS_ERROR_THROTTLE(60,
                          "Input msg queue getting too long! Dropping "
@@ -299,8 +294,8 @@ template <typename T, typename SubmapType, typename MsgType, typename VoxelType,
           typename GeometryVoxelType, typename ColorVoxelType>
 void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
             GeometryVoxelType,
-            ColorVoxelType>::set_pose_graph_mode(std::shared_ptr<MapHistory>&
-                                                     map_history) {
+            ColorVoxelType>::setPoseGraphMode(std::shared_ptr<MapHistory>&
+                                                  map_history) {
   pose_graph_mode_ = true;
   last_valid_message_ = ros::Time::now();
   map_history_ = map_history;

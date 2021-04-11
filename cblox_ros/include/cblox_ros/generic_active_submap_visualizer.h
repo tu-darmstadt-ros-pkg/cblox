@@ -51,7 +51,7 @@ class GenericActiveSubmapVisualizer {
         geometry_submap_collection_ptr_(geometry_submap_collection_ptr),
         color_layer_(false),
         color_cycle_length_(kDefaultColorCycleLength),
-        //current_color_idx_(0),
+        // current_color_idx_(0),
         verbose_(false),
         opacity_(1.0),
         nh_(nh),
@@ -61,7 +61,8 @@ class GenericActiveSubmapVisualizer {
         remove_alpha_(false),
         geometry_id_(0),
         color_id_(0),
-        message_id_(0) {
+        message_id_(0),
+        publish_in_local_frame_(false) {
     publisher_ =
         nh_private_.advertise<visualization_msgs::MarkerArray>(topic, 1);
     if (update_interval > 0.0) {
@@ -87,7 +88,7 @@ class GenericActiveSubmapVisualizer {
         color_layer_(true),
         color_submap_collection_ptr_(color_submap_collection_ptr),
         color_cycle_length_(kDefaultColorCycleLength),
-        //current_color_idx_(0),
+        // current_color_idx_(0),
         verbose_(false),
         opacity_(1.0),
         nh_(nh),
@@ -97,7 +98,8 @@ class GenericActiveSubmapVisualizer {
         remove_alpha_(false),
         geometry_id_(0),
         color_id_(0),
-        message_id_(0) {
+        message_id_(0),
+        publish_in_local_frame_(false) {
     publisher_ =
         nh_private_.advertise<visualization_msgs::MarkerArray>(topic, 1);
         std::cout << "update interval" << std::endl;
@@ -144,6 +146,8 @@ class GenericActiveSubmapVisualizer {
   void setUseDefault();
   void setRemoveAlpha(bool val);
 
+  void setPublishInLocalFrame(bool val);
+
  private:
   // Functions called when swapping active submaps
   //void createMeshLayer();
@@ -154,6 +158,10 @@ class GenericActiveSubmapVisualizer {
   // into the global frame (G).
   void transformMeshLayerToGlobalFrame(const MeshLayer& mesh_layer_S,
                                        MeshLayer* mesh_layer_G_ptr) const;
+
+  void copyMeshLayer(const MeshLayer& mesh_layer_S,
+                     MeshLayer* mesh_layer_S_ptr) const;
+
   void colorMeshWithCurrentIndex(MeshLayer* mesh_layer_ptr) const;
 
   bool recolorWithColorFunction(MeshLayer* mesh_layer_ptr) const;
@@ -168,6 +176,15 @@ class GenericActiveSubmapVisualizer {
 
   bool republishMeshCallback(std_srvs::Empty::Request& /*request*/,
                              std_srvs::Empty::Response& /*response*/);
+
+  void fillMarkerWithMeshAndColor(const MeshLayer::ConstPtr& mesh_layer,
+                                  voxblox::ColorMode color_mode,
+                                  visualization_msgs::Marker* marker);
+
+  std_msgs::ColorRGBA applyColorMode(const voxblox::Color& color,
+                                     const voxblox::ColorMode& color_mode,
+                                     const voxblox::Point& vertex,
+                                     const voxblox::Point& normal);
 
   // Config
   const MeshIntegratorConfig mesh_config_;
@@ -215,6 +232,8 @@ class GenericActiveSubmapVisualizer {
   unsigned int geometry_id_;
   unsigned int color_id_;
   unsigned int message_id_;
+
+  bool publish_in_local_frame_;
 
   ros::Timer update_mesh_timer_;
 };

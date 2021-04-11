@@ -115,8 +115,7 @@ visualizers:
   }]
   ]
 
-pose_graph_settings:
-{
+pose_graph_settings: {
   enabled: true,
   submap_anouncement_topic: "",
   submap_list_topic: "",
