@@ -12,13 +12,15 @@ RGBSensor<SubmapType, GeometryVoxelType>::RGBSensor(
         coll_submap_collection_ptr,
     std::shared_ptr<GenericSubmapCollection<voxblox::RGBVoxel>>
         rgb_submap_collection_ptr,
-    ProjectionIntegratorConfig& integrator_config, int frames_per_submap)
+    ProjectionIntegratorConfig& integrator_config, int frames_per_submap,
+    double msg_delay, bool use_msg_delay)
     : Sensor<RGBSensor<SubmapType, GeometryVoxelType>, SubmapType,
              sensor_msgs::Image::Ptr, voxblox::RGBVoxel,
              RGBProjectionIntegrator<GeometryVoxelType>, ProjectionData<Color>,
              GeometryVoxelType, voxblox::RGBVoxel>(
           /*submap_collection_ptr, */ nh, nh_private, world_frame,
-          rgb_submap_collection_ptr, frames_per_submap),
+          rgb_submap_collection_ptr, frames_per_submap, msg_delay,
+          use_msg_delay),
       nh_(nh),
       nh_private_(nh_private),
       world_frame_(world_frame),
@@ -49,7 +51,7 @@ RGBSensor<SubmapType, GeometryVoxelType>::RGBSensor(
     : RGBSensor(nh, nh_private, c.camera_topic, c.camera_info_topic, c.frame,
                 c.sub_sample_factor, c.coll_submap_collection_ptr,
                 c.rgb_submap_collection_ptr, integrator_config,
-                c.frames_per_submap) {}
+                c.frames_per_submap, c.msg_delay, c.use_msg_delay) {}
 
 template <typename SubmapType, typename GeometryVoxelType>
 void RGBSensor<SubmapType, GeometryVoxelType>::subscribeAndAdvertise(

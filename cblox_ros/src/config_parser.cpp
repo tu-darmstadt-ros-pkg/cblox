@@ -312,6 +312,12 @@ ConfigParser::parseLidarSensor(
     sc.integrator_type =
         static_cast<std::string>(sensor_config["integrator_type"]);
   }
+  if (sensor_config.hasMember("msg_delay")) {
+    sc.msg_delay = static_cast<double>(sensor_config["msg_delay"]);
+  }
+  if (sensor_config.hasMember("use_msg_delay")) {
+    sc.use_msg_delay = static_cast<bool>(sensor_config["use_msg_delay"]);
+  }
   sc.submap_collection_ptr = tsdf_map;
   
   //integrator config
@@ -348,6 +354,12 @@ ConfigParser::parseRgbSensor(
   }
   if (sensor_config.hasMember("frames_per_submap")) {
     sc.frame = static_cast<int>(sensor_config["frames_per_submap"]);
+  }
+  if (sensor_config.hasMember("msg_delay")) {
+    sc.msg_delay = static_cast<double>(sensor_config["msg_delay"]);
+  }
+  if (sensor_config.hasMember("use_msg_delay")) {
+    sc.use_msg_delay = static_cast<bool>(sensor_config["use_msg_delay"]);
   }
   sc.coll_submap_collection_ptr = tsdf_map;
   sc.rgb_submap_collection_ptr = rgb_map;
@@ -387,6 +399,12 @@ ConfigParser::parseThermalSensor(
   }
   if (sensor_config.hasMember("frames_per_submap")) {
     sc.frame = static_cast<int>(sensor_config["frames_per_submap"]);
+  }
+  if (sensor_config.hasMember("msg_delay")) {
+    sc.msg_delay = static_cast<double>(sensor_config["msg_delay"]);
+  }
+  if (sensor_config.hasMember("use_msg_delay")) {
+    sc.use_msg_delay = static_cast<bool>(sensor_config["use_msg_delay"]);
   }
   if (sensor_config.hasMember("normalize")) {
     sc.normalize = static_cast<bool>(sensor_config["normalize"]);
@@ -563,6 +581,7 @@ void ConfigParser::parseVisualizers(
 
       //voxblox::Color (*f4)(const voxblox::TsdfVoxel*){&func4};
       //vis->setColorFunction(f4);
+      vis->setUseColorMap();
     }
 
     if (type.compare("rgb") == 0) {
@@ -648,7 +667,6 @@ ConfigParser::parseTsdfVisualizer(
   auto visualizer = std::make_shared<
       GenericActiveSubmapVisualizer<voxblox::TsdfVoxel, voxblox::TsdfVoxel>>(
       nh, nh_private, c);
-
   return visualizer;
 }
 
@@ -716,6 +734,7 @@ ConfigParser::parsePoseGraphSettings(const ros::NodeHandle& nh, const ros::NodeH
   std::string list = "";
   double angle = 0.0;
   double distance = 0.0;
+  bool publish_local = true;
   if (pose_graph_settings.hasMember("submap_anouncement_topic")) {
     anouncement = static_cast<std::string>(pose_graph_settings["submap_anouncement_topic"]);
   }
@@ -728,7 +747,11 @@ ConfigParser::parsePoseGraphSettings(const ros::NodeHandle& nh, const ros::NodeH
   if (pose_graph_settings.hasMember("min_remesh_distance_meters")) {
     distance = static_cast<double>(pose_graph_settings["min_remesh_distance_meters"]);
   }
-  auto pose_graph_updater = std::make_shared<PoseGraphUpdater> (nh, nh_private, anouncement, list, angle, distance);
+  if (pose_graph_settings.hasMember("publish_local")) {
+    publish_local = static_cast<bool>(pose_graph_settings["publish_local"]);
+  }
+  auto pose_graph_updater = std::make_shared<PoseGraphUpdater>(
+      nh, nh_private, anouncement, list, angle, distance, publish_local);
   return pose_graph_updater;
 }
 

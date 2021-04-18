@@ -23,6 +23,8 @@ class LIDARSensor
     std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
         submap_collection_ptr;
     int frames_per_submap = 20;
+    double msg_delay;
+    bool use_msg_delay;
     std::string integrator_type = "simple";
   };
 
@@ -31,7 +33,8 @@ class LIDARSensor
               std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
                   submap_collection_ptr,
               voxblox::TsdfIntegratorBase::Config& integrator_config,
-              int frames_per_submap, std::string integrator_type);
+              int frames_per_submap, double msg_delay, bool use_msg_delay,
+              std::string integrator_type);
 
   LIDARSensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
               LIDARSensor<SubmapType, GeometryVoxelType>::Config c,

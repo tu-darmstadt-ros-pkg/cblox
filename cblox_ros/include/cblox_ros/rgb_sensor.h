@@ -35,6 +35,8 @@ class RGBSensor
     typename GenericSubmapCollection<voxblox::RGBVoxel>::Ptr
         rgb_submap_collection_ptr;
     int frames_per_submap = 20;
+    double msg_delay;
+    bool use_msg_delay;
   };
   RGBSensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
             std::string camera_image_topic, std::string camera_info_topic,
@@ -44,7 +46,7 @@ class RGBSensor
             std::shared_ptr<GenericSubmapCollection<voxblox::RGBVoxel>>
                 rgb_submap_collection_ptr,
             ProjectionIntegratorConfig& integrator_config,
-            int frames_per_submap);
+            int frames_per_submap, double msg_delay, bool use_msg_delay);
 
   RGBSensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
             Config c, ProjectionIntegratorConfig& integrator_config);

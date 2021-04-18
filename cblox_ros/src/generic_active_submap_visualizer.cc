@@ -116,7 +116,8 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType,
     if (!publish_in_local_frame_) {
       marker.header.frame_id = "world";
     } else {
-      marker.header.frame_id = "submap_" + active_submap_id_;
+      marker.header.frame_id = "submap_" + std::to_string(active_submap_id_);
+      // marker.header.frame_id = "submap_0";
     }
     // marker.id = message_id_; //TODO check if this works
     marker.id = active_submap_id_;
@@ -279,7 +280,9 @@ MeshLayer::Ptr GenericActiveSubmapVisualizer<
     transformMeshLayerToGlobalFrame(*active_submap_mesh_layer_ptr_,
                                     mesh_layer_G_ptr.get());
   else
-    copyMeshLayer(*active_submap_mesh_layer_ptr_, mesh_layer_G_ptr.get());
+    return active_submap_mesh_layer_ptr_;
+
+  //  copyMeshLayer(*active_submap_mesh_layer_ptr_, mesh_layer_G_ptr.get());
 
   // Coloring the mesh
   /*if (use_color_map_) colorMeshWithCurrentIndex(mesh_layer_G_ptr.get());
@@ -410,17 +413,14 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType, ColorVoxelType>::
       }
 
       // lookup color
-      // Coloring the mesh
+      // Coloring the mesh, like cblox did before
       if (use_color_map_) {
         marker->points.push_back(point_msg);
         double color_map_float = static_cast<double>(active_submap_color_idx_) /
                                  static_cast<double>(color_cycle_length_ - 1);
         const Color color = voxblox::rainbowColorMap(color_map_float);
         std_msgs::ColorRGBA c;
-        c.r = color.r;
-        c.g = color.g;
-        c.b = color.b;
-        c.a = color.a;
+        voxblox::colorVoxbloxToMsg(color, &c);
         marker->colors.push_back(c);
       }
 

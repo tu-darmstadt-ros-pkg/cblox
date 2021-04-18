@@ -13,13 +13,15 @@ ThermalSensor<SubmapType, GeometryVoxelType>::ThermalSensor(
     std::shared_ptr<GenericSubmapCollection<voxblox::IntensityVoxel>>
         thermal_submap_collection_ptr,
     ProjectionIntegratorConfig& integrator_config, int frames_per_submap,
-    bool normalize, FloatingPoint min_intensity, FloatingPoint max_intensity)
+    double msg_delay, bool use_msg_delay, bool normalize,
+    FloatingPoint min_intensity, FloatingPoint max_intensity)
     : Sensor<ThermalSensor<SubmapType, GeometryVoxelType>, SubmapType,
              sensor_msgs::Image::Ptr, voxblox::IntensityVoxel,
              ThermalProjectionIntegrator<GeometryVoxelType>,
              ProjectionData<float>, GeometryVoxelType, voxblox::IntensityVoxel>(
           /*submap_collection_ptr, */ nh, nh_private, world_frame,
-          thermal_submap_collection_ptr, frames_per_submap),
+          thermal_submap_collection_ptr, frames_per_submap, msg_delay,
+          use_msg_delay),
       nh_(nh),
       nh_private_(nh_private),
       world_frame_(world_frame),
@@ -54,8 +56,8 @@ ThermalSensor<SubmapType, GeometryVoxelType>::ThermalSensor(
     : ThermalSensor(nh, nh_private, c.camera_topic, c.camera_info_topic,
                     c.frame, c.sub_sample_factor, c.coll_submap_collection_ptr,
                     c.thermal_submap_collection_ptr, integrator_config,
-                    c.frames_per_submap, c.normalize, c.min_intensity,
-                    c.max_intensity) {}
+                    c.frames_per_submap, c.msg_delay, c.use_msg_delay,
+                    c.normalize, c.min_intensity, c.max_intensity) {}
 
 template <typename SubmapType, typename GeometryVoxelType>
 void ThermalSensor<SubmapType, GeometryVoxelType>::subscribeAndAdvertise(

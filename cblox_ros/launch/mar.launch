@@ -4,7 +4,7 @@
 
   <!-- Path to dataset -->
   <arg name="dataset_path" default="/home/frederik/Downloads/2021-03-18-16-34-45.bag" />
-  <arg name="play_rate" default="1.0" />
+  <arg name="play_rate" default="0.3" />
 
   <!-- cblox Parameters -->
   <arg name="voxel_size" default="0.1" />

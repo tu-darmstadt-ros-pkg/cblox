@@ -34,6 +34,8 @@ class ThermalSensor
     typename GenericSubmapCollection<voxblox::IntensityVoxel>::Ptr
         thermal_submap_collection_ptr;
     int frames_per_submap = 20;
+    double msg_delay;
+    bool use_msg_delay;
     bool normalize = false;
     FloatingPoint min_intensity = 0.0;
     FloatingPoint max_intensity = 1.0;
@@ -47,7 +49,8 @@ class ThermalSensor
       std::shared_ptr<GenericSubmapCollection<voxblox::IntensityVoxel>>
           thermal_submap_collection_ptr,
       ProjectionIntegratorConfig& integrator_config, int frames_per_submap,
-      bool normalize, FloatingPoint min_intensity, FloatingPoint max_intensity);
+      double msg_delay, bool use_msg_delay, bool normalize,
+      FloatingPoint min_intensity, FloatingPoint max_intensity);
   ThermalSensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
                 Config c, ProjectionIntegratorConfig& integrator_config);
 

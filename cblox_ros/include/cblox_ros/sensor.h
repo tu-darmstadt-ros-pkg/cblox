@@ -36,7 +36,7 @@ class Sensor {
       const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
       std::string world_frame,
       std::shared_ptr<GenericSubmapCollection<VoxelType>> submap_collection_ptr,
-      int frames_per_submap);
+      int frames_per_submap, double msg_delay, bool use_msg_delay);
 
   virtual ~Sensor(){};
 
@@ -100,7 +100,7 @@ class Sensor {
   // msg delaying
   ros::Duration msg_delay_;   // TODO init
   ros::Time last_msg_stamp_;  // TODO init
-
+  bool use_msg_delay_;
   // queue
   std::queue<MsgType> msg_queue_;
   // TODO look at submap_queue

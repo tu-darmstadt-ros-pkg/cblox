@@ -12,14 +12,15 @@ Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
            std::string world_frame,
            std::shared_ptr<GenericSubmapCollection<VoxelType>>
                submap_collection_ptr,
-           int frames_per_submap)
+           int frames_per_submap, double msg_delay, bool use_msg_delay)
     : nh_(nh),
       nh_private_(nh_private),
       world_frame_("world"),
       submap_collection_ptr_(submap_collection_ptr),
       transformer_(nh, nh_private),
       last_msg_stamp_(ros::Time(0)),
-      msg_delay_(ros::Duration(1.0)),
+      msg_delay_(ros::Duration(msg_delay)),
+      use_msg_delay_(use_msg_delay),
       num_integrated_frames_current_submap_(0),
       num_integrated_frames_per_submap_(frames_per_submap),
       visualizer_registered_(false),
@@ -52,8 +53,7 @@ void Sensor<T, SubmapType, MsgType, VoxelType, IntegratorType, IntegrationData,
             GeometryVoxelType, ColorVoxelType>::addMessageToQueue(const MsgType&
                                                                       msg) {
   // TODO handle delay different in config and bool to disable
-  msg_delay_ = ros::Duration(0.1);
-  if (msg->header.stamp - last_msg_stamp_ > msg_delay_) {
+  if (msg->header.stamp - last_msg_stamp_ > msg_delay_ || !use_msg_delay_) {
     last_msg_stamp_ = msg->header.stamp;
     msg_queue_.push(msg);
   }

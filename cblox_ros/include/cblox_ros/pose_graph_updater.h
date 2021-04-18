@@ -16,11 +16,13 @@ class PoseGraphUpdater {
     public:
 
     typedef std::shared_ptr<PoseGraphUpdater> Ptr;
-    explicit PoseGraphUpdater(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
-    const std::string submap_anouncement_topic,
-                                       const std::string submap_list_topic, 
-                                       const double min_remesh_angle, 
-                                       const double min_remesh_distance);
+    explicit PoseGraphUpdater(const ros::NodeHandle& nh,
+                              const ros::NodeHandle& nh_private,
+                              const std::string submap_anouncement_topic,
+                              const std::string submap_list_topic,
+                              const double min_remesh_angle,
+                              const double min_remesh_distance,
+                              bool publish_local);
     virtual ~PoseGraphUpdater() {}
 
     //function to add maps 
@@ -57,6 +59,8 @@ class PoseGraphUpdater {
     //remeshing
     double min_remesh_angle_;
     double min_remesh_distance_;
+
+    bool publish_local_;
 
     std::shared_ptr<MapHistory> map_history_;
 };

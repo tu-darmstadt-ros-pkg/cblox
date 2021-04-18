@@ -3,18 +3,25 @@
 
 namespace cblox {
 
-    PoseGraphUpdater::PoseGraphUpdater(const ros::NodeHandle& nh,
-                                       const ros::NodeHandle& nh_private,
-                                       const std::string submap_anouncement_topic,
-                                       const std::string submap_list_topic,
-                                       const double min_remesh_angle,
-                                       const double min_remesh_distance)
-        : nh_(nh), nh_private_(nh_private), min_remesh_angle_(min_remesh_angle), min_remesh_distance_(min_remesh_distance) {
-            submap_anouncement_sub_ = nh_.subscribe(submap_anouncement_topic, 1000, &PoseGraphUpdater::submapAnouncementCallback, this);
-            submap_list_sub_ = nh_.subscribe(submap_list_topic, 10, &PoseGraphUpdater::submapListCallback, this);
-
-            map_history_ = std::make_shared<MapHistory>();
-        }
+PoseGraphUpdater::PoseGraphUpdater(const ros::NodeHandle& nh,
+                                   const ros::NodeHandle& nh_private,
+                                   const std::string submap_anouncement_topic,
+                                   const std::string submap_list_topic,
+                                   const double min_remesh_angle,
+                                   const double min_remesh_distance,
+                                   bool publish_local)
+    : nh_(nh),
+      nh_private_(nh_private),
+      min_remesh_angle_(min_remesh_angle),
+      min_remesh_distance_(min_remesh_distance) {
+  submap_anouncement_sub_ =
+      nh_.subscribe(submap_anouncement_topic, 1000,
+                    &PoseGraphUpdater::submapAnouncementCallback, this);
+  submap_list_sub_ = nh_.subscribe(submap_list_topic, 10,
+                                   &PoseGraphUpdater::submapListCallback, this);
+  publish_local_ = publish_local;
+  map_history_ = std::make_shared<MapHistory>();
+}
 
     //function to add maps
     void PoseGraphUpdater::initMaps(std::shared_ptr<MapVariantsMap> maps) {
@@ -49,8 +56,8 @@ namespace cblox {
         visualizers_ = visualizers;
         std::cout << "inited visualizers" << std::endl;
 
-        auto init_visualizers_bound_visitor =
-            std::bind(init_visualizers_visitor(), std::placeholders::_1, false);
+        auto init_visualizers_bound_visitor = std::bind(
+            init_visualizers_visitor(), std::placeholders::_1, publish_local_);
 
         for (auto it = visualizers_->begin(); it != visualizers_->end(); it++) {
           // std::cout << it->first << std::endl;

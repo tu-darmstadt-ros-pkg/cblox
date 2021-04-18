@@ -12,7 +12,9 @@ sensors:
     pointcloud_topic: "/scan_cloud_filtered",
     integrator_type: "simple", 
     frame: "world",
-    frames_per_submap: 20
+    frames_per_submap: 20,
+    msg_delay: 0.1,
+    use_msg_delay: true
     }, #TODO add integrator type
     {default_truncation_distance: 0.4, #not all have to be set
     max_weight: 10000.0,
@@ -30,7 +32,7 @@ sensors:
     start_voxel_subsampling_factor: 1.0,
     max_consecutive_ray_collisions: 2,
     clear_checks_every_n_frames: 1 #,
-    #max_integration_time_s: 999999
+    #max_integration_time_s: 999999,
     }
    ],
    ["rgb_sensor",
@@ -41,11 +43,13 @@ sensors:
     camera_info_topic: "/realsense_d435_back/color/camera_info",
     frame: "world",
     sub_sample_factor: 1.0,
-    frames_per_submap: 20
+    frames_per_submap: 20,
+    msg_delay: 0.1,
+    use_msg_delay: true
     },
     {max_distance: 40.0, 
     max_weight: 100.0,
-    prop_voxel_radius: 2
+    prop_voxel_radius: 2,
     }
    ],
    ["thermal_sensor",
@@ -58,6 +62,8 @@ sensors:
     frame: "world",
     sub_sample_factor: 1.0,
     frames_per_submap: 20,
+    msg_delay: 0.1,
+    use_msg_delay: true,
     normalize: true,
     min_intensity: 0.0,
     max_intensity: 40.0 #to normalize into 0.0 to 0.1
@@ -120,5 +126,6 @@ pose_graph_settings: {
   submap_anouncement_topic: "",
   submap_list_topic: "",
   min_remesh_angle_radians: 1.0,
-  min_remesh_distance_meters: 0.1 
+  min_remesh_distance_meters: 0.1,
+  publish_local: true 
 }
