@@ -46,7 +46,8 @@ ThermalSensor<SubmapType, GeometryVoxelType>::ThermalSensor(
   last_parent_id_ = coll_submap_collection_ptr->getActiveSubmapID();
   Transformation t = coll_submap_collection_ptr->getActiveSubmapPose();
   // creating child map instead of normal map
-  thermal_submap_collection_ptr->createNewChildSubMap(t, last_parent_id_);
+  // thermal_submap_collection_ptr->createNewChildSubMap(t, last_parent_id_);
+  thermal_submap_collection_ptr->setSubmapMode(t, last_parent_id_);
 }
 
 template <typename SubmapType, typename GeometryVoxelType>

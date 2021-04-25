@@ -48,7 +48,13 @@ template <typename VoxelType>
 void GenericSubmapCollection<VoxelType>::createNewSubmapPoseGraph(
     const Transformation& T_G_S, const SubmapID submap_id) {
   const auto it = id_to_submap_.find(submap_id);
-  CHECK(it == id_to_submap_.end());
+  if (it != id_to_submap_.end()) {
+    std::cout << "trying to create duplicate of submap, changing submap instead"
+              << std::endl;
+    active_submap_id_ = submap_id;
+    return;
+  }
+  // CHECK(it == id_to_submap_.end());
   // Creating the new submap and adding it to the list
 
   typename GenericSubmap<VoxelType>::Ptr sub_map(
@@ -57,10 +63,11 @@ void GenericSubmapCollection<VoxelType>::createNewSubmapPoseGraph(
 
   // Updating the active submap
   active_submap_id_ = submap_id;
-
+  std::cout << "created new posegraph submap" << std::endl;
   // this is a bit of a hack, as all submaps are synched and childmaps aren't
   // really needed, but to not completely destory support
   if (has_parent_) {
+    std::cout << "is child map" << std::endl;
     parent_to_child_.emplace(submap_id, std::vector<SubmapID>());
     parent_to_child_.find(submap_id)->second.push_back(submap_id);
   }
@@ -85,8 +92,9 @@ void GenericSubmapCollection<VoxelType>::createNewSubmap(
   id_to_submap_.emplace(submap_id, std::move(sub_map));
   // Updating the active submap
   active_submap_id_ = submap_id;
-
+  std::cout << "created submap with id:" << active_submap_id_ << std::endl;
   if (has_parent_) {
+    std::cout << "is cild map" << std::endl;
     if (parent_to_child_.find(last_parent_id_) == parent_to_child_.end()) {
       parent_to_child_.emplace(last_parent_id_, std::vector<SubmapID>());
     }
@@ -539,6 +547,21 @@ SubmapID GenericSubmapCollection<VoxelType>::createNewChildSubMap(
   return new_ID;
 }
 
+template <typename VoxelType>
+void GenericSubmapCollection<VoxelType>::setSubmapMode(
+    const Transformation& T_G_P, const SubmapID parent) {
+  // if already child map, nothing to do
+  if (has_parent_) {
+    return;
+  }
+  has_parent_ = true;
+  if (id_to_submap_.empty()) {
+    createNewChildSubMap(T_G_P, parent);
+  } else {
+    parent_to_child_.emplace(parent, std::vector<SubmapID>());
+    parent_to_child_.find(parent)->second.push_back(active_submap_id_);
+  }
+}
 
 template <typename VoxelType>
 std::shared_ptr<voxblox::MeshLayer> GenericSubmapCollection<VoxelType>::getSubmapMeshLayer(const SubmapID submap_id) {

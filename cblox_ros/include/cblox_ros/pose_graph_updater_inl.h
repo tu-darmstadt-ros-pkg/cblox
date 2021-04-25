@@ -88,9 +88,11 @@ PoseGraphUpdater::PoseGraphUpdater(const ros::NodeHandle& nh,
         entry.id = msg->submap.submap_index;
         Transformation transform;
         tf::Transform tf_trans;
+        // DEBUG
         tf::poseMsgToTF(msg->submap.pose, tf_trans);
         tf::transformTFToKindr(tf_trans, &transform);
         entry.T_w_m = transform;
+
         entry.stamp = msg->submap.start_stamp;
         map_history_->push_back(entry);
     }
@@ -99,6 +101,7 @@ PoseGraphUpdater::PoseGraphUpdater(const ros::NodeHandle& nh,
       // anouncement)
       std::cout << "list callback" << std::endl;
 
+      // DEBUG
       auto update_transform_bound_visitor =
           std::bind(update_transform_visitor(), std::placeholders::_1, msg);
       for (auto it = maps_->begin(); it != maps_->end(); it++) {

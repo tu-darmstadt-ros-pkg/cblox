@@ -68,6 +68,9 @@ void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::addBearingVectors(
   // TODO change mutex to only lock on access of maps, directly pass ids of
   // map/submap pair, dont use get active/set active
 
+  // double rays = 0.0;
+  // double hits = 0.0;
+
   // timing::Timer intensity_timer("intensity/integrate");
   CHECK_EQ(bearing_vectors.size(), data.size())
       << "Intensity and bearing vector size does not match!";
@@ -83,10 +86,11 @@ void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::addBearingVectors(
         T_Geometry_W_.getRotationMatrix() * bearing_vectors[i], max_distance_,
         &surface_intersection);
 
+    rays++;
     if (!success) {
       continue;
     }
-
+    hits++;
     //TODO this transforms back into color layer coordinates, but we want to keep
     Point real_surface_intersection =
         T_W_Data_.inverse() * T_Geometry_W_.inverse() * surface_intersection;
@@ -114,6 +118,11 @@ void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::addBearingVectors(
       }
     }
   }
+
+  // double percentage = hits/rays * 100;
+  // std::cout << "hit percentage: " <<  percentage << std::endl;
+  // std::cout << "rays: " << rays << std::endl;
+  // std::cout << "hits: " << hits << std::endl;
 
   // TODO maybe improve by locking and relocking only on data access?
   lock1.unlock();

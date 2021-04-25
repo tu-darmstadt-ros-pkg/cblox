@@ -190,6 +190,8 @@ class GenericSubmapCollection
 
   std::shared_ptr<voxblox::MeshLayer> recoverSubmapMeshLayer(const SubmapID submap_id);
 
+  void setSubmapMode(const Transformation& T_P_S, const SubmapID parent);
+
  private:
   // TODO(alexmillane): Get some concurrency guards
 
