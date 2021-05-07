@@ -17,7 +17,8 @@ ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::ProjectionIntegrator(
       prop_voxel_radius_(integrator_config.prop_voxel_radius),
       geometry_collection_(geometry_collection),
       data_collection_(data_collection),
-      integration_layer_(data_collection->getActiveMapPtr()->getLayerPtr())
+      integration_layer_(data_collection->getActiveMapPtr()->getLayerPtr()),
+      use_previous_maps_(integrator_config.use_previous_maps)
 // msg_transformation_(msg_transformation)
 {}
 
@@ -27,6 +28,7 @@ ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::ProjectionIntegrator(
     : max_distance_(config.integrator_config.max_distance),
       max_weight_(config.integrator_config.max_weight),
       prop_voxel_radius_(config.integrator_config.prop_voxel_radius),
+      use_previous_maps_(config.integrator_config.use_previous_maps),
       geometry_collection_(config.geometry_collection),
       data_collection_(config.data_collection),
       integration_layer_(
@@ -40,11 +42,33 @@ void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::integrate(
   // get active collision layer
   // ignoring transform, as data was already projected to world
 
+  submap_nr_ = 1;
+
   // TODO rethink updating of layers
   setLayers(data.geometry_id, data.id);
   setTransformations(data.geometry_id, data.id);
+  
+  addBearingVectors(data.origin, data.bearing_vectors, data.data, data.integrated);
 
-  addBearingVectors(data.origin, data.bearing_vectors, data.data);
+  debug_ = false;
+
+  //try integrating in multiple maps, by trying to load submap id - 1 for parent and get the active child map to it
+  //skipping already projected points 
+  for(int i = 1; i <= use_previous_maps_; i++) {
+    submap_nr_++;
+    SubmapID geometry_id = data.geometry_id - 1;
+    if (geometry_collection_->exists(geometry_id)) {
+      std::vector<SubmapID> data_ids = data_collection_->getChildMapIDs(geometry_id);
+      if (data_ids.size() > 0) {
+        SubmapID data_id = data_ids.back();
+        setLayers(geometry_id, data_id);
+        setTransformations(geometry_id, data_id);
+        addBearingVectors(data.origin, data.bearing_vectors, data.data, data.integrated);
+      }
+    }
+    
+  }
+
 
   // using transform to project back from world frame after collision
 }
@@ -56,20 +80,22 @@ void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::integrate(
 template <typename T, typename VoxelType1, typename VoxelType2, typename Data>
 void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::addBearingVectors(
     const Point& origin, const Pointcloud& bearing_vectors,
-    const std::vector<Data>& data) {
+    const std::vector<Data>& data, std::shared_ptr<std::vector<int>> integrated) {
   // creating mutex
   std::unique_lock<std::mutex> lock1(geometry_collection_->collection_mutex_,
                                      std::defer_lock);
   std::unique_lock<std::mutex> lock2(data_collection_->collection_mutex_,
                                      std::defer_lock);
   std::lock(lock1, lock2);
+
+
   // TODO check if locks should be set directly
 
   // TODO change mutex to only lock on access of maps, directly pass ids of
   // map/submap pair, dont use get active/set active
 
-  // double rays = 0.0;
-  // double hits = 0.0;
+   double rays = 0.0;
+   double hits = 0.0;
 
   // timing::Timer intensity_timer("intensity/integrate");
   CHECK_EQ(bearing_vectors.size(), data.size())
@@ -77,6 +103,13 @@ void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::addBearingVectors(
   const FloatingPoint voxel_size = collision_layer_->voxel_size();
 
   for (size_t i = 0; i < bearing_vectors.size(); ++i) {
+    if (integrated) {
+      if ((*integrated)[i] > 0) {
+        continue;
+        //skipping already integrated
+      }
+    }
+
     Point surface_intersection = Point::Zero();
     // Cast ray from the origin in the direction of the bearing vector until
     // finding an intersection with a surface.
@@ -91,6 +124,12 @@ void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::addBearingVectors(
       continue;
     }
     hits++;
+
+    if (integrated) {
+      (*integrated)[i] = submap_nr_;
+    }
+
+
     //TODO this transforms back into color layer coordinates, but we want to keep
     Point real_surface_intersection =
         T_W_Data_.inverse() * T_Geometry_W_.inverse() * surface_intersection;
@@ -118,15 +157,17 @@ void ProjectionIntegrator<T, VoxelType1, VoxelType2, Data>::addBearingVectors(
       }
     }
   }
+  if (debug_) {
+     double percentage = hits/rays * 100;
+     std::cout << "hit percentage: " <<  percentage << std::endl;
+     std::cout << "rays: " << rays << std::endl;
+     std::cout << "hits: " << hits << std::endl;
 
-  // double percentage = hits/rays * 100;
-  // std::cout << "hit percentage: " <<  percentage << std::endl;
-  // std::cout << "rays: " << rays << std::endl;
-  // std::cout << "hits: " << hits << std::endl;
-
-  // TODO maybe improve by locking and relocking only on data access?
-  lock1.unlock();
-  lock2.unlock();
+    // TODO maybe improve by locking and relocking only on data access?
+  }
+    lock1.unlock();
+    lock2.unlock();
+  
 }
 
 // sets the layers of geometry and data to the newest. This is not

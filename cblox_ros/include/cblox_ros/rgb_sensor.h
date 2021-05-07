@@ -11,6 +11,7 @@
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
 #include "cblox_ros/sensor.h"
+#include <image_transport/image_transport.h>
 
 namespace cblox {
 
@@ -37,6 +38,8 @@ class RGBSensor
     int frames_per_submap = 20;
     double msg_delay;
     bool use_msg_delay;
+    bool debug_image = false;
+    std::string debug_image_topic = "";
   };
   RGBSensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
             std::string camera_image_topic, std::string camera_info_topic,
@@ -46,7 +49,7 @@ class RGBSensor
             std::shared_ptr<GenericSubmapCollection<voxblox::RGBVoxel>>
                 rgb_submap_collection_ptr,
             ProjectionIntegratorConfig& integrator_config,
-            int frames_per_submap, double msg_delay, bool use_msg_delay);
+            int frames_per_submap, double msg_delay, bool use_msg_delay, bool debug_image, std::string debug_image_topic);
 
   RGBSensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
             Config c, ProjectionIntegratorConfig& integrator_config);
@@ -62,6 +65,9 @@ class RGBSensor
 
   void integrateMessage(const sensor_msgs::Image::Ptr msg,
                         const Transformation T_G_C);
+
+
+  sensor_msgs::Image::Ptr createDebugImage(const sensor_msgs::Image::Ptr msg, std::shared_ptr<std::vector<int>> integrated);
 
  protected:
   // Subscribers
@@ -81,6 +87,10 @@ class RGBSensor
   std::shared_ptr<GenericSubmapCollection<GeometryVoxelType>>
       collision_submap_collection_ptr_;
   SubmapID last_parent_id_;
+
+  bool debug_image_;
+  std::string debug_image_topic_;
+  image_transport::Publisher debug_image_publisher_;
 };
 
 }  // namespace cblox

@@ -11,6 +11,7 @@
 #include <sensor_msgs/Image.h>
 #include <voxblox/core/voxel.h>
 #include "cblox_ros/sensor.h"
+#include <image_transport/image_transport.h>
 
 namespace cblox {
 
@@ -39,6 +40,8 @@ class ThermalSensor
     bool normalize = false;
     FloatingPoint min_intensity = 0.0;
     FloatingPoint max_intensity = 1.0;
+    bool debug_image = false;
+    std::string debug_image_topic = "";
   };
   ThermalSensor(
       const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
@@ -50,7 +53,7 @@ class ThermalSensor
           thermal_submap_collection_ptr,
       ProjectionIntegratorConfig& integrator_config, int frames_per_submap,
       double msg_delay, bool use_msg_delay, bool normalize,
-      FloatingPoint min_intensity, FloatingPoint max_intensity);
+      FloatingPoint min_intensity, FloatingPoint max_intensity, bool debug_image, std::string debug_image_topic);
   ThermalSensor(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
                 Config c, ProjectionIntegratorConfig& integrator_config);
 
@@ -65,6 +68,8 @@ class ThermalSensor
 
   void integrateMessage(const sensor_msgs::Image::Ptr msg,
                         const Transformation T_G_C);
+
+  sensor_msgs::Image::Ptr createDebugImage(const sensor_msgs::Image::Ptr msg, std::shared_ptr<std::vector<int>> integrated);
 
  protected:
   // Subscribers
@@ -90,6 +95,10 @@ class ThermalSensor
   bool normalize_;
   FloatingPoint min_intensity_;
   FloatingPoint max_intensity_;
+
+  bool debug_image_;
+  std::string debug_image_topic_;
+  image_transport::Publisher debug_image_publisher_;
 };
 
 }  // namespace cblox

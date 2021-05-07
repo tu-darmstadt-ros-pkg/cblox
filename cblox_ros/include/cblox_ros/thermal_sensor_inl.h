@@ -14,7 +14,7 @@ ThermalSensor<SubmapType, GeometryVoxelType>::ThermalSensor(
         thermal_submap_collection_ptr,
     ProjectionIntegratorConfig& integrator_config, int frames_per_submap,
     double msg_delay, bool use_msg_delay, bool normalize,
-    FloatingPoint min_intensity, FloatingPoint max_intensity)
+    FloatingPoint min_intensity, FloatingPoint max_intensity, bool debug_image, std::string debug_image_topic)
     : Sensor<ThermalSensor<SubmapType, GeometryVoxelType>, SubmapType,
              sensor_msgs::Image::Ptr, voxblox::IntensityVoxel,
              ThermalProjectionIntegrator<GeometryVoxelType>,
@@ -30,7 +30,9 @@ ThermalSensor<SubmapType, GeometryVoxelType>::ThermalSensor(
       collision_submap_collection_ptr_(coll_submap_collection_ptr),
       normalize_(normalize),
       min_intensity_(min_intensity),
-      max_intensity_(max_intensity) {
+      max_intensity_(max_intensity),
+      debug_image_(debug_image),
+      debug_image_topic_(debug_image_topic) {
   ProjectionConfig<GeometryVoxelType, voxblox::IntensityVoxel, float> config;
   config.geometry_collection = coll_submap_collection_ptr;
   config.data_collection = thermal_submap_collection_ptr;
@@ -48,6 +50,11 @@ ThermalSensor<SubmapType, GeometryVoxelType>::ThermalSensor(
   // creating child map instead of normal map
   // thermal_submap_collection_ptr->createNewChildSubMap(t, last_parent_id_);
   thermal_submap_collection_ptr->setSubmapMode(t, last_parent_id_);
+
+  if (debug_image) {
+    image_transport::ImageTransport it(nh);
+    debug_image_publisher_ = it.advertise(debug_image_topic, 10);
+  }
 }
 
 template <typename SubmapType, typename GeometryVoxelType>
@@ -58,7 +65,7 @@ ThermalSensor<SubmapType, GeometryVoxelType>::ThermalSensor(
                     c.frame, c.sub_sample_factor, c.coll_submap_collection_ptr,
                     c.thermal_submap_collection_ptr, integrator_config,
                     c.frames_per_submap, c.msg_delay, c.use_msg_delay,
-                    c.normalize, c.min_intensity, c.max_intensity) {}
+                    c.normalize, c.min_intensity, c.max_intensity, c.debug_image, c.debug_image_topic) {}
 
 template <typename SubmapType, typename GeometryVoxelType>
 void ThermalSensor<SubmapType, GeometryVoxelType>::subscribeAndAdvertise(
@@ -99,7 +106,16 @@ void ThermalSensor<SubmapType, GeometryVoxelType>::integrateMessage(
       // creating child map instead of normal map
       this->submap_collection_ptr_->createNewChildSubMap(t, last_parent_id_);
     }
+  } else {
+    //in pose_graph_mode assuming maps are aligned by id with cartographer
+    last_parent_id_ = collision_submap_collection_ptr_->getActiveSubmapID();
+    
+    if (last_parent_id_ != this->submap_collection_ptr_->getActiveSubmapID()) {
+      ROS_INFO("Parent map and thermal map aren't currently aligned in pose graph mode, skipping");
+      return;
+    }
   }
+  SubmapID child_id = this->submap_collection_ptr_->getActiveSubmapID();
 
   if (!valid_info_) {
     ROS_WARN("No Camera Info received");
@@ -163,15 +179,32 @@ void ThermalSensor<SubmapType, GeometryVoxelType>::integrateMessage(
 
   data.origin = T_G_C.getPosition();
   data.geometry_id = last_parent_id_;
-  data.id = this->submap_collection_ptr_->getActiveSubmapID();
+  data.id = child_id;
 
   // std::cout << "min/max" << min_i << " " << max_i << std::endl;
   // empty transformation as unused in this case
   Transformation trans;
 
+  std::shared_ptr<std::vector<int>> integrated;
+  integrated = std::make_shared<std::vector<int>>(data.bearing_vectors.size(), 0);
+  data.integrated = integrated;
+
   // start integration
   this->submap_collection_integrator_->integrate(trans, data);
+
+  if (debug_image_) {
+    sensor_msgs::Image::Ptr debug_img = createDebugImage(msg, integrated);
+    debug_image_publisher_.publish(debug_img);
+  }
 }
+
+template <typename SubmapType, typename GeometryVoxelType>
+sensor_msgs::Image::Ptr ThermalSensor<SubmapType, GeometryVoxelType>::createDebugImage(const sensor_msgs::Image::Ptr msg, std::shared_ptr<std::vector<int>> integrated) {
+  //TODO
+  sensor_msgs::Image::Ptr img;
+  return img;
+}
+
 
 }  // namespace cblox
 #endif  // CBLOX_ROS_RGB_SENSOR_INL_H_

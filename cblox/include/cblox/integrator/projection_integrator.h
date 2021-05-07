@@ -22,12 +22,14 @@ struct ProjectionData {
   std::vector<Data> data;
   SubmapID id;
   SubmapID geometry_id;
+  std::shared_ptr<std::vector<int>> integrated;
 };
 
 struct ProjectionIntegratorConfig {
     float max_distance = 40.0;
     float max_weight = 100.0;
     int prop_voxel_radius = 2;
+    int use_previous_maps = 0;
 };
 
 template <typename VoxelType1, typename VoxelType2, typename Data>
@@ -64,7 +66,8 @@ class ProjectionIntegrator {
   void integrate(const Transformation& T_G_C, const ProjectionData<Data>& data);
 
   void addBearingVectors(const Point& origin, const Pointcloud& bearing_vectors,
-                         const std::vector<Data>& data);
+                         const std::vector<Data>& data, 
+  std::shared_ptr<std::vector<int>> integrated);
 
   // void (*integration_function_)(VoxelType2&, IntegrationData&);
 
@@ -94,6 +97,11 @@ class ProjectionIntegrator {
   Layer<VoxelType2>* integration_layer_;
   Transformation T_Geometry_W_;
   Transformation T_W_Data_;
+
+  bool debug_;
+  int submap_nr_;
+  int use_previous_maps_;
+
 };
 
 }  // namespace cblox

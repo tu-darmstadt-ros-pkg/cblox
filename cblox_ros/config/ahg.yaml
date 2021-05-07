@@ -1,8 +1,9 @@
 #Maps as list of list, sub lists include a name, layer type, layer Config (as dict)
 maps: 
-  [["tsdf1", "tsdf", {voxel_size: 0.05, voxels_per_side: 16}], #voxel_size 0.1 
-  ["rgb1", "rgb", {voxel_size: 0.1, voxels_per_side: 16}],
-   ["thermal1", "thermal", {voxel_size: 0.4, voxels_per_side: 16}]]
+  [["tsdf1", "tsdf", {voxel_size: 0.07, voxels_per_side: 16}], #voxel_size 0.1 
+  #["rgb1", "rgb", {voxel_size: 0.1, voxels_per_side: 16}],
+  # ["thermal1", "thermal", {voxel_size: 0.4, voxels_per_side: 16}]
+  ]
 
 #Sensors as list of lists, sub lists include the sensor_type, a config with all inputs [layer types + name, topics, working frame], a config with the integrator parameters
 sensors:
@@ -10,9 +11,9 @@ sensors:
   ["lidar_sensor",
     "lidar_sensor1", 
     {collision_type: "tsdf", collision_layer: "tsdf1",
-    pointcloud_topic: "/scan_cloud_filtered",
+    pointcloud_topic: "/scan_matched_points2",
     integrator_type: "simple", #fast, merged, simple 
-    frame: "world_cartographer",
+    frame: "world",
     frames_per_submap: 20,
     msg_delay: 0.01,
     use_msg_delay: true
@@ -21,7 +22,7 @@ sensors:
     max_weight: 10000.0,
     voxel_carving_enabled: true,
     min_ray_length_m: 0.1,
-    max_ray_length_m: 20.0,
+    max_ray_length_m: 30.0,
     use_const_weight: false,
     allow_clear: true,
     use_weight_dropoff: true,
@@ -35,49 +36,46 @@ sensors:
     clear_checks_every_n_frames: 1 #,
     #max_integration_time_s: 999999,
     }
-   ],
-   ["rgb_sensor",
-   "rgb_sensor1",
-   {collision_type: "tsdf", collision_layer: "tsdf1",
-    rgb_layer: "rgb1",
-    camera_topic: "/camera360/pinhole_back/image_rect_color/image_raw",
-    camera_info_topic: "/camera360/pinhole_back/camera_info",
-    frame: "world_cartographer",
-    sub_sample_factor: 1.0,
-    frames_per_submap: 20,
-    msg_delay: 0.1,
-    use_msg_delay: false,
-    debug_image: true,
-    debug_image_topic: "debug_image1"
-    },
-    {max_distance: 20.0, 
-    max_weight: 100.0,
-    prop_voxel_radius: 4,
-    use_previous_maps: 1
-    }
-     ]
-    ,
-    #test if two sensors can work in one map, currently not working due to map creation?
-   ["rgb_sensor",
-    "rgb_sensor2",
-    {collision_type: "tsdf", collision_layer: "tsdf1",
-    rgb_layer: "rgb1",
-    camera_topic: "/camera360/pinhole_front/image_rect_color/image_raw",
-    camera_info_topic: "/camera360/pinhole_front/camera_info",
-    frame: "world_cartographer",
-    sub_sample_factor: 1.0,
-    frames_per_submap: 20,
-    msg_delay: 0.01,
-    use_msg_delay: false,
-    debug_image: true,
-    debug_image_topic: "debug_image2"
-    },
-    {max_distance: 20.0,
-    max_weight: 100.0,
-    prop_voxel_radius: 4,
-    use_previous_maps: 1
-    }
    ]
+   #,
+   #["rgb_sensor",
+   #"rgb_sensor1",
+   #{collision_type: "tsdf", collision_layer: "tsdf1",
+   # rgb_layer: "rgb1",
+   # camera_topic: "/camera360/pinhole_back/image_rect_color/image_raw",
+   # camera_info_topic: "/camera360/pinhole_back/camera_info",
+   # frame: "world_cartographer",
+   # sub_sample_factor: 1.0,
+   # frames_per_submap: 20,
+   # msg_delay: 0.1,
+   # use_msg_delay: false
+   # },
+   # {max_distance: 20.0, 
+   # max_weight: 100.0,
+   # prop_voxel_radius: 4,
+   # use_previous_maps: 1
+   # }
+   #  ]
+   # ,
+    #test if two sensors can work in one map, currently not working due to map creation?
+    #["rgb_sensor",
+    #"rgb_sensor2",
+    #{collision_type: "tsdf", collision_layer: "tsdf1",
+    #rgb_layer: "rgb1",
+    #camera_topic: "/camera360/pinhole_front/image_rect_color/image_raw",
+    #camera_info_topic: "/camera360/pinhole_front/camera_info",
+    #frame: "world_cartographer",
+    #sub_sample_factor: 1.0,
+    #frames_per_submap: 20,
+    #msg_delay: 0.01,
+    #use_msg_delay: false
+    ##},
+    #{max_distance: 20.0,
+    #max_weight: 100.0,
+    # prop_voxel_radius: 4,
+    # use_previous_maps: 1
+    #}
+    #]
    #["thermal_sensor",
    # "thermal_sensor1",
    # {
@@ -110,7 +108,7 @@ visualizers:
   {
   collision_layer_type: "tsdf", collision_layer: "tsdf1",
   color_layer_type: "tsdf", color_layer: "tsdf1",
-  update_interval: 10.0,
+  update_interval: 5.0,
   topic: "mesh1"
   }, 
   {
@@ -118,21 +116,22 @@ visualizers:
   min_weight: 0.0001 #,
   #integrator_threads: 1,
   }
-  ],
-  ["visualizer2",
-  "rgb",
-  {
-  collision_layer_type: "tsdf", collision_layer: "tsdf1",
-  color_layer_type: "rgb", color_layer: "rgb1",
-  update_interval: 10.0,
-  topic: "mesh2"
-  },
-  {
-  use_color: true,
-  min_weight: 0.0001 #,
-  #integrator_threads: 1,
-  }
   ]
+  #,
+  #["visualizer2",
+  #"rgb",
+  #{
+  #collision_layer_type: "tsdf", collision_layer: "tsdf1",
+  #color_layer_type: "rgb", color_layer: "rgb1",
+  #update_interval: 10.0,
+  #topic: "mesh2"
+  #},
+  #{
+  #use_color: true,
+  #min_weight: 0.0001 #,
+  ##integrator_threads: 1,
+  #}
+  #]
   #,
   #  ["visualizer3",
   #"thermal",

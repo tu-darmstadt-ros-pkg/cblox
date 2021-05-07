@@ -361,6 +361,12 @@ ConfigParser::parseRgbSensor(
   if (sensor_config.hasMember("use_msg_delay")) {
     sc.use_msg_delay = static_cast<bool>(sensor_config["use_msg_delay"]);
   }
+  if (sensor_config.hasMember("debug_image")) {
+    sc.debug_image = static_cast<bool>(sensor_config["debug_image"]);
+  }
+  if (sensor_config.hasMember("debug_image_topic")) {
+    sc.debug_image_topic = static_cast<std::string>(sensor_config["debug_image_topic"]);
+  }
   sc.coll_submap_collection_ptr = tsdf_map;
   sc.rgb_submap_collection_ptr = rgb_map;
 
@@ -414,6 +420,12 @@ ConfigParser::parseThermalSensor(
   }
   if (sensor_config.hasMember("max_intensity")) {
     sc.max_intensity = static_cast<double>(sensor_config["max_intensity"]);
+  }
+  if (sensor_config.hasMember("debug_image")) {
+    sc.debug_image = static_cast<bool>(sensor_config["debug_image"]);
+  }
+  if (sensor_config.hasMember("debug_image_topic")) {
+    sc.debug_image_topic = static_cast<std::string>(sensor_config["debug_image_topic"]);
   }
 
   sc.coll_submap_collection_ptr = tsdf_map;
@@ -520,6 +532,10 @@ ConfigParser::parseProjectionConfig(XmlRpc::XmlRpcValue integrator_config) {
   if (integrator_config.hasMember("prop_voxel_radius")) {
     config.prop_voxel_radius =
         static_cast<int>(integrator_config["prop_voxel_radius"]);
+  }
+  if (integrator_config.hasMember("use_previous_maps")) {
+    config.use_previous_maps =
+        static_cast<int>(integrator_config["use_previous_maps"]);
   }
 
   return config;
