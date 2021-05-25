@@ -1,3 +1,5 @@
+//This file was adapted from cblox/tsdf_submap.cpp
+
 #include "cblox/core/generic_submap.h"
 
 #include "cblox/utils/quat_transformation_protobuf_utils.h"
@@ -36,7 +38,7 @@ bool GenericSubmap<VoxelType>::saveToStream(std::fstream* outfile_ptr) const {
   SubmapProto submap_proto;
   getProto(&submap_proto);
   if (!voxblox::utils::writeProtoMsgToStream(submap_proto, outfile_ptr)) {
-    LOG(ERROR) << "Could not write tsdf sub map message.";
+    LOG(ERROR) << "Could not write sub map message.";
     outfile_ptr->close();
     return false;
   }
@@ -65,7 +67,7 @@ GenericSubmap<VoxelType>::LoadFromStream(const Config& config,
   SubmapProto submap_proto;
   if (!voxblox::utils::readProtoMsgFromStream(proto_file_ptr, &submap_proto,
                                               tmp_byte_offset_ptr)) {
-    LOG(ERROR) << "Could not read tsdf sub map protobuf message.";
+    LOG(ERROR) << "Could not read sub map protobuf message.";
     return nullptr;
   }
 

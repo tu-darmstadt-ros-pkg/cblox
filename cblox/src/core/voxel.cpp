@@ -1,9 +1,10 @@
+//adapted from voxblox block.cc to work for rgb voxels
 #include "cblox/core/voxel.h"
 namespace voxblox {
 template <>
 void Block<RGBVoxel>::deserializeFromIntegers(
     const std::vector<uint32_t>& data) {
-  constexpr size_t kNumDataPacketsPerVoxel = 3u;
+  constexpr size_t kNumDataPacketsPerVoxel = 2u;
   const size_t num_data_packets = data.size();
   CHECK_EQ(num_voxels_ * kNumDataPacketsPerVoxel, num_data_packets);
   for (size_t voxel_idx = 0u, data_idx = 0u;
@@ -26,7 +27,7 @@ void Block<RGBVoxel>::deserializeFromIntegers(
 template <>
 void Block<RGBVoxel>::serializeToIntegers(std::vector<uint32_t>* data) const {
   CHECK_NOTNULL(data);
-  constexpr size_t kNumDataPacketsPerVoxel = 3u;
+  constexpr size_t kNumDataPacketsPerVoxel = 2u;
   data->clear();
   data->reserve(num_voxels_ * kNumDataPacketsPerVoxel);
   for (size_t voxel_idx = 0u; voxel_idx < num_voxels_; ++voxel_idx) {

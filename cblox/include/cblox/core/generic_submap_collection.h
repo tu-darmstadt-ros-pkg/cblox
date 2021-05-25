@@ -30,13 +30,13 @@ class GenericSubmapCollectionInterface {
   // NOTE(alexmillane): I'm moving methods over only as I need them. There's no
   // design intent here in leaving some out. There is only the intent to be
   // lazy.
-  virtual const Transformation& getActiveSubmapPose() const = 0;
-  virtual SubmapID getActiveSubmapID() const = 0;
+  virtual const Transformation& getActiveSubmapPose() = 0; //removing const from functions, as state of class is not const anymore(due to loading and unloading)
+  virtual SubmapID getActiveSubmapID() = 0; //removing const from functions, as state of class is not const anymore(due to loading and unloading)
   virtual bool getSubmapPose(const SubmapID submap_id,
-                             Transformation* pose_ptr) const = 0;
+                             Transformation* pose_ptr) = 0; //removing const from functions, as state of class is not const anymore(due to loading and unloading)
 
   virtual typename GenericMap<VoxelType>::Ptr getActiveMapPtr() = 0;
-  virtual const GenericMap<VoxelType>& getActiveMap() const = 0;
+  virtual const GenericMap<VoxelType>& getActiveMap() = 0; //removing const from functions, as state of class is not const anymore(due to loading and unloading)
   virtual typename GenericMap<VoxelType>::Ptr getMapPtr(
       const SubmapID submap_id) = 0;
 
@@ -55,11 +55,16 @@ class GenericSubmapCollection
   typedef std::shared_ptr<const GenericSubmapCollection> ConstPtr;
 
   // Constructor. Constructs an empty submap collection map
-  explicit GenericSubmapCollection(
+  explicit GenericSubmapCollection(std::string name,
       const typename GenericSubmap<VoxelType>::Config& submap_config)
       : GenericSubmapCollectionInterface<VoxelType>(),
         submap_config_(submap_config),
-        active_submap_id_(-1) {}
+        name_(name),
+        active_submap_id_(-1), 
+        has_parent_(false), 
+        last_parent_id_(0), 
+        save_to_file_(false), 
+        call_(0) {}
 
   // Constructor. Constructs a submap collection from a list of submaps
   GenericSubmapCollection(
@@ -91,27 +96,26 @@ class GenericSubmapCollection
   // NOTE(alexmillane): This function hard fails when the submap doesn't
   // exist... This puts the onus on the caller to call exists() first. I don't
   // like this but I can't see a solution.
-  const GenericSubmap<VoxelType>& getSubmap(const SubmapID submap_id) const;
+  const GenericSubmap<VoxelType>& getSubmap(const SubmapID submap_id); //removing const from functions, as state of class is not const anymore(due to loading and unloading)
   // Note(alexmillane): Unlike the above method, the two methods below return a
   // nullptr when the map doesn't exist. No hard crash.
   typename GenericSubmap<VoxelType>::Ptr getSubmapPtr(const SubmapID submap_id);
   typename GenericSubmap<VoxelType>::ConstPtr getSubmapConstPtr(
-      const SubmapID submap_id) const;
+      const SubmapID submap_id); //removing const from functions, as state of class is not const anymore(due to loading and unloading)
   // A list of the submaps
-  const std::vector<typename GenericSubmap<VoxelType>::Ptr> getSubmapPtrs()
-      const;
+  const std::vector<typename GenericSubmap<VoxelType>::Ptr> getSubmapPtrs(); //removing const from functions, as state of class is not const anymore(due to loading and unloading)
   const std::vector<typename GenericSubmap<VoxelType>::ConstPtr>
-  getSubmapConstPtrs() const;
+  getSubmapConstPtrs(); //removing const from functions, as state of class is not const anymore(due to loading and unloading)
 
   // Interactions with the active submap
-  const GenericSubmap<VoxelType>& getActiveSubmap() const;
+  const GenericSubmap<VoxelType>& getActiveSubmap(); //removing const from functions, as state of class is not const anymore(due to loading and unloading)
   typename GenericSubmap<VoxelType>::Ptr getActiveSubmapPtr();
-  const Transformation& getActiveSubmapPose() const;
-  SubmapID getActiveSubmapID() const;
+  const Transformation& getActiveSubmapPose(); //removing const from functions, as state of class is not const anymore(due to loading and unloading)
+  SubmapID getActiveSubmapID(); //removing const from functions, as state of class is not const anymore(due to loading and unloading)
 
   // Access the tsdf_map member of the active submap
   typename GenericMap<VoxelType>::Ptr getActiveMapPtr();
-  const GenericMap<VoxelType>& getActiveMap() const;
+  const GenericMap<VoxelType>& getActiveMap(); //removing const from functions, as state of class is not const anymore(due to loading and unloading)
   // Access the tsdf_map member of any submap
   virtual typename GenericMap<VoxelType>::Ptr getMapPtr(
       const SubmapID submap_id);
@@ -124,8 +128,8 @@ class GenericSubmapCollection
   // Interacting with the submap poses
   bool setSubmapPose(const SubmapID submap_id, const Transformation& pose);
   void setSubmapPoses(const SubmapIdPoseMap& id_pose_map);
-  bool getSubmapPose(const SubmapID submap_id, Transformation* pose_ptr) const;
-  void getSubmapPoses(TransformationVector* submap_poses) const;
+  bool getSubmapPose(const SubmapID submap_id, Transformation* pose_ptr); //removing const from functions, as state of class is not const anymore(due to loading and unloading)
+  void getSubmapPoses(TransformationVector* submap_poses); //removing const from functions, as state of class is not const anymore(due to loading and unloading)
 
   // Clears the collection, leaving an empty map
   void clear() { id_to_submap_.clear(); }
@@ -137,7 +141,7 @@ class GenericSubmapCollection
   FloatingPoint block_size() const {
     return (id_to_submap_.begin()->second)->block_size();
   }
-  size_t getNumberOfAllocatedBlocks() const;
+  size_t getNumberOfAllocatedBlocks(); //removing const from functions, as state of class is not const anymore(due to loading and unloading)
 
   // Returns the config of the submaps
   const typename GenericSubmap<VoxelType>::Config& getConfig() const {
@@ -159,12 +163,16 @@ class GenericSubmapCollection
   typename GenericMap<VoxelType>::Ptr getProjectedMap() const;
 
   // Gets the combined memory size of the layers in this collection.
-  size_t getMemorySize() const;
+  size_t getMemorySize(); //removing const from functions, as state of class is not const anymore(due to loading and unloading)
 
   // Loading from file
   static bool LoadFromFile(
       const std::string& file_path,
       typename GenericSubmapCollection<VoxelType>::Ptr* submap_collection_ptr);
+
+  //saving and loading of submaps for save of memory usage
+  bool saveSubmapToFile(const SubmapID id, const std::string& folder);
+  bool loadSubmapFromFile(const SubmapID id, const std::string& folder);
 
   // TODO rethink mutex/check if needed later
   mutable std::mutex collection_mutex_;
@@ -192,6 +200,10 @@ class GenericSubmapCollection
 
   void setSubmapMode(const Transformation& T_P_S, const SubmapID parent);
 
+  void setSaveToFiles(bool active, int calls_till_save, std::string save_folder);
+
+  void accessSubmap(const SubmapID id);
+
  private:
   // TODO(alexmillane): Get some concurrency guards
 
@@ -213,6 +225,19 @@ class GenericSubmapCollection
   Transformation last_parent_transform_;
 
   std::map<SubmapID, std::shared_ptr<voxblox::MeshLayer>> mesh_collection_;
+
+  std::string name_;
+
+
+  //for unloading of maps if unused for n calls
+  bool save_to_file_;
+  int calls_till_save_;
+  std::string save_folder_;
+  std::map<SubmapID, bool> used_in_cycle_;
+  std::map<SubmapID, bool> loaded_;
+  int call_;
+  mutable std::mutex save_mutex_;
+
 };
 
 }  // namespace cblox
