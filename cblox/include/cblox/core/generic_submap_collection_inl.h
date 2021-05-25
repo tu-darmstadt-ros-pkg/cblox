@@ -12,13 +12,16 @@
 
 namespace cblox {
 
-
-//not really supported
+// not really supported
 template <typename VoxelType>
 GenericSubmapCollection<VoxelType>::GenericSubmapCollection(
     const typename GenericSubmap<VoxelType>::Config& submap_config,
     const std::vector<typename GenericSubmap<VoxelType>::Ptr>& sub_maps)
-    : submap_config_(submap_config), has_parent_(false), last_parent_id_(0), save_to_file_(false), call_(0) {
+    : submap_config_(submap_config),
+      has_parent_(false),
+      last_parent_id_(0),
+      save_to_file_(false),
+      call_(0) {
   // Constructing from a list of existing submaps
   // NOTE(alexmillane): Relies on the submaps having unique submap IDs...
   for (const auto& submap_ptr : sub_maps) {
@@ -79,12 +82,11 @@ void GenericSubmapCollection<VoxelType>::createNewSubmapPoseGraph(
     used_in_cycle_[submap_id] = true;
   }
 
-    //DEBUG
+  // DEBUG
   /*std::cout << "saving previous submap to file" << std::endl;
   if(submap_id > 0) {
-    bool success = saveSubmapToFile(submap_id - 1, "/home/frederik/cblox_maps/");
-    if(success){
-      std::cout << "saved" << std::endl; 
+    bool success = saveSubmapToFile(submap_id - 1,
+  "/home/frederik/cblox_maps/"); if(success){ std::cout << "saved" << std::endl;
     }
   }
   std::cout << "saved submap" << std::endl;
@@ -135,18 +137,17 @@ void GenericSubmapCollection<VoxelType>::createNewSubmap(
     parent_to_child_.find(last_parent_id_)->second.push_back(submap_id);
   }
 
-  //check if this increases memory too much, if yes try too shrink
-  //if (save_to_file_) {
-    loaded_[submap_id] = true;
-    used_in_cycle_[submap_id] = true;
+  // check if this increases memory too much, if yes try too shrink
+  // if (save_to_file_) {
+  loaded_[submap_id] = true;
+  used_in_cycle_[submap_id] = true;
   //}
 
-  //DEBUG
+  // DEBUG
   /*std::cout << "saving previous submap to file" << std::endl;
   if(submap_id > 0) {
-    bool success = saveSubmapToFile(submap_id - 1, "/home/frederik/cblox_maps/");
-    if(success){
-      std::cout << "saved" << std::endl;
+    bool success = saveSubmapToFile(submap_id - 1,
+  "/home/frederik/cblox_maps/"); if(success){ std::cout << "saved" << std::endl;
     }
   }
   std::cout << "saved submap" << std::endl;
@@ -182,8 +183,8 @@ SubmapID GenericSubmapCollection<VoxelType>::createNewSubmap(
   return new_ID;
 }
 
-
-//TODO this function is currently not really used and therefore not updated for parent maps or automatic unloading
+// TODO this function is currently not really used and therefore not updated for
+// parent maps or automatic unloading
 template <typename VoxelType>
 void GenericSubmapCollection<VoxelType>::addSubmap(
     const typename GenericSubmap<VoxelType>::Ptr submap) {
@@ -194,10 +195,10 @@ void GenericSubmapCollection<VoxelType>::addSubmap(
   // Add
   id_to_submap_.emplace(submap_id, std::move(submap));
   active_submap_id_ = submap_id;
-
 }
 
-//TODO this function is currently not really used and therefore not updated for parent maps or automatic unloading
+// TODO this function is currently not really used and therefore not updated for
+// parent maps or automatic unloading
 template <typename VoxelType>
 bool GenericSubmapCollection<VoxelType>::duplicateSubmap(
     const SubmapID source_submap_id, const SubmapID new_submap_id) {
@@ -225,8 +226,8 @@ bool GenericSubmapCollection<VoxelType>::duplicateSubmap(
   return false;
 }
 
-
-//removing const from functions, as state of class is not const anymore(due to loading and unloading)
+// removing const from functions, as state of class is not const anymore(due to
+// loading and unloading)
 template <typename VoxelType>
 const GenericSubmap<VoxelType>& GenericSubmapCollection<VoxelType>::getSubmap(
     const SubmapID submap_id) {
@@ -236,7 +237,8 @@ const GenericSubmap<VoxelType>& GenericSubmapCollection<VoxelType>::getSubmap(
   return *it->second;
 }
 
-//removing const from functions, as state of class is not const anymore(due to loading and unloading)
+// removing const from functions, as state of class is not const anymore(due to
+// loading and unloading)
 template <typename VoxelType>
 const std::vector<typename GenericSubmap<VoxelType>::Ptr>
 GenericSubmapCollection<VoxelType>::getSubmapPtrs() {
@@ -248,7 +250,8 @@ GenericSubmapCollection<VoxelType>::getSubmapPtrs() {
   return submap_ptrs;
 }
 
-//removing const from functions, as state of class is not const anymore(due to loading and unloading)
+// removing const from functions, as state of class is not const anymore(due to
+// loading and unloading)
 template <typename VoxelType>
 const std::vector<typename GenericSubmap<VoxelType>::ConstPtr>
 GenericSubmapCollection<VoxelType>::getSubmapConstPtrs() {
@@ -278,17 +281,19 @@ GenericSubmapCollection<VoxelType>::getMapPtr(const SubmapID submap_id) {
   return (it->second)->getMapPtr();
 }
 
-//removing const from functions, as state of class is not const anymore(due to loading and unloading)
+// removing const from functions, as state of class is not const anymore(due to
+// loading and unloading)
 template <typename VoxelType>
-const GenericMap<VoxelType>& GenericSubmapCollection<VoxelType>::getActiveMap()
-    {
-      accessSubmap(active_submap_id_);
+const GenericMap<VoxelType>&
+GenericSubmapCollection<VoxelType>::getActiveMap() {
+  accessSubmap(active_submap_id_);
   const auto it = id_to_submap_.find(active_submap_id_);
   CHECK(it != id_to_submap_.end());
   return (it->second)->getMap();
 }
 
-//removing const from functions, as state of class is not const anymore(due to loading and unloading)
+// removing const from functions, as state of class is not const anymore(due to
+// loading and unloading)
 template <typename VoxelType>
 const GenericSubmap<VoxelType>&
 GenericSubmapCollection<VoxelType>::getActiveSubmap() {
@@ -308,10 +313,11 @@ GenericSubmapCollection<VoxelType>::getActiveSubmapPtr() {
   return it->second;
 }
 
-//removing const from functions, as state of class is not const anymore(due to loading and unloading)
+// removing const from functions, as state of class is not const anymore(due to
+// loading and unloading)
 template <typename VoxelType>
-const Transformation& GenericSubmapCollection<VoxelType>::getActiveSubmapPose()
-    {
+const Transformation&
+GenericSubmapCollection<VoxelType>::getActiveSubmapPose() {
   return getActiveSubmap().getPose();
 }
 template <typename VoxelType>
@@ -322,14 +328,13 @@ SubmapID GenericSubmapCollection<VoxelType>::getActiveSubmapID() {
 template <typename VoxelType>
 void GenericSubmapCollection<VoxelType>::activateSubmap(
     const SubmapID submap_id) {
-      accessSubmap(submap_id);
+  accessSubmap(submap_id);
   const auto it = id_to_submap_.find(submap_id);
   CHECK(it != id_to_submap_.end());
   active_submap_id_ = submap_id;
 }
 
-
-//TODO should not be used right now
+// TODO should not be used right now
 template <typename VoxelType>
 typename GenericMap<VoxelType>::Ptr
 GenericSubmapCollection<VoxelType>::getProjectedMap() const {
@@ -352,7 +357,7 @@ GenericSubmapCollection<VoxelType>::getProjectedMap() const {
 template <typename VoxelType>
 bool GenericSubmapCollection<VoxelType>::setSubmapPose(
     const SubmapID submap_id, const Transformation& pose) {
-      accessSubmap(submap_id);
+  accessSubmap(submap_id);
   // Looking for the submap
   const auto submap_ptr_it = id_to_submap_.find(submap_id);
   if (submap_ptr_it != id_to_submap_.end()) {
@@ -375,7 +380,8 @@ void GenericSubmapCollection<VoxelType>::setSubmapPoses(
   }
 }
 
-//removing const from functions, as state of class is not const anymore(due to loading and unloading)
+// removing const from functions, as state of class is not const anymore(due to
+// loading and unloading)
 template <typename VoxelType>
 bool GenericSubmapCollection<VoxelType>::getSubmapPose(
     const SubmapID submap_id, Transformation* pose_ptr) {
@@ -393,7 +399,8 @@ bool GenericSubmapCollection<VoxelType>::getSubmapPose(
   }
 }
 
-//removing const from functions, as state of class is not const anymore(due to loading and unloading)
+// removing const from functions, as state of class is not const anymore(due to
+// loading and unloading)
 template <typename VoxelType>
 void GenericSubmapCollection<VoxelType>::getSubmapPoses(
     AlignedVector<Transformation>* submap_poses_ptr) {
@@ -407,13 +414,12 @@ void GenericSubmapCollection<VoxelType>::getSubmapPoses(
   }
 }
 
-
-//TODO handle loaded/unloaded here
-//check if unloaded, if so load it from file into id_to_submap
-//also on every nth load, mark all maps as unused and unload previous unused maps
-//if a map is accessed, mark it as used
-//other way would be a usage vector for every map, but communication overhead
-//or only keep n maps loaded at a time
+// TODO handle loaded/unloaded here
+// check if unloaded, if so load it from file into id_to_submap
+// also on every nth load, mark all maps as unused and unload previous unused
+// maps if a map is accessed, mark it as used other way would be a usage vector
+// for every map, but communication overhead or only keep n maps loaded at a
+// time
 template <typename VoxelType>
 typename GenericSubmap<VoxelType>::Ptr
 GenericSubmapCollection<VoxelType>::getSubmapPtr(const SubmapID submap_id) {
@@ -426,13 +432,13 @@ GenericSubmapCollection<VoxelType>::getSubmapPtr(const SubmapID submap_id) {
   }
 }
 
-
-//removing const from functions, as state of class is not const anymore(due to loading and unloading)
+// removing const from functions, as state of class is not const anymore(due to
+// loading and unloading)
 template <typename VoxelType>
 typename GenericSubmap<VoxelType>::ConstPtr
 GenericSubmapCollection<VoxelType>::getSubmapConstPtr(
     const SubmapID submap_id) {
-      accessSubmap(submap_id);
+  accessSubmap(submap_id);
   const auto submap_ptr_it = id_to_submap_.find(submap_id);
   if (submap_ptr_it != id_to_submap_.end()) {
     return submap_ptr_it->second;
@@ -441,31 +447,30 @@ GenericSubmapCollection<VoxelType>::getSubmapConstPtr(
   }
 }
 
-//similar to saveToFile
+// similar to saveToFile
 template <typename VoxelType>
 bool GenericSubmapCollection<VoxelType>::saveSubmapToFile(
-  const SubmapID id, const std::string& folder) {
-    //handle empty folder
-    std::string file_path = folder + name_ + std::to_string(id);
-    std::fstream outfile;
-    outfile.open(file_path, std::fstream::out | std::fstream::binary);
-    if (!outfile.is_open()) {
-      LOG(ERROR) << "Could not open file for writing: " << file_path;
+    const SubmapID id, const std::string& folder) {
+  // handle empty folder
+  std::string file_path = folder + name_ + std::to_string(id);
+  std::fstream outfile;
+  outfile.open(file_path, std::fstream::out | std::fstream::binary);
+  if (!outfile.is_open()) {
+    LOG(ERROR) << "Could not open file for writing: " << file_path;
     return false;
-    }
-
-    auto submap_ptr = getSubmapPtr(id);
-    if (!submap_ptr->saveToStream(&outfile)) {
-      outfile.close();
-      LOG(ERROR) << "Failed to save submap " << file_path;
-      return false;
-    }
-    outfile.close();
-    return true;
   }
 
+  auto submap_ptr = getSubmapPtr(id);
+  if (!submap_ptr->saveToStream(&outfile)) {
+    outfile.close();
+    LOG(ERROR) << "Failed to save submap " << file_path;
+    return false;
+  }
+  outfile.close();
+  return true;
+}
 
-//currently not completely supported
+// currently not completely supported
 template <typename VoxelType>
 bool GenericSubmapCollection<VoxelType>::saveToFile(
     const std::string& file_path) const {
@@ -511,14 +516,12 @@ void GenericSubmapCollection<VoxelType>::getProto(
   proto->set_num_submaps(num_patches());
 }
 
-
-//TODO incomplete loading
-//similar to loadFromFile
+// TODO incomplete loading
+// similar to loadFromFile
 template <typename VoxelType>
 bool GenericSubmapCollection<VoxelType>::loadSubmapFromFile(
-const SubmapID id, const std::string& folder) {
-
-  //TODO check if map is unloaded right now, else skip
+    const SubmapID id, const std::string& folder) {
+  // TODO check if map is unloaded right now, else skip
   std::fstream proto_file;
   std::string file_path = folder + name_ + std::to_string(id);
   proto_file.open(file_path, std::fstream::in);
@@ -529,23 +532,22 @@ const SubmapID id, const std::string& folder) {
   // Unused byte offset result.
   uint64_t tmp_byte_offset = 0u;
   typename GenericSubmap<VoxelType>::Ptr submap_ptr =
-        GenericSubmap<VoxelType>::LoadFromStream(
-        getConfig(), &proto_file,
-            &tmp_byte_offset);
+      GenericSubmap<VoxelType>::LoadFromStream(getConfig(), &proto_file,
+                                               &tmp_byte_offset);
 
   if (!submap_ptr) {
     LOG(ERROR) << "Failed to load submap " << file_path;
     proto_file.close();
     return false;
   }
-  
-  //TODOset loaded + used
+
+  // TODOset loaded + used
   id_to_submap_[id] = submap_ptr;
   proto_file.close();
   return true;
 }
 
-//currently not completely supported
+// currently not completely supported
 template <typename VoxelType>
 bool GenericSubmapCollection<VoxelType>::LoadFromFile(
     const std::string& file_path,
@@ -592,7 +594,7 @@ bool GenericSubmapCollection<VoxelType>::LoadFromFile(
   return true;
 }
 
-//currently not completely supported
+// currently not completely supported
 template <typename VoxelType>
 void GenericSubmapCollection<VoxelType>::fuseSubmapPair(
     const SubmapIdPair& submap_id_pair) {
@@ -635,25 +637,30 @@ void GenericSubmapCollection<VoxelType>::fuseSubmapPair(
   }
 }
 
-//removing const from functions, as state of class is not const anymore(due to loading and unloading)
+// removing const from functions, as state of class is not const anymore(due to
+// loading and unloading)
 template <typename VoxelType>
 size_t GenericSubmapCollection<VoxelType>::getNumberOfAllocatedBlocks() {
   // Looping over the submaps totalling the sizes
   size_t total_blocks = 0;
   for (const auto& id_submap_pair : id_to_submap_) {
-    accessSubmap(id_submap_pair.first); //TODO maybe make this easier here by saving part information, if needed?
+    accessSubmap(id_submap_pair.first);  // TODO maybe make this easier here by
+                                         // saving part information, if needed?
     total_blocks += (id_submap_pair.second)->getNumberOfAllocatedBlocks();
   }
   return total_blocks;
 }
 
-//removing const from functions, as state of class is not const anymore(due to loading and unloading)
+// removing const from functions, as state of class is not const anymore(due to
+// loading and unloading)
 template <typename VoxelType>
 size_t GenericSubmapCollection<VoxelType>::getMemorySize() {
   // Looping over the submaps totalling the sizes
   size_t size = 0u;
   for (const auto& id_submap_pair : id_to_submap_) {
-    accessSubmap(id_submap_pair.first); //TODO maybe only printing real used memory size here?
+    accessSubmap(
+        id_submap_pair
+            .first);  // TODO maybe only printing real used memory size here?
     size += (id_submap_pair.second)->getMemorySize();
   }
   return size;
@@ -692,7 +699,7 @@ GenericSubmapCollection<VoxelType>::getAllMaps() {
   std::vector<typename GenericSubmap<VoxelType>::Ptr> vec;
   for( auto it = id_to_submap_.begin(); it != id_to_submap_.end(); ++it ) {
     accessSubmap(it->first);
-        vec.push_back( it->second );
+    vec.push_back(it->second);
     }
   return vec;
 }
@@ -757,65 +764,70 @@ std::shared_ptr<voxblox::MeshLayer> GenericSubmapCollection<VoxelType>::recoverS
 }
 
 template <typename VoxelType>
-void GenericSubmapCollection<VoxelType>::setSaveToFiles(bool active, int calls_till_save, std::string save_folder) {
-  
-  if(active) {
+void GenericSubmapCollection<VoxelType>::setSaveToFiles(
+    bool active, int calls_till_save, std::string save_folder) {
+  if (active) {
     calls_till_save_ = calls_till_save;
     save_folder_ = save_folder;
-    //in case folder has no /
-    if (!save_folder_.back() == '/'){
+    // in case folder has no /
+    if (!save_folder_.back() == '/') {
       save_folder_.push_back('/');
     }
-    std::cout << "saving to: " << save_folder_ << " after being unused for " << calls_till_save << std::endl;
+    std::cout << "saving to: " << save_folder_ << " after being unused for "
+              << calls_till_save << std::endl;
   }
   save_to_file_ = active;
 }
 
-//maybe also unload on too much memory use?
+// maybe also unload on too much memory use?
 template <typename VoxelType>
 void GenericSubmapCollection<VoxelType>::accessSubmap(const SubmapID id) {
-  if(!save_to_file_) {
+  if (!save_to_file_) {
     return;
   }
 
-  //mutex for thread safety
+  // mutex for thread safety
   std::unique_lock<std::mutex> lock1(save_mutex_);
 
   used_in_cycle_[id] = true;
   if (call_ > calls_till_save_) {
     call_ = 0;
-    //unload unused submaps
+    // unload unused submaps
     auto ids = getIDs();
     for (auto elem : ids) {
-      //save unused maps
+      // save unused maps
       if (!used_in_cycle_[elem] && loaded_[elem]) {
         saveSubmapToFile(elem, save_folder_);
         std::cout << "trying to unload map: " << elem << std::endl;
-        std::cout << "memory count: " << id_to_submap_[elem]->getMemorySize() <<std::endl;
+        std::cout << "memory count: " << id_to_submap_[elem]->getMemorySize()
+                  << std::endl;
 
-        //check if shared_ptr is used elsewhere, if unused, it should be only one
+        // check if shared_ptr is used elsewhere, if unused, it should be only
+        // one
         std::cout << "map use count (id: " << elem << std::endl;
         int use_count = id_to_submap_[elem].use_count();
-        std::cout <<  use_count << std::endl;
+        std::cout << use_count << std::endl;
         if (use_count > 1) {
-          std::cout << "Warning map is still in use. Not unloading, only saving" << std::endl;
-          //used_in_cycle_[elem] = true;
+          std::cout << "Warning map is still in use. Not unloading, only saving"
+                    << std::endl;
+          // used_in_cycle_[elem] = true;
         } else {
           id_to_submap_[elem].reset();
-          std::cout << "deleted last shared_ptr to submap " << elem << std::endl;
-          
+          std::cout << "deleted last shared_ptr to submap " << elem
+                    << std::endl;
+
           loaded_[elem] = false;
         }
-      }else if(used_in_cycle_[elem]){
-        std::cout << "map " << elem << " was used this cycle, not unloading" << std::endl;
+      } else if (used_in_cycle_[elem]) {
+        std::cout << "map " << elem << " was used this cycle, not unloading"
+                  << std::endl;
       }
       used_in_cycle_[elem] = false;
     }
 
-    //if map to access is not loaded
-    if(!loaded_[id]) {
-      if (loadSubmapFromFile(id, save_folder_))
-        loaded_[id] = true;
+    // if map to access is not loaded
+    if (!loaded_[id]) {
+      if (loadSubmapFromFile(id, save_folder_)) loaded_[id] = true;
     }
     used_in_cycle_[id] = true;
   }

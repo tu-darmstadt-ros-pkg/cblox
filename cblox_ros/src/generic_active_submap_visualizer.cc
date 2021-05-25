@@ -110,7 +110,7 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType,
   visualization_msgs::MarkerArray marker_array;
   std::cout << "publishing mesh" << std::endl;
   while (it != geometry_ids.end()) {
-    //std::cout << *it << std::endl; 
+    // std::cout << *it << std::endl;
     switchToSubmap(*it);
     updateMeshLayer();
     visualization_msgs::Marker marker;
@@ -168,7 +168,7 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType,
   CHECK(active_submap_mesh_integrator_ptr_) << "Integrator not initialized.";
 
   // Updating the mesh layer
-  constexpr bool only_mesh_updated_blocks = true; //DEBUG set to default again
+  constexpr bool only_mesh_updated_blocks = true;  // DEBUG set to default again
   constexpr bool clear_updated_flag = true;
   active_submap_mesh_integrator_ptr_->generateMesh(only_mesh_updated_blocks,
                                                    clear_updated_flag);

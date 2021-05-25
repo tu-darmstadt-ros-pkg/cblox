@@ -129,7 +129,8 @@ void ConfigParser::parseMaps(XmlRpc::XmlRpcValue maps,
       map_collection->insert(
           std::pair<std::string,
                     typename GenericSubmapCollection<voxblox::TsdfVoxel>::Ptr>(
-              static_cast<std::string>(map[0]), parseTsdfMap(static_cast<std::string>(map[0]), map[2])));
+              static_cast<std::string>(map[0]),
+              parseTsdfMap(static_cast<std::string>(map[0]), map[2])));
     }
 
     if (type.compare("rgb") == 0) {
@@ -137,7 +138,8 @@ void ConfigParser::parseMaps(XmlRpc::XmlRpcValue maps,
       map_collection->insert(
           std::pair<std::string,
                     typename GenericSubmapCollection<voxblox::RGBVoxel>::Ptr>(
-              static_cast<std::string>(map[0]), parseRgbMap(static_cast<std::string>(map[0]), map[2])));
+              static_cast<std::string>(map[0]),
+              parseRgbMap(static_cast<std::string>(map[0]), map[2])));
     }
 
     if (type.compare("thermal") == 0) {
@@ -145,7 +147,8 @@ void ConfigParser::parseMaps(XmlRpc::XmlRpcValue maps,
       map_collection->insert(
           std::pair<std::string, typename GenericSubmapCollection<
                                      voxblox::IntensityVoxel>::Ptr>(
-              static_cast<std::string>(map[0]), parseThermalMap(static_cast<std::string>(map[0]), map[2])));
+              static_cast<std::string>(map[0]),
+              parseThermalMap(static_cast<std::string>(map[0]), map[2])));
     }
   }
 }
@@ -163,7 +166,7 @@ ConfigParser::parseTsdfMap(std::string name, XmlRpc::XmlRpcValue config) {
   }
   bool save_to_file = false;
   int cycles = 10000;
-  std::string location ="~/cblox_maps";
+  std::string location = "~/cblox_maps";
   if (config.hasMember("save_to_file")) {
     save_to_file = static_cast<bool>(config["save_to_file"]);
   }
@@ -174,7 +177,8 @@ ConfigParser::parseTsdfMap(std::string name, XmlRpc::XmlRpcValue config) {
     location = static_cast<std::string>(config["save_location"]);
   }
 
-  auto tsdf = std::make_shared<GenericSubmapCollection<voxblox::TsdfVoxel>>(name, c);
+  auto tsdf =
+      std::make_shared<GenericSubmapCollection<voxblox::TsdfVoxel>>(name, c);
   tsdf->setSaveToFiles(save_to_file, cycles, location);
   // TODO fix by fixing submapcollectionintegrator
   Transformation t;
@@ -196,7 +200,7 @@ ConfigParser::parseRgbMap(std::string name, XmlRpc::XmlRpcValue config) {
 
   bool save_to_file = false;
   int cycles = 10000;
-  std::string location ="~/cblox_maps";
+  std::string location = "~/cblox_maps";
   if (config.hasMember("save_to_file")) {
     save_to_file = static_cast<bool>(config["save_to_file"]);
   }
@@ -207,7 +211,8 @@ ConfigParser::parseRgbMap(std::string name, XmlRpc::XmlRpcValue config) {
     location = static_cast<std::string>(config["save_location"]);
   }
 
-  auto rgb = std::make_shared<GenericSubmapCollection<voxblox::RGBVoxel>>(name, c);
+  auto rgb =
+      std::make_shared<GenericSubmapCollection<voxblox::RGBVoxel>>(name, c);
   rgb->setSaveToFiles(save_to_file, cycles, location);
 
   // TODO fix by fixing submapcollectionintegrator
@@ -229,7 +234,7 @@ ConfigParser::parseThermalMap(std::string name, XmlRpc::XmlRpcValue config) {
 
   bool save_to_file = false;
   int cycles = 10000;
-  std::string location ="~/cblox_maps";
+  std::string location = "~/cblox_maps";
   if (config.hasMember("save_to_file")) {
     save_to_file = static_cast<bool>(config["save_to_file"]);
   }
@@ -241,7 +246,8 @@ ConfigParser::parseThermalMap(std::string name, XmlRpc::XmlRpcValue config) {
   }
 
   auto intensity =
-      std::make_shared<GenericSubmapCollection<voxblox::IntensityVoxel>>(name, c);
+      std::make_shared<GenericSubmapCollection<voxblox::IntensityVoxel>>(name,
+                                                                         c);
 
   intensity->setSaveToFiles(save_to_file, cycles, location);
   // TODO fix by fixing submapcollectionintegrator

@@ -1,4 +1,4 @@
-//adapted from voxblox block.cc to work for rgb voxels
+// adapted from voxblox block.cc to work for rgb voxels
 #include "cblox/core/voxel.h"
 namespace voxblox {
 template <>

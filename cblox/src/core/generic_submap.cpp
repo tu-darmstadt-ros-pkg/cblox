@@ -1,4 +1,4 @@
-//This file was adapted from cblox/tsdf_submap.cpp
+// This file was adapted from cblox/tsdf_submap.cpp
 
 #include "cblox/core/generic_submap.h"
 
