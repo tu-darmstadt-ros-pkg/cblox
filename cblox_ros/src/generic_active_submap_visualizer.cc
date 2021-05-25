@@ -108,7 +108,9 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType,
 
   // moved out of loop
   visualization_msgs::MarkerArray marker_array;
+  std::cout << "publishing mesh" << std::endl;
   while (it != geometry_ids.end()) {
+    //std::cout << *it << std::endl; 
     switchToSubmap(*it);
     updateMeshLayer();
     visualization_msgs::Marker marker;
@@ -117,15 +119,12 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType,
       marker.header.frame_id = "world";
     } else {
       marker.header.frame_id = "submap_" + std::to_string(active_submap_id_);
-      // marker.header.frame_id = "submap_0";
     }
-    // marker.id = message_id_; //TODO check if this works
     marker.id = active_submap_id_;
     message_id_++;
     //check for size, if 0 skip
     if(marker.points.size() > 0) {
       marker_array.markers.push_back(marker);
-
     } else {
       ROS_INFO("Map marker %d is empty and not published!", *it);
     }
@@ -169,8 +168,7 @@ void GenericActiveSubmapVisualizer<GeometryVoxelType,
   CHECK(active_submap_mesh_integrator_ptr_) << "Integrator not initialized.";
 
   // Updating the mesh layer
-  // TODO save mesh layers so this can be easier
-  constexpr bool only_mesh_updated_blocks = true;
+  constexpr bool only_mesh_updated_blocks = true; //DEBUG set to default again
   constexpr bool clear_updated_flag = true;
   active_submap_mesh_integrator_ptr_->generateMesh(only_mesh_updated_blocks,
                                                    clear_updated_flag);

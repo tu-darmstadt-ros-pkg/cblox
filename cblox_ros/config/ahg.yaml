@@ -1,8 +1,8 @@
 #Maps as list of list, sub lists include a name, layer type, layer Config (as dict)
 maps: 
-  [["tsdf1", "tsdf", {voxel_size: 0.07, voxels_per_side: 16}], #voxel_size 0.1 
-  #["rgb1", "rgb", {voxel_size: 0.1, voxels_per_side: 16}],
-  # ["thermal1", "thermal", {voxel_size: 0.4, voxels_per_side: 16}]
+  [["tsdf1", "tsdf", {voxel_size: 0.07, voxels_per_side: 16, save_to_file: true, calls_till_save: 10000, save_location: "/home/frederik/cblox_maps"}], #voxel_size 0.1 
+  #["rgb1", "rgb", {voxel_size: 0.1, voxels_per_side: 16, save_to_file: true, calls_till_save: 10000, save_location: "/home/frederik/cblox_maps"}],
+  # ["thermal1", "thermal", {voxel_size: 0.4, voxels_per_side: 16, save_to_file: true, calls_till_save: 10000, save_location: "/home/frederik/cblox_maps"}]
   ]
 
 #Sensors as list of lists, sub lists include the sensor_type, a config with all inputs [layer types + name, topics, working frame], a config with the integrator parameters

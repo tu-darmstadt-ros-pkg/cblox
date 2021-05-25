@@ -39,11 +39,13 @@ class ConfigParser {
   static void parseMaps(XmlRpc::XmlRpcValue maps,
                         std::shared_ptr<MapVariantsMap> map_collection);
   static typename GenericSubmapCollection<voxblox::TsdfVoxel>::Ptr parseTsdfMap(
+      std::string name,
       XmlRpc::XmlRpcValue config);
   static typename GenericSubmapCollection<voxblox::RGBVoxel>::Ptr parseRgbMap(
+      std::string name,
       XmlRpc::XmlRpcValue config);
   static typename GenericSubmapCollection<voxblox::IntensityVoxel>::Ptr
-  parseThermalMap(XmlRpc::XmlRpcValue config);
+  parseThermalMap(std::string name, XmlRpc::XmlRpcValue config);
 
   static void parseSensors(const ros::NodeHandle& nh,
                            const ros::NodeHandle& nh_private,
